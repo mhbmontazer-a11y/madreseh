@@ -4753,7 +4753,23 @@ html.ref-pending::after{content:"";position:fixed;z-index:2147483647;top:50%;lef
       const recommendedPosts = DB.posts.filter(p => p.id !== post.id && p.status === 'published' && p.featured).slice(0, 3);
 
       return `
+        <div id="reading-progress-bar"></div>
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8 animate-fade-in">
+          <!-- Reading Comfort & Gamification Toolbar -->
+          <div class="glass-panel" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:12px 20px;border-radius:20px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:12px;font-weight:800;color:var(--mu,#a3b1e0)">قلم و تم:</span>
+              <button type="button" class="ch" onclick="changeArticleFontSize(-1)" title="کوچک‌تر">A-</button>
+              <button type="button" class="ch" onclick="changeArticleFontSize(1)" title="بزرگ‌تر">A+</button>
+              <button type="button" class="ch" onclick="toggleReadingMode()" title="تغییر تم شب/روز">🌓 تم مطالعه</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <button type="button" class="ch" onclick="toggleBookmarkPost('${post.id}')">${isBookmarked ? '❤️ ذخیره‌شده' : '🤍 ذخیره'}</button>
+              <button type="button" class="b" onclick="toggleCompletedPost('${post.id}'); if (!${isCompleted}) showToast('+۵۰ XP به حساب کاربریت اضافه شد! 🎉', 'success')" style="padding:6px 16px;font-size:12px">
+                ${isCompleted ? '✓ مطالعه‌شده (+۵۰ XP)' : '☑ خواندم (+۵۰ XP)'}
+              </button>
+            </div>
+          </div>
           <!-- Breadcrumb (مسیر راهنمای صفحات) -->
           <nav class="flex flex-wrap items-center gap-2 text-xs text-slate-500 bg-white px-4 py-2.5 rounded-2xl border border-slate-200/80 shadow-sm">
             <button type="button" onclick="navigateTo('home')" class="hover:text-turquoise-600 font-bold">صفحه اصلی</button>
@@ -5249,8 +5265,30 @@ html.ref-pending::after{content:"";position:fixed;z-index:2147483647;top:50%;lef
 
               <div class="py-4">
                 <p class="text-xs text-turquoise-300 font-bold mb-2">درس یا مبحث در حال مطالعه:</p>
-                <input id="timer-subject-input" type="text" value="${STATE.timerSubject}" oninput="STATE.timerSubject=this.value" class="px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white text-center text-sm font-bold focus:outline-none focus:border-turquoise-400" />
-                <div id="pomodoro-clock-display" class="text-6xl sm:text-7xl font-black tracking-wider font-mono text-white my-6">${mins}:${secs}</div>
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-2 max-w-md mx-auto">
+                  <input id="timer-subject-input" type="text" value="${STATE.timerSubject}" oninput="STATE.timerSubject=this.value" class="w-full px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white text-center text-sm font-bold focus:outline-none focus:border-turquoise-400" />
+                </div>
+                <!-- Quick subject selection pills -->
+                <div class="flex flex-wrap justify-center gap-1.5 mt-2.5">
+                  ${['ریاضی', 'فیزیک', 'زیست', 'شیمی', 'ادبیات', 'دینی', 'زبان'].map(s => `
+                    <button type="button" onclick="STATE.timerSubject='${s}'; document.getElementById('timer-subject-input').value='${s}'" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white/10 hover:bg-white/20 text-slate-200 transition">${s}</button>
+                  `).join('')}
+                </div>
+
+                <!-- SVG Circular Progress Ring -->
+                <div class="pomodoro-circle-wrap" style="position:relative;width:220px;height:220px;margin:20px auto;display:flex;align-items:center;justify-content:center">
+                  <svg class="pomodoro-svg" viewBox="0 0 240 240" style="position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)">
+                    <circle cx="120" cy="120" r="100" stroke="rgba(255,255,255,0.12)" stroke-width="10" fill="none" />
+                    <circle id="pomodoro-svg-ring" cx="120" cy="120" r="100" stroke="${STATE.timerMode === 'break' ? '#f5b942' : '#4fd1c5'}" stroke-width="10" stroke-linecap="round" fill="none"
+                            stroke-dasharray="628" stroke-dashoffset="${628 * (1 - STATE.timerSeconds / Math.max(1, (STATE.timerMode === 'study' ? 25 : STATE.timerMode === 'deep' ? 50 : STATE.timerMode === 'exam' ? 75 : 10) * 60))}" style="transition:stroke-dashoffset 1s linear, stroke 0.3s ease" />
+                  </svg>
+                  <div style="position:relative;z-index:2;text-align:center">
+                    <span style="display:inline-block;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:800;margin-bottom:4px;background:${STATE.timerMode === 'break' ? 'rgba(245,185,66,0.2)' : 'rgba(79,209,197,0.2)'};color:${STATE.timerMode === 'break' ? '#fcd34d' : '#67e8f9'}">
+                      ${STATE.timerMode === 'break' ? '🌿 زمان استراحت مغز' : (STATE.timerRunning ? '🔥 در حال تمرکز عمیق' : '✨ آماده برای تمرکز')}
+                    </span>
+                    <div id="pomodoro-clock-display" class="text-5xl font-black tracking-wider font-mono text-white">${mins}:${secs}</div>
+                  </div>
+                </div>
               </div>
 
               <div class="flex justify-center gap-3">
@@ -5542,6 +5580,12 @@ html.ref-pending::after{content:"";position:fixed;z-index:2147483647;top:50%;lef
             const m = String(Math.floor(STATE.timerSeconds / 60)).padStart(2, '0');
             const s = String(STATE.timerSeconds % 60).padStart(2, '0');
             el.textContent = `${m}:${s}`;
+          }
+          const ring = document.getElementById('pomodoro-svg-ring');
+          if (ring) {
+            const total = (STATE.timerMode === 'study' ? 25 : STATE.timerMode === 'deep' ? 50 : STATE.timerMode === 'exam' ? 75 : 10) * 60;
+            const offset = 628 * (1 - (STATE.timerSeconds / Math.max(1, total)));
+            ring.style.strokeDashoffset = String(offset);
           }
         } else {
           clearInterval(STATE.timerInterval);
@@ -18379,6 +18423,194 @@ if (typeof CloudSync !== 'undefined' && CloudSync.fetchFromCloud) {
 })();
 </script>
   <style id="ref-design-css">
+/* --- Living Aurora Mesh Hero & Floating Depth --- */
+@keyframes auroraShift {
+  0% { background-position: 0% 50%, 50% 0%, 100% 50%; }
+  50% { background-position: 100% 50%, 0% 100%, 50% 100%; }
+  100% { background-position: 0% 50%, 50% 0%, 100% 50%; }
+}
+
+.hero {
+  background: radial-gradient(circle at 20% 20%, rgba(6, 182, 212, 0.16), transparent 45%),
+              radial-gradient(circle at 80% 80%, rgba(91, 184, 255, 0.14), transparent 45%),
+              radial-gradient(circle at 50% 50%, rgba(245, 185, 66, 0.09), transparent 50%),
+              linear-gradient(135deg, rgba(255,255,255,0.03) 25%, transparent 25%) -14px 0/ 28px 28px,
+              linear-gradient(225deg, rgba(255,255,255,0.03) 25%, transparent 25%) -14px 0/ 28px 28px,
+              var(--bg);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 28px 28px, 28px 28px, auto;
+}
+
+html.reading-mode .hero {
+  background: radial-gradient(circle at 20% 20%, rgba(6, 182, 212, 0.24), transparent 45%),
+              radial-gradient(circle at 80% 80%, rgba(99, 102, 241, 0.22), transparent 45%),
+              radial-gradient(circle at 50% 50%, rgba(245, 185, 66, 0.14), transparent 50%),
+              linear-gradient(135deg, rgba(255,255,255,0.02) 25%, transparent 25%) -14px 0/ 28px 28px,
+              linear-gradient(225deg, rgba(255,255,255,0.02) 25%, transparent 25%) -14px 0/ 28px 28px,
+              #060d1d;
+  background-size: 100% 100%, 100% 100%, 100% 100%, 28px 28px, 28px 28px, auto;
+}
+
+/* --- Tactile Card Physics & Spotlight Borders --- */
+.card-modern, .c, .bento-card, .pcard, .cat {
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.32s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease !important;
+}
+.card-modern:hover, .c:hover, .bento-card:hover, .pcard:hover, .cat:hover {
+  transform: translateY(-6px) scale(1.008) !important;
+  box-shadow: 0 20px 38px -10px rgba(15, 36, 66, 0.16), 0 0 24px -4px rgba(79, 209, 197, 0.18) !important;
+  border-color: rgba(79, 209, 197, 0.55) !important;
+}
+
+/* --- Soundwave & Pulse Animation --- */
+@keyframes eqBars {
+  0%, 100% { height: 4px; }
+  50% { height: 16px; }
+}
+.eq-bars {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2.5px;
+  height: 18px;
+  padding: 0 2px;
+  vertical-align: middle;
+}
+.eq-bars i {
+  display: block;
+  width: 3px;
+  background: var(--aq, #4fd1c5);
+  border-radius: 2px;
+  animation: eqBars 1.2s ease-in-out infinite;
+}
+.eq-bars i:nth-child(1) { animation-delay: 0.1s; height: 8px; }
+.eq-bars i:nth-child(2) { animation-delay: 0.3s; height: 14px; }
+.eq-bars i:nth-child(3) { animation-delay: 0.2s; height: 10px; }
+
+@keyframes pulseRing {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(79, 209, 197, 0.7); }
+  70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(79, 209, 197, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(79, 209, 197, 0); }
+}
+.play-pulse-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--aq, #4fd1c5);
+  color: var(--ink, #0a1128);
+  animation: pulseRing 2s infinite cubic-bezier(0.45, 0, 0.55, 1);
+  vertical-align: middle;
+}
+
+/* --- Glassmorphic Panels & Docks --- */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--ln);
+}
+html.reading-mode .glass-panel {
+  background: rgba(18, 28, 44, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--ln);
+}
+
+/* --- Student Gamification HUD Cockpit --- */
+.hud-card {
+  background: var(--s);
+  border: 1px solid var(--ln);
+  border-radius: 22px;
+  padding: 20px;
+  box-shadow: 0 16px 36px rgba(0,0,0,0.18);
+  position: relative;
+  overflow: hidden;
+}
+.hud-progress-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.12);
+  overflow: hidden;
+  margin: 10px 0;
+}
+.hud-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--aq, #4fd1c5), var(--gold, #f5b942));
+  border-radius: 999px;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* --- Interactive Need Router (Bento Pills) --- */
+.need-router-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(245px, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+.need-pill {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--s);
+  border: 1px solid var(--ln);
+  border-radius: 18px;
+  padding: 16px;
+  cursor: pointer;
+  text-align: right;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.need-pill:hover {
+  transform: translateY(-4px) scale(1.015);
+  border-color: var(--pill-color, var(--gold));
+  background: color-mix(in srgb, var(--pill-color, var(--gold)) 10%, var(--s));
+  box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+}
+.need-pill .np-badge {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--pill-color, var(--gold)) 16%, transparent);
+  color: var(--pill-color, var(--gold));
+}
+
+/* --- Zen Breathing Animation --- */
+@keyframes breatheCircle {
+  0% { transform: scale(0.9); }
+  25% { transform: scale(1.3); }
+  50% { transform: scale(1.3); }
+  75% { transform: scale(0.9); }
+  100% { transform: scale(0.9); }
+}
+.zen-circle-pulse {
+  animation: breatheCircle 16s infinite ease-in-out;
+}
+
+/* --- Circular Pomodoro SVG --- */
+.pomodoro-svg {
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+.pomodoro-svg circle {
+  transition: stroke-dashoffset 0.8s ease-in-out, stroke 0.3s ease;
+}
+
+/* --- Reading progress bar --- */
+#reading-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--aq, #4fd1c5), var(--gold, #f5b942));
+  width: 0%;
+  z-index: 9999;
+  transition: width 0.1s linear;
+}
+
 :root{--bg:#0a1128;--s:rgba(255,255,255,.045);--ln:rgba(255,255,255,.13);--tx:#f2f5ff;--mu:#a3b1e0;--gold:#f5b942;--aq:#4fd1c5;--co:#ff7a6b;--li:#a392ff;--sk:#5bb8ff;--pk:#ff8ac8;--ink:#0a1128;--g1:#fff;--g2:#f5b942;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:calc(76px + env(safe-area-inset-top,0px))}
@@ -18644,15 +18876,206 @@ html.reading-mode body #app-viewport :is(.bg-softyellow-300,.bg-softyellow-400,.
   const tops = c => (c.subcategories || []).filter(s => !s.parentId);
   let tmo; const toast = m => { try { showToast(m, 'success'); } catch(e){} };
 
-  // ---------- post card (reference style) ----------
+  // ---------- Student Gamification Engine (Zero Backend XP & Level HUD) ----------
+  window.getStudentGamificationStats = function() {
+    const sd = DB.studentData || {};
+    const completedCount = (sd.completedPostIds || []).length;
+    const studySessions = sd.studySessions || [];
+    const studyMinutes = studySessions.reduce((acc, s) => acc + (Number(s.minutes) || 0), 0);
+    const quizCount = (sd.quizHistory || []).length;
+    const checklistItems = sd.dailyChecklist || [];
+    const habitsDoneCount = checklistItems.filter(h => h.done === true).length;
+    const bookmarkedCount = (sd.bookmarkedPostIds || []).length;
+
+    const xp = (completedCount * 50) +
+               (studyMinutes * 2) +
+               (quizCount * 100) +
+               (habitsDoneCount * 30) +
+               (bookmarkedCount * 15);
+
+    let levelTier = '🌱 سطح ۱: رهجوی مسیر موفقیت';
+    let nextLevelXp = 200;
+    let prevLevelXp = 0;
+    let levelNum = 1;
+
+    if (xp >= 1000) {
+      levelTier = '👑 سطح ۴: نخبه پیشتاز باقرالعلوم';
+      nextLevelXp = 2500;
+      prevLevelXp = 1000;
+      levelNum = 4;
+    } else if (xp >= 500) {
+      levelTier = '🔥 سطح ۳: استراتژیست آزمون و نهایی';
+      nextLevelXp = 1000;
+      prevLevelXp = 500;
+      levelNum = 3;
+    } else if (xp >= 200) {
+      levelTier = '⚡ سطح ۲: معمار تمرکز و زمان';
+      nextLevelXp = 500;
+      prevLevelXp = 200;
+      levelNum = 2;
+    }
+
+    const range = Math.max(1, nextLevelXp - prevLevelXp);
+    const progressPercent = Math.min(100, Math.max(0, Math.round(((xp - prevLevelXp) / range) * 100)));
+
+    const todayStr = (window.JalaliDateEngine && JalaliDateEngine.todayJalali) ? JalaliDateEngine.todayJalali() : new Date().toISOString().slice(0, 10);
+    const todayStudyMinutes = studySessions
+      .filter(s => s.date === todayStr)
+      .reduce((acc, s) => acc + (Number(s.minutes) || 0), 0);
+
+    const lastReadPostId = (sd.recentlyViewedPostIds && sd.recentlyViewedPostIds.length > 0) ? sd.recentlyViewedPostIds[0] : null;
+    const lastReadPost = lastReadPostId ? (DB.posts || []).find(p => p.id === lastReadPostId) : null;
+
+    return {
+      xp,
+      levelTier,
+      levelNum,
+      nextLevelXp,
+      prevLevelXp,
+      progressPercent,
+      todayStudyMinutes,
+      lastReadPost,
+      completedCount,
+      studyMinutes,
+      quizCount,
+      habitsDoneCount,
+      bookmarkedCount
+    };
+  };
+
+  // ---------- Interactive 60-Second Box Breathing Zen Modal ----------
+  window.openBreathingZenModal = function() {
+    const content = `
+      <div id="zen-breathing-box" style="text-align:center;padding:12px 6px">
+        <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px">
+          <span style="font-size:26px">🌿</span>
+          <h3 style="margin:0;font-size:22px;font-weight:900;color:var(--tx)">تمرین ۶۰ ثانیه‌ای تنفس مربعی (۴-۴-۴-۴)</h3>
+        </div>
+        <p style="font-size:13px;color:var(--mu);margin:0 0 20px">پروتکل علمی و اثبات‌شده برای آرامش فوری ضربان قلب، رفع استرس شدید و بازگشت تمرکز</p>
+        
+        <div style="position:relative;width:200px;height:200px;margin:20px auto;display:flex;align-items:center;justify-content:center">
+          <div id="zen-ring-outer" class="zen-circle-pulse" style="position:absolute;inset:0;border-radius:50%;border:3px dashed var(--aq);opacity:0.4"></div>
+          <div id="zen-ring-inner" style="position:absolute;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle, var(--aq) 0%, rgba(79,209,197,0.15) 70%, transparent 100%);transition:all 4s cubic-bezier(0.4, 0, 0.2, 1);display:flex;align-items:center;justify-content:center;box-shadow:0 0 35px rgba(79,209,197,0.3)">
+            <span id="zen-sec-counter" style="font-size:38px;font-weight:900;font-family:Lalezar,sans-serif;color:var(--ink)">۴</span>
+          </div>
+        </div>
+
+        <div style="min-height:56px;margin-bottom:16px">
+          <div id="zen-phase-title" style="font-size:19px;font-weight:800;color:var(--aq);margin-bottom:4px">دم عمیق (از راه بینی)</div>
+          <div id="zen-phase-desc" style="font-size:13px;color:var(--mu)">شش‌ها را آرام و عمیق پر از اکسیژن کن...</div>
+        </div>
+
+        <div style="display:flex;justify-content:center;gap:8px;margin-bottom:24px" id="zen-cycle-dots">
+          <span class="zen-dot active" style="width:10px;height:10px;border-radius:50%;background:var(--aq)"></span>
+          <span class="zen-dot" style="width:10px;height:10px;border-radius:50%;background:var(--ln)"></span>
+          <span class="zen-dot" style="width:10px;height:10px;border-radius:50%;background:var(--ln)"></span>
+          <span class="zen-dot" style="width:10px;height:10px;border-radius:50%;background:var(--ln)"></span>
+        </div>
+
+        <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center">
+          <button class="b" onclick="closeModal(); navigateTo('post', {id: 'post-7'})" style="font-size:13px;padding:9px 20px">📖 مطالعه راهکارهای علمی کاهش اضطراب (مطلب ۷)</button>
+          <button class="b g" onclick="closeModal()" style="font-size:13px;padding:9px 18px">متشکرم، حالم بهتر است</button>
+        </div>
+      </div>
+    `;
+    openModal('آرامش فوری و تنفس ذهن', content);
+
+    if (window.__zenTimer) clearInterval(window.__zenTimer);
+    let cycle = 0;
+    let phase = 0;
+    let sec = 4;
+
+    const phases = [
+      { title: 'دم عمیق (از راه بینی)', desc: 'شش‌ها را آرام و عمیق پر از اکسیژن کن...', scale: '160px', bg: 'var(--aq)' },
+      { title: 'حبس نفس', desc: 'هوا را با آرامش در ریه‌ها نگه دار...', scale: '160px', bg: 'var(--gold)' },
+      { title: 'بازدم آرام (از دهان)', desc: 'تمام تنش و خستگی را به آرامی تخلیه کن...', scale: '100px', bg: 'var(--co)' },
+      { title: 'آرامش و رهایی ذهن', desc: 'ذهن و عضلات را کاملاً رها کن...', scale: '100px', bg: 'var(--li)' }
+    ];
+
+    const updateZenUI = () => {
+      const p = phases[phase];
+      const tEl = document.getElementById('zen-phase-title');
+      const dEl = document.getElementById('zen-phase-desc');
+      const cEl = document.getElementById('zen-sec-counter');
+      const inner = document.getElementById('zen-ring-inner');
+      const dots = document.querySelectorAll('#zen-cycle-dots .zen-dot');
+
+      if (tEl) tEl.textContent = p.title;
+      if (dEl) dEl.textContent = p.desc;
+      if (cEl) {
+        cEl.textContent = fa(sec);
+        cEl.style.color = 'var(--ink)';
+      }
+      if (inner) {
+        inner.style.width = p.scale;
+        inner.style.height = p.scale;
+        inner.style.background = `radial-gradient(circle, ${p.bg} 0%, rgba(79,209,197,0.15) 70%, transparent 100%)`;
+      }
+      if (dots) {
+        dots.forEach((d, idx) => d.style.background = (idx <= cycle ? 'var(--aq)' : 'var(--ln)'));
+      }
+    };
+
+    updateZenUI();
+
+    window.__zenTimer = setInterval(() => {
+      sec--;
+      if (sec <= 0) {
+        sec = 4;
+        phase++;
+        if (phase > 3) {
+          phase = 0;
+          cycle++;
+          if (cycle >= 4) {
+            clearInterval(window.__zenTimer);
+            const tEl = document.getElementById('zen-phase-title');
+            const dEl = document.getElementById('zen-phase-desc');
+            if (tEl) tEl.textContent = '✨ تمرین کامل شد!';
+            if (dEl) dEl.textContent = 'عالی بود! ضربان قلب منظم‌تر و تمرکز ذهن شما بازگشته است.';
+            return;
+          }
+        }
+      }
+      updateZenUI();
+    }, 1000);
+  };
+
+  // ---------- Reader Font Scale Controller ----------
+  window.changeArticleFontSize = function(delta) {
+    const prose = document.querySelector('.article-prose');
+    if (!prose) return;
+    const cur = parseInt(window.getComputedStyle(prose).fontSize) || 16;
+    const next = Math.max(13, Math.min(26, cur + delta * 2));
+    prose.style.fontSize = next + 'px';
+    prose.style.lineHeight = '2.1';
+  };
+
+  // ---------- post card (reference style with soundwave / pulse) ----------
   window.renderPostCard = function(p){
     const c = catOf(p.categoryId), col = CL[cidx(p.categoryId) % 6], k = kindOf(p);
     const done = ((DB.studentData || {}).completedPostIds || []).includes(p.id), bm = ((DB.studentData || {}).bookmarkedPostIds || []).includes(p.id);
-    return `<article class="c pcard" style="--c:var(--${col})" onclick="navigateTo('post', {id: '${p.id}'})">
-      <div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><span class="tg" style="margin:0;color:var(--c)">${c.icon || ''} ${esc(clean(c.title))}</span><span class="ch" style="cursor:default">${KL[k]}</span></div>
-      <h3>${esc(p.title)}</h3><p>${esc(p.summary || '')}</p>
-      <div class="chs" style="margin-top:12px"><span class="ch" style="cursor:default">⏱ ${esc(p.readingTime || '')}</span>${p.importance ? `<span class="ch" style="cursor:default;color:var(--gold)">${esc(p.importance)}</span>` : ''}${done ? '<span class="ch" style="cursor:default;color:var(--aq)">✓ مطالعه‌شده (+۵۰ XP)</span>' : ''}</div>
-      <div class="chs" style="margin-top:auto;padding-top:12px"><button class="ch" onclick="event.stopPropagation(); toggleBookmarkPost('${p.id}')">${bm ? '❤️ ذخیره‌شده' : '🤍 ذخیره'}</button><button class="ch" onclick="event.stopPropagation(); toggleCompletedPost('${p.id}')">${done ? '✓ انجام شد' : '☑ خواندم'}</button></div></article>`;
+    const formatIcon = k === 'audio'
+      ? '<span class="eq-bars"><i></i><i></i><i></i></span>'
+      : k === 'video'
+        ? '<span class="play-pulse-btn" style="width:20px;height:20px;font-size:10px">▶</span>'
+        : '';
+    return `<article class="c pcard card-modern" style="--c:var(--${col})" onclick="navigateTo('post', {id: '${p.id}'})">
+      <div style="display:flex;justify-content:space-between;gap:8px;align-items:center">
+        <span class="tg" style="margin:0;color:var(--c)">${c.icon || ''} ${esc(clean(c.title))}</span>
+        <span class="ch" style="cursor:default;display:inline-flex;align-items:center;gap:4px">${formatIcon} ${KL[k]}</span>
+      </div>
+      <h3>${esc(p.title)}</h3>
+      <p>${esc(p.summary || '')}</p>
+      <div class="chs" style="margin-top:12px">
+        <span class="ch" style="cursor:default">⏱ ${esc(p.readingTime || '۵ دقیقه')}</span>
+        ${p.importance ? `<span class="ch" style="cursor:default;color:var(--gold)">⭐ ${esc(p.importance)}</span>` : ''}
+        ${done ? '<span class="ch" style="cursor:default;color:var(--aq)">✓ مطالعه‌شده (+۵۰ XP)</span>' : ''}
+      </div>
+      <div class="chs" style="margin-top:auto;padding-top:12px">
+        <button class="ch" onclick="event.stopPropagation(); toggleBookmarkPost('${p.id}')">${bm ? '❤️ ذخیره‌شده' : '🤍 ذخیره'}</button>
+        <button class="ch" onclick="event.stopPropagation(); toggleCompletedPost('${p.id}'); if (!${done}) showToast('+۵۰ XP به حسابت اضافه شد! 🎉', 'success')">${done ? '✓ انجام شد' : '☑ خواندم'}</button>
+      </div>
+    </article>`;
   };
 
   // ---------- categories grid ----------
@@ -18679,35 +19102,174 @@ html.reading-mode body #app-viewport :is(.bg-softyellow-300,.bg-softyellow-400,.
   // ---------- home markup ----------
   function home(){
     const C = cats(), P = posts(), nQ = Array.isArray(DB.quizzes) ? DB.quizzes.length : 0;
+    const stats = getStudentGamificationStats();
     const fq = (Array.isArray(DB.faqs) ? DB.faqs.filter(f => f.approved !== false) : []).filter(f => (f.question || f.q || f.title) && (f.answer || f.a || f.body)).slice(0, 6);
     const faqs = fq.length ? fq.map((f, i) => `<details ${i ? '' : 'open'}><summary>${esc(f.question || f.q || f.title)}</summary><p>${esc(f.answer || f.a || f.body)}</p></details>`).join('')
       : [['چطور وقت مشاوره بگیرم؟','حضوری در واحد مشاوره، شنبه تا چهارشنبه ۷:۳۰ تا ۱۴:۳۰.'],['گفت‌وگوهایم محرمانه می‌ماند؟','مشاوره بر پایه رازداری است. استثنا فقط جایی است که جان یا سلامت خودت یا دیگری در خطر باشد.'],['از کجا شروع کنم؟','پایه‌ات را انتخاب کن، بعد آزمون تیپ مطالعه را بزن و از دسته مدیریت زمان شروع کن.']].map((f, i) => `<details ${i ? '' : 'open'}><summary>${f[0]}</summary><p>${f[1]}</p></details>`).join('');
+
     return `<div id="ref-home">
+<!-- 1. LIVING AURORA MESH HERO & STUDENT GAMIFICATION COCKPIT -->
 <section class="hero" id="top"><div class="w hg"><div>
   <h1>از انتخاب رشته تا آرامش ذهن، همراهتیم</h1>
   <p class="lead">مرجع مشاوره‌ای، تحصیلی و روان‌شناختی دانش‌آموزان دبیرستان نمونه دولتی پسرانه باقرالعلوم، برای نسلی خودآگاه، هدفمند و مسلط بر مهارت‌های مطالعه و زندگی.</p>
   <div class="fd"><label for="fq" class="sr">چه کمکی لازم داری؟</label><input id="fq" type="search" autocomplete="off" placeholder="چه کمکی لازم داری؟ «استرس»، «انتخاب رشته»، «برنامه»..."><kbd>/</kbd><ul id="rs" hidden></ul></div>
   <div class="qc" id="qc"></div>
-  <div class="cta"><a class="b" href="#grades" onclick="document.getElementById('grades').scrollIntoView({behavior:'smooth'});return false">مسیرم را پیدا کن</a><a class="b g" href="#" onclick="openCounselorModal();return false">گفت‌وگو با مشاور</a></div>
+  <div class="cta"><a class="b" href="#router" onclick="document.getElementById('router').scrollIntoView({behavior:'smooth'});return false">🧭 راهنمای فوری دغدغه‌ها</a><a class="b g" href="#" onclick="openCounselorModal();return false">گفت‌وگو با مشاور</a></div>
   <dl class="st" style="margin-bottom:0"><div><b>${fa(C.length)}</b><span>دسته‌بندی تخصصی</span></div><div><b>۳</b><span>پایه تحصیلی</span></div><div><b>${fa(P.length)}</b><span>مطلب آموزشی</span></div><div><b>${fa(nQ)}</b><span>آزمون خودارزیابی</span></div></dl>
-</div><div class="orb" aria-hidden="true"><svg viewBox="0 0 400 400"><circle class="rg" cx="200" cy="200" r="70"/><circle class="rg" cx="200" cy="200" r="120"/><circle class="rg" cx="200" cy="200" r="172"/><g class="o"><circle cx="200" cy="28" r="10" fill="var(--gold)"/><circle cx="200" cy="372" r="6" fill="var(--sk)"/></g><g class="o r"><circle cx="200" cy="80" r="8" fill="var(--aq)"/><circle cx="80" cy="200" r="5" fill="var(--li)"/></g><g class="o f"><circle cx="200" cy="130" r="6" fill="var(--co)"/></g><circle cx="200" cy="200" r="46" fill="var(--gold)"/><text x="200" y="222" text-anchor="middle" font-family="Lalezar" font-size="64" fill="#0a1128">ب</text></svg>
-  <span class="chip" style="top:6%;inset-inline-end:-2%">برنامه‌ریزی</span><span class="chip" style="top:52%;inset-inline-start:-4%">کنکور</span><span class="chip" style="bottom:4%;inset-inline-end:8%">آرامش ذهن</span></div></div></section>
+</div>
+
+<!-- Right Column: Student Gamification HUD Cockpit & Cosmic Orb -->
+<div style="display:flex;flex-direction:column;gap:18px;align-items:center">
+  <div class="hud-card" style="width:100%;max-width:390px;backdrop-filter:blur(16px)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:22px">🏆</span>
+        <div>
+          <span style="display:block;font-size:11px;color:var(--mu);font-weight:700">سطح دانش‌آموزی شما</span>
+          <strong style="font-size:14px;color:var(--gold)">${stats.levelTier}</strong>
+        </div>
+      </div>
+      <span class="np-badge" style="background:rgba(245,185,66,0.18);color:var(--gold);font-weight:900;padding:4px 10px;border-radius:12px;font-size:13px">${fa(stats.xp)} XP</span>
+    </div>
+
+    <!-- Animated XP Progress Bar -->
+    <div class="hud-progress-bar">
+      <div class="hud-progress-fill" style="width: ${stats.progressPercent}%;"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--mu);margin-bottom:12px">
+      <span>پیشرفت به سطح بعدی:</span>
+      <span>${fa(stats.progressPercent)}٪ (${fa(stats.xp)} / ${fa(stats.nextLevelXp)} XP)</span>
+    </div>
+
+    <!-- Quick Stats Grid -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 0;border-top:1px solid var(--ln);border-bottom:1px solid var(--ln);font-size:12px">
+      <div style="text-align:center;padding:4px">
+        <span style="display:block;font-size:11px;color:var(--mu)">⏱️ مطالعه امروز:</span>
+        <strong style="color:var(--aq)">${fa(stats.todayStudyMinutes)} دقیقه</strong>
+      </div>
+      <div style="text-align:center;padding:4px">
+        <span style="display:block;font-size:11px;color:var(--mu)">✓ مقالات تکمیل‌شده:</span>
+        <strong style="color:var(--tx)">${fa(stats.completedCount)} مطلب</strong>
+      </div>
+    </div>
+
+    <!-- Resume last read button if exists -->
+    ${stats.lastReadPost ? `
+      <div style="margin-top:12px">
+        <button class="b" onclick="navigateTo('post', {id: '${stats.lastReadPost.id}'})" style="width:100%;font-size:12px;padding:8px 12px;display:flex;align-items:center;justify-content:center;gap:6px;background:linear-gradient(90deg,var(--gold),#e5a730);color:#0a1128">
+          <span>📖 ادامه آخرین مطالعه:</span>
+          <span style="max-width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(stats.lastReadPost.title)}</span>
+          <span>←</span>
+        </button>
+      </div>
+    ` : `
+      <div style="margin-top:10px;display:flex;gap:6px">
+        <button class="ch" onclick="navigateTo('tools', {tab: 'timer'})" style="flex:1;text-align:center">⏱️ تایمر پومودورو</button>
+        <button class="ch" onclick="navigateTo('quizzes')" style="flex:1;text-align:center">🧭 آزمون خودشناسی</button>
+      </div>
+    `}
+  </div>
+
+  <div class="orb" aria-hidden="true" style="width:min(100%,300px);aspect-ratio:1">
+    <svg viewBox="0 0 400 400"><circle class="rg" cx="200" cy="200" r="70"/><circle class="rg" cx="200" cy="200" r="120"/><circle class="rg" cx="200" cy="200" r="172"/><g class="o"><circle cx="200" cy="28" r="10" fill="var(--gold)"/><circle cx="200" cy="372" r="6" fill="var(--sk)"/></g><g class="o r"><circle cx="200" cy="80" r="8" fill="var(--aq)"/><circle cx="80" cy="200" r="5" fill="var(--li)"/></g><g class="o f"><circle cx="200" cy="130" r="6" fill="var(--co)"/></g><circle cx="200" cy="200" r="46" fill="var(--gold)"/><text x="200" y="222" text-anchor="middle" font-family="Lalezar" font-size="64" fill="#0a1128">ب</text></svg>
+    <span class="chip" style="top:6%;inset-inline-end:-2%">برنامه‌ریزی</span><span class="chip" style="top:52%;inset-inline-start:-4%">کنکور</span><span class="chip" style="bottom:4%;inset-inline-end:8%">آرامش ذهن</span>
+  </div>
+</div>
+</div></section>
+
 <div class="mq" aria-label="موضوعات پرطرفدار"><div class="mt" id="mk"></div></div>
+
+<!-- 2. INTERACTIVE NEED-BASED QUICK ROUTER (8 BENTO PILLS) -->
+<section class="sec" id="router" style="padding-top:30px;padding-bottom:30px">
+  <div class="w">
+    <div class="sh" style="margin-bottom:16px">
+      <h2>🧭 قطب‌نمای سریع: همین الان تو چه وضعیتی هستی؟</h2>
+      <p>روی دغدغه یا وضعیت فعلی‌ات کلیک کن تا کوتاه‌ترین مسیر حل مسئله را ببینی:</p>
+    </div>
+    <div class="need-router-grid">
+      <div class="need-pill" style="--pill-color:var(--co)" onclick="navigateTo('category', {id: 'cat-15'})">
+        <div style="font-weight:900;font-size:15px;color:var(--tx)">🔥 حوصله شروع درس رو ندارم و مدام عقب می‌ندازم!</div>
+        <div class="np-badge">قانون ۲ دقیقه + پادکست رهایی از اهمال‌کاری ←</div>
+      </div>
+      <div class="need-pill" style="--pill-color:var(--gold)" onclick="navigateTo('category', {id: 'cat-4'})">
+        <div style="font-weight:900;font-size:15px;color:var(--tx)">📅 برنامه‌م به هم ریخته و می‌خوام اصولی برنامه‌ریزی کنم</div>
+        <div class="np-badge">فرمول تستی/تشریحی + جدول خام برنامه ←</div>
+      </div>
+      <div class="need-pill" style="--pill-color:var(--aq)" onclick="navigateTo('category', {id: 'cat-7'})">
+        <div style="font-weight:900;font-size:15px;color:var(--tx)">🏅 می‌خوام تو امتحانات نهایی نمره ۲۰ بگیرم</div>
+        <div class="np-badge">کلیدواژه‌نویسی نهایی + بارم‌بندی خرداد ←</div>
+      </div>
+      <div class="need-pill" style="--pill-color:var(--sk)" onclick="navigateTo('category', {id: 'cat-6'})">
+        <div style="font-weight:900;font-size:15px;color:var(--tx)">📝 تو جلسه آزمون وقت کم میارم یا بی‌دقتی می‌کنم</div>
+        <div class="np-badge">ویدئوی ضربدر و منها + استراتژی بازگشت ←</div>
+      </div>
+      <div class="need-pill" style="--pill-color:var(--li)" onclick="navigateTo('category', {id: 'cat-13'})">
+        <div style="font-weight:900;font-size:15px;color:var(--tx)">📱 گوشی و فضای مجازی تمرکزم رو نابود کرده!</div>
+        <div class="np-badge">پروتکل سم‌زدایی دوپامین + تمرکز عمیق ←</div>
+      </div>
+      <div class="need-pill" style="--pill-color:var(--aq)" onclick="openBreathingZenModal()">
+        <div style="font-weight:900;font-size:15px;color:var(--tx)">🌿 استرس دارم و نیاز به آرامش فوری ذهن دارم</div>
+        <div class="np-badge">تمرین ۶۰ ثانیه‌ای تنفس مربعی (۴-۴-۴-۴) ←</div>
+      </div>
+      <div class="need-pill" style="--pill-color:var(--co)" onclick="navigateTo('category', {id: 'cat-18'})">
+        <div style="font-weight:900;font-size:15px;color:var(--tx)">🛟 از بودجه‌بندی عقب افتادم و تراز آزمونم افت کرده</div>
+        <div class="np-badge">پروتکل جبران اورژانسی + اولویت‌بندی بودجه ←</div>
+      </div>
+      <div class="need-pill" style="--pill-color:var(--pk)" onclick="navigateTo('quizzes')">
+        <div style="font-weight:900;font-size:15px;color:var(--tx)">🧭 نمی‌دونم سبک یادگیری و نقاط قوت من چیه</div>
+        <div class="np-badge">۹ آزمون خودشناسی و استعدادیابی آنی ←</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. GRADE-LEVEL ROADMAP -->
 <section class="sec" id="grades"><div class="w"><div class="sh"><h2>مسیر هر پایه، روشن و قدم‌به‌قدم</h2><p>پایه‌ات را انتخاب کن تا نقشه راه همان سال را ببینی.</p></div><div class="tabs" id="gt" role="tablist"></div><div class="c" id="gp"></div></div></section>
-<section class="sec" id="cats"><div class="w">${catsBlock('هرچه برای موفقیتت لازم است، یک‌جا', fa(C.length) + ' موضوع تخصصی. جست‌وجو کن یا مرور کن.')}</div></section>
+
+<!-- 4. MEDIA FORMAT QUICK-SWITCH BAR & ALL 18 CATEGORIES BENTO GRID -->
+<section class="sec" id="cats">
+  <div class="w">
+    <!-- Format Hub -->
+    <div style="margin-bottom:28px">
+      <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none">
+        <button class="ch" onclick="navigateTo('explorer', {format: 'all'})" style="font-weight:800;border-color:var(--gold);color:var(--gold)">✨ همه قالب‌های محتوایی</button>
+        <button class="ch" onclick="navigateTo('explorer', {format: 'article'})">📄 مقالات و راهنماها</button>
+        <button class="ch" onclick="navigateTo('explorer', {format: 'video'})">🎬 ویدئوهای آموزشی</button>
+        <button class="ch" onclick="navigateTo('explorer', {format: 'audio'})">🎧 پادکست‌های صوتی</button>
+        <button class="ch" onclick="navigateTo('explorer', {format: 'download'})">📥 جزوه‌ها و جداول دانلودی</button>
+        <button class="ch" onclick="navigateTo('faq')">❓ سؤالات پرتکرار دانش‌آموزان</button>
+      </div>
+    </div>
+    ${catsBlock('هرچه برای موفقیتت لازم است، یک‌جا', fa(C.length) + ' موضوع تخصصی. جست‌وجو کن یا مرور کن.')}
+  </div>
+</section>
+
+<!-- 5. LIBRARY & MEDIA FORMATS -->
 <section class="sec" id="library"><div class="w"><div class="sh"><h2>کتابخانه‌ای که همیشه باز است</h2><p>ویدئو، صوت و فایل. هر قالبی که برایت راحت‌تر است.</p></div><div class="lg4" id="lb"></div></div></section>
+
+<!-- 6. SELF-ASSESSMENT TESTS -->
 <section class="sec" id="tests"><div class="w"><div class="sh"><h2>خودت را بهتر بشناس</h2><p>آزمون‌های کوتاه خودارزیابی با نتیجه فوری.</p></div><div class="g2">
   <div class="c"><h3 style="font-size:28px;margin-bottom:6px">تیپ مطالعه‌ات چیست؟</h3><div id="qb"></div></div>
   <div class="c"><h3 style="font-size:28px;margin-bottom:6px">آزمون‌های سایت</h3><ul class="tl fl" style="display:block">${(DB.quizzes || []).slice(0, 6).map(q => `<li style="cursor:pointer" onclick="navigateTo('quizzes')"><span>${esc(clean(q.title || q.name || 'آزمون'))}</span><span>شروع ←</span></li>`).join('')}</ul><button class="b g" style="margin-top:10px" onclick="navigateTo('quizzes')">همهٔ آزمون‌ها</button><p class="mu" style="font-size:14px">نتیجه آزمون‌ها خودارزیابی است و جای ارزیابی تخصصی مشاور را نمی‌گیرد.</p></div></div></div></section>
+
+<!-- 7. TOOLS PREVIEW -->
 <section class="sec" id="tools"><div class="w"><div class="sh"><h2>ابزارهایی که کار را ساده می‌کنند</h2><p>ابزارهای کوچک برای برنامه‌ریزی دقیق‌تر.</p></div><div class="g2">
   <div class="c tool"><h3>شمارنده روزهای باقی‌مانده</h3><p class="mu" style="margin:0">تاریخ امتحان یا آزمون بعدی را انتخاب کن.</p><input type="date" id="cd"><p class="out" id="co"></p></div>
   <div class="c tool"><h3>محاسبه ساعت مطالعه</h3><p class="mu" style="margin:0">روزی چند ساعت می‌خوانی؟ <b id="hv"></b> ساعت</p><input type="range" id="hr" min="1" max="10" value="4" aria-label="ساعت مطالعه روزانه"><p class="out" id="ho"></p></div></div>
   <div style="margin-top:16px"><button class="b" onclick="navigateTo('tools')">میز کار کامل و تایمر پومودورو ←</button></div></div></section>
+
+<!-- 8. MAJORS & CAREERS -->
 <section class="sec" id="fields"><div class="w"><div class="sh"><h2>رشته‌ای که به آینده‌ات می‌خورد</h2><p>با علایق و توانایی‌هایت شروع کن، بعد شغل را انتخاب کن.</p></div><div class="fg" id="fg"></div><div style="margin-top:34px"><button class="b g" onclick="navigateTo('majors')">همهٔ رشته‌ها و مشاغل ←</button></div></div></section>
+
+<!-- 9. FAQ -->
 <section class="sec" id="faq"><div class="w"><div class="sh"><h2>پاسخ پرسش‌های پرتکرار</h2><p>اگر جواب سؤالت اینجا نبود، مستقیم از مشاور بپرس.</p></div>${faqs}<div style="grid-column:2;margin-top:18px"><button class="b g" onclick="navigateTo('faq')">همهٔ پرسش‌ها و ثبت سؤال ←</button></div></div></section>
+
+<!-- 10. COUNSELOR PROFILE -->
 <section class="sec" id="counselor"><div class="w"><div class="sh"><h2>کنار تو هستم، همین‌جا</h2><p>برای هر سؤال تحصیلی یا نگرانی ذهنی، بدون خجالت بپرس.</p></div><div class="g2">
-  <div class="c"><div class="av">م</div><h3 style="font-size:32px">محمد هادی برخوری مهنی</h3><p class="mu" style="margin:0">مشاور و روان‌شناس، واحد مشاوره و هدایت تحصیلی</p><p>حضوری: شنبه تا چهارشنبه، ۷:۳۰ تا ۱۴:۳۰<br>طبقه اول، واحد مشاوره</p></div>
+  <div class="c"><div class="av">م</div><h3 style="font-size:32px">محمد هادی برخوری مهنی</h3><p class="mu" style="margin:0">مشاور و روان‌شناس، واحد مشاوره و هدایت تحصیلی</p><p>حضوری: شنبه تا چهارشنبه، ۷:۳۰ تا ۱۴:۳۰<br>طبقه اول، واحد مشاوره دبیرستان نمونه دولتی باقرالعلوم</p></div>
   <div class="c"><h3 style="font-size:28px">سؤال یا پیام محرمانه</h3><p class="mu">سؤالت را ثبت کن یا با معرفی مشاور و ساعات حضور آشنا شو.</p><div class="cta"><button class="b" onclick="navigateTo('faq')">ثبت سؤال</button><button class="b g" onclick="openCounselorModal()">معرفی و وقت مشاوره</button></div></div></div></div></section>
+
+<!-- 11. REASSURANCE CTA BAND -->
 <section class="band"><div class="w"><div class="bd"><div><h2>مسیرت را با هم بچینیم</h2><p>یک گفت‌وگوی کوتاه با مشاور می‌تواند مسیر یک سال تحصیلی را روشن کند.</p></div><a class="b" href="#" onclick="openCounselorModal();return false">وقت مشاوره می‌خواهم</a></div></div></section></div>`;
   }
 
@@ -18784,7 +19346,11 @@ html.reading-mode body #app-viewport :is(.bg-softyellow-300,.bg-softyellow-400,.
     document.getElementById('ref-dock').innerHTML = it.map(x => `<button class="${x[3].includes(v) ? 'on' : ''}" onclick="${x[2]}"><svg viewBox="0 0 24 24">${x[4]}</svg>${x[1]}</button>`).join('');
   }
   try { if (localStorage.getItem('HAMRAH_READING_MODE') === null && !matchMedia('(prefers-color-scheme: light)').matches) { document.documentElement.classList.add('reading-mode'); if (window.updateReadingModeBtn) updateReadingModeBtn(); } } catch(e){}
-  addEventListener('scroll', () => { const b = $('#pb'); if (b) b.style.width = scrollY / Math.max(1, document.documentElement.scrollHeight - innerHeight) * 100 + '%'; }, {passive:true});
+  addEventListener('scroll', () => {
+    const p = scrollY / Math.max(1, document.documentElement.scrollHeight - innerHeight) * 100 + '%';
+    const b = $('#pb'); if (b) b.style.width = p;
+    const rb = $('#reading-progress-bar'); if (rb) rb.style.width = p;
+  }, {passive:true});
 
   const MY = ['home','categories','category'];
   if (window.GestaltEngine && GestaltEngine.syncDOM && !GestaltEngine.__refWrapped) {
