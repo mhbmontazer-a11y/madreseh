@@ -7484,6 +7484,26 @@ html.ref-pending::after{content:"";position:fixed;z-index:2147483647;top:50%;lef
         case 'majors':
           viewport.innerHTML = renderMajorsView();
           break;
+        case 'about':
+          if (typeof openAboutModal === 'function') openAboutModal();
+          viewport.innerHTML = renderHomeView();
+          break;
+        case 'contact':
+          if (typeof openContactModal === 'function') openContactModal();
+          viewport.innerHTML = renderHomeView();
+          break;
+        case 'privacy':
+          if (typeof openPrivacyModal === 'function') openPrivacyModal();
+          viewport.innerHTML = renderHomeView();
+          break;
+        case 'terms':
+          if (typeof openTermsModal === 'function') openTermsModal();
+          viewport.innerHTML = renderHomeView();
+          break;
+        case 'counselor':
+          if (typeof openCounselorModal === 'function') openCounselorModal();
+          viewport.innerHTML = renderHomeView();
+          break;
         case 'student-portal':
           viewport.innerHTML = renderHomeView();
           break;
@@ -19041,6 +19061,86 @@ html.reading-mode body #app-viewport :is(.bg-softyellow-300,.bg-softyellow-400,.
   };
 
   // ---------- Reader Font Scale Controller ----------
+  window.openAboutModal = function() {
+    const ss = DB.siteSettings || {};
+    const cp = DB.customPageTexts || {};
+    const title = ss.siteTitle || 'همراه باقرالعلوم';
+    const school = ss.schoolName || 'دبیرستان نمونه دولتی پسرانه باقرالعلوم';
+    const text = cp.aboutText || ss.counselorMissionText || 'سامانه جامع مشاوره‌ای، آموزشی و رشد فردی دبیرستان نمونه دولتی پسرانه باقرالعلوم.';
+    openModal('درباره ' + title, `
+      <div style="padding:10px 4px;text-align:right">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <span style="font-size:28px">🏫</span>
+          <div>
+            <h4 style="margin:0;font-size:16px;font-weight:900;color:var(--tx)">${esc(title)} — ${esc(school)}</h4>
+            <p style="margin:2px 0 0;font-size:12px;color:var(--mu)">مرجع اختصاصی مشاوره و هدایت تحصیلی</p>
+          </div>
+        </div>
+        <p style="font-size:14px;line-height:2;color:var(--tx);margin:0 0 16px">${esc(text)}</p>
+        <div style="text-align:end"><button class="b" onclick="closeModal()">بستن</button></div>
+      </div>
+    `);
+  };
+
+  window.openContactModal = function() {
+    const ss = DB.siteSettings || {};
+    const cp = DB.customPageTexts || {};
+    openModal('تماس با مشاور و مدرسه', `
+      <div style="padding:10px 4px;text-align:right">
+        <div style="margin-bottom:14px">
+          <h4 style="margin:0 0 6px;font-size:16px;font-weight:900;color:var(--tx)">👨‍🏫 مشاور: ${esc(ss.counselorLeadName || 'محمد هادی برخوری مهنی')}</h4>
+          <p style="margin:0;font-size:13px;color:var(--mu)">${esc(ss.counselorLeadDegree || 'مشاور مدرسه')} — ${esc(ss.schoolName || 'دبیرستان نمونه دولتی باقرالعلوم')}</p>
+        </div>
+        <div style="background:var(--s);padding:14px;border-radius:14px;border:1px solid var(--ln);font-size:13px;line-height:1.9;margin-bottom:14px">
+          <p style="margin:0 0 6px">📍 <b>نشانی:</b> ${esc(ss.schoolAddress || 'طبقه اول، واحد مشاوره')}</p>
+          <p style="margin:0 0 6px">⏰ <b>ساعات حضور:</b> ${esc(ss.officeHours || 'شنبه تا چهارشنبه ۷:۳۰ الی ۱۴:۳۰')}</p>
+          ${ss.counselorPhone ? `<p style="margin:0">📞 <b>تلفن تماس:</b> <span dir="ltr">${esc(ss.counselorPhone)}</span></p>` : ''}
+        </div>
+        <p style="font-size:12px;color:var(--mu);margin:0 0 16px">${esc(cp.contactExtra || 'جهت هماهنگی جلسات مشاوره فردی یا اولیا، در ساعات حضور مراجعه فرمایید.')}</p>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button class="b" onclick="closeModal(); navigateTo('faq')">ثبت سؤال محرمانه</button>
+          <button class="b g" onclick="closeModal()">بستن</button>
+        </div>
+      </div>
+    `);
+  };
+
+  window.openPrivacyModal = function() {
+    const cp = DB.customPageTexts || {};
+    const text = cp.privacyText || 'تمامی اطلاعات شخصی، یادداشت‌ها و نتایج آزمون‌های دانش‌آموزان به صورت محرمانه نگهداری می‌شود.';
+    openModal('سیاست حریم خصوصی و محرمانگی', `
+      <div style="padding:10px 4px;text-align:right">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <span style="font-size:28px">🔒</span>
+          <div>
+            <h4 style="margin:0;font-size:16px;font-weight:900;color:var(--tx)">رازداری و حفظ اطلاعات دانش‌آموزان</h4>
+            <p style="margin:2px 0 0;font-size:12px;color:var(--mu)">اطلاعات شما نزد واحد مشاوره کاملاً محفوظ است</p>
+          </div>
+        </div>
+        <p style="font-size:14px;line-height:2;color:var(--tx);margin:0 0 16px">${esc(text)}</p>
+        <div style="text-align:end"><button class="b" onclick="closeModal()">متوجه شدم</button></div>
+      </div>
+    `);
+  };
+
+  window.openTermsModal = function() {
+    const cp = DB.customPageTexts || {};
+    const text = cp.termsText || 'استفاده از تمامی محتواهای آموزشی، ویدئوها، پادکست‌ها و جزوات این سامانه برای دانش‌آموزان دبیرستان نمونه دولتی باقرالعلوم آزاد و رایگان است.';
+    openModal('شرایط و قوانین استفاده', `
+      <div style="padding:10px 4px;text-align:right">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <span style="font-size:28px">📜</span>
+          <div>
+            <h4 style="margin:0;font-size:16px;font-weight:900;color:var(--tx)">قوانین استفاده از محتوای سامانه</h4>
+            <p style="margin:2px 0 0;font-size:12px;color:var(--mu)">ویژه دانش‌آموزان دبیرستان نمونه دولتی باقرالعلوم</p>
+          </div>
+        </div>
+        <p style="font-size:14px;line-height:2;color:var(--tx);margin:0 0 16px">${esc(text)}</p>
+        <div style="text-align:end"><button class="b" onclick="closeModal()">بستن</button></div>
+      </div>
+    `);
+  };
+
   window.changeArticleFontSize = function(delta) {
     const prose = document.querySelector('.article-prose');
     if (!prose) return;
@@ -19103,6 +19203,14 @@ html.reading-mode body #app-viewport :is(.bg-softyellow-300,.bg-softyellow-400,.
   function home(){
     const C = cats(), P = posts(), nQ = Array.isArray(DB.quizzes) ? DB.quizzes.length : 0;
     const stats = getStudentGamificationStats();
+    const ss = DB.siteSettings || {};
+    const heroHeading = ss.heroTitle || 'از انتخاب رشته تا آرامش ذهن، همراهتیم';
+    const heroSub = ss.heroSubtitle || 'مرجع مشاوره‌ای، تحصیلی و روان‌شناختی دانش‌آموزان دبیرستان نمونه دولتی پسرانه باقرالعلوم، برای نسلی خودآگاه، هدفمند و مسلط بر مهارت‌های مطالعه و زندگی.';
+    const counselorName = ss.counselorLeadName || 'محمد هادی برخوری مهنی';
+    const counselorDeg = ss.counselorLeadDegree || 'مشاور و روان‌شناس';
+    const counselorHead = ss.counselorSectionHeading || 'واحد مشاوره و هدایت تحصیلی';
+    const counselorHours = ss.officeHours || 'شنبه تا چهارشنبه، ۷:۳۰ تا ۱۴:۳۰';
+    const schoolLoc = ss.schoolAddress || 'طبقه اول، واحد مشاوره دبیرستان نمونه دولتی باقرالعلوم';
     const fq = (Array.isArray(DB.faqs) ? DB.faqs.filter(f => f.approved !== false) : []).filter(f => (f.question || f.q || f.title) && (f.answer || f.a || f.body)).slice(0, 6);
     const faqs = fq.length ? fq.map((f, i) => `<details ${i ? '' : 'open'}><summary>${esc(f.question || f.q || f.title)}</summary><p>${esc(f.answer || f.a || f.body)}</p></details>`).join('')
       : [['چطور وقت مشاوره بگیرم؟','حضوری در واحد مشاوره، شنبه تا چهارشنبه ۷:۳۰ تا ۱۴:۳۰.'],['گفت‌وگوهایم محرمانه می‌ماند؟','مشاوره بر پایه رازداری است. استثنا فقط جایی است که جان یا سلامت خودت یا دیگری در خطر باشد.'],['از کجا شروع کنم؟','پایه‌ات را انتخاب کن، بعد آزمون تیپ مطالعه را بزن و از دسته مدیریت زمان شروع کن.']].map((f, i) => `<details ${i ? '' : 'open'}><summary>${f[0]}</summary><p>${f[1]}</p></details>`).join('');
@@ -19110,8 +19218,8 @@ html.reading-mode body #app-viewport :is(.bg-softyellow-300,.bg-softyellow-400,.
     return `<div id="ref-home">
 <!-- 1. LIVING AURORA MESH HERO & STUDENT GAMIFICATION COCKPIT -->
 <section class="hero" id="top"><div class="w hg"><div>
-  <h1>از انتخاب رشته تا آرامش ذهن، همراهتیم</h1>
-  <p class="lead">مرجع مشاوره‌ای، تحصیلی و روان‌شناختی دانش‌آموزان دبیرستان نمونه دولتی پسرانه باقرالعلوم، برای نسلی خودآگاه، هدفمند و مسلط بر مهارت‌های مطالعه و زندگی.</p>
+  <h1>${esc(heroHeading)}</h1>
+  <p class="lead">${esc(heroSub)}</p>
   <div class="fd"><label for="fq" class="sr">چه کمکی لازم داری؟</label><input id="fq" type="search" autocomplete="off" placeholder="چه کمکی لازم داری؟ «استرس»، «انتخاب رشته»، «برنامه»..."><kbd>/</kbd><ul id="rs" hidden></ul></div>
   <div class="qc" id="qc"></div>
   <div class="cta"><a class="b" href="#router" onclick="document.getElementById('router').scrollIntoView({behavior:'smooth'});return false">🧭 راهنمای فوری دغدغه‌ها</a><a class="b g" href="#" onclick="openCounselorModal();return false">گفت‌وگو با مشاور</a></div>
@@ -19266,7 +19374,7 @@ html.reading-mode body #app-viewport :is(.bg-softyellow-300,.bg-softyellow-400,.
 
 <!-- 10. COUNSELOR PROFILE -->
 <section class="sec" id="counselor"><div class="w"><div class="sh"><h2>کنار تو هستم، همین‌جا</h2><p>برای هر سؤال تحصیلی یا نگرانی ذهنی، بدون خجالت بپرس.</p></div><div class="g2">
-  <div class="c"><div class="av">م</div><h3 style="font-size:32px">محمد هادی برخوری مهنی</h3><p class="mu" style="margin:0">مشاور و روان‌شناس، واحد مشاوره و هدایت تحصیلی</p><p>حضوری: شنبه تا چهارشنبه، ۷:۳۰ تا ۱۴:۳۰<br>طبقه اول، واحد مشاوره دبیرستان نمونه دولتی باقرالعلوم</p></div>
+  <div class="c"><div class="av">${esc(counselorName[0] || 'م')}</div><h3 style="font-size:32px">${esc(counselorName)}</h3><p class="mu" style="margin:0">${esc(counselorDeg)}، ${esc(counselorHead)}</p><p>حضوری: ${esc(counselorHours)}<br>${esc(schoolLoc)}</p></div>
   <div class="c"><h3 style="font-size:28px">سؤال یا پیام محرمانه</h3><p class="mu">سؤالت را ثبت کن یا با معرفی مشاور و ساعات حضور آشنا شو.</p><div class="cta"><button class="b" onclick="navigateTo('faq')">ثبت سؤال</button><button class="b g" onclick="openCounselorModal()">معرفی و وقت مشاوره</button></div></div></div></div></section>
 
 <!-- 11. REASSURANCE CTA BAND -->
@@ -19336,9 +19444,31 @@ html.reading-mode body #app-viewport :is(.bg-softyellow-300,.bg-softyellow-400,.
   function shell(){
     document.documentElement.classList.add('js');
     try { if (window.updateReadingModeBtn) updateReadingModeBtn(); } catch(e){}
-    window.refFooter = function(){ const ft = document.getElementById('main-footer'); if (!ft || ft.querySelector('.fl') || ft.querySelector('.live-cms-control')) return; if (window.__ftObs) window.__ftObs.disconnect();
-      const L2 = [['دسته‌بندی‌ها',"navigateTo('categories')"],['کتابخانه',"navigateTo('explorer')"],['آزمون‌ها',"navigateTo('quizzes')"],['ابزارها',"navigateTo('tools')"],['رشته‌ها و مشاغل',"navigateTo('majors')"],['پرسش‌ها',"navigateTo('faq')"],['مشاور',"navigateTo('counselor')"],['درباره',"navigateTo('about')"],['تماس',"navigateTo('contact')"],['حریم خصوصی',"navigateTo('privacy')"],['قوانین',"navigateTo('terms')"],['نقشه سایت',"openSitemapModal()"]];
-      ft.className = ''; ft.innerHTML = '<div class="w"><ul class="fl">' + L2.map(x => `<li><button type="button" onclick="${x[1]}">${x[0]}</button></li>`).join('') + '</ul><p class="mu" style="margin:0">© همراه باقرالعلوم، دبیرستان نمونه دولتی پسرانه باقرالعلوم. اطلاعات شخصی دانش‌آموزان محفوظ می‌ماند. <span class="js-cat-count" hidden>۱۸</span></p></div>'; if (window.__ftObs) window.__ftObs.observe(ft, {childList: true}); };
+    window.refFooter = function(){
+      const ft = document.getElementById('main-footer');
+      if (!ft) return;
+      if (window.__ftObs) window.__ftObs.disconnect();
+      const ss = DB.siteSettings || {};
+      const school = esc(ss.schoolName || 'دبیرستان نمونه دولتی پسرانه باقرالعلوم');
+      const title = esc(ss.siteTitle || 'همراه باقرالعلوم');
+      const L2 = [
+        ['دسته‌بندی‌ها', "navigateTo('categories')"],
+        ['کتابخانه', "navigateTo('explorer')"],
+        ['آزمون‌ها', "navigateTo('quizzes')"],
+        ['ابزارها', "navigateTo('tools')"],
+        ['رشته‌ها و مشاغل', "navigateTo('majors')"],
+        ['پرسش‌ها', "navigateTo('faq')"],
+        ['مشاور', "openCounselorModal()"],
+        ['درباره', "openAboutModal()"],
+        ['تماس', "openContactModal()"],
+        ['حریم خصوصی', "openPrivacyModal()"],
+        ['قوانین', "openTermsModal()"],
+        ['نقشه سایت', "openSitemapModal()"]
+      ];
+      ft.className = '';
+      ft.innerHTML = '<div class="w"><ul class="fl">' + L2.map(x => `<li><button type="button" onclick="${x[1]}">${x[0]}</button></li>`).join('') + `</ul><p class="mu" style="margin:0">© ${title}، ${school}. تمامی حقوق محفوظ است. <span class="js-cat-count" hidden>${fa(cats().length)}</span></p></div>`;
+      if (window.__ftObs) window.__ftObs.observe(ft, {childList: true});
+    };
     refFooter(); const f0 = document.getElementById('main-footer'); if (f0 && !window.__ftObs) { window.__ftObs = new MutationObserver(() => refFooter()); window.__ftObs.observe(f0, {childList: true}); }
     const h = document.getElementById('main-header'); if (h && !document.getElementById('pb')) h.insertAdjacentHTML('beforeend', '<i id="pb"></i>');
     if (!document.getElementById('ref-dock')) document.body.insertAdjacentHTML('beforeend', '<nav class="dk" id="ref-dock" aria-label="دسترسی سریع"></nav>');
