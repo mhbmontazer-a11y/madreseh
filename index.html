@@ -66,14 +66,14 @@ html.ref-pending::after{content:"";position:fixed;z-index:2147483647;top:50%;lef
   <meta property="og:title" content="همراه باقرالعلوم | سامانه جامع مشاوره‌ای، آموزشی و رشد فردی دبیرستان نمونه دولتی باقرالعلوم" />
   <meta property="og:description" content="مرجع اختصاصی هدایت تحصیلی، برنامه‌ریزی کنکور، آزمون‌های خودارزیابی و مشاوره فردی استاد محمد هادی برخوری مهنی" />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://hamrah-bagherololum-copy.psyeducation-hadi.workers.dev/" />
+  <meta property="og:url" content="https://mhbmontazer-a11y.github.io/madreseh/" />
   <meta property="og:site_name" content="همراه باقرالعلوم" />
   <meta property="og:locale" content="fa_IR" />
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="همراه باقرالعلوم | سامانه جامع مشاوره‌ای دبیرستان نمونه دولتی باقرالعلوم" />
   <meta name="twitter:description" content="سامانه هوشمند مشاوره تحصیلی و هدایت رشته دبیرستان باقرالعلوم" />
   <meta name="theme-color" content="#f5f7ff" media="(prefers-color-scheme: light)" /><meta name="theme-color" content="#0a1128" media="(prefers-color-scheme: dark)" />
-  <link rel="canonical" href="https://hamrah-bagherololum-copy.psyeducation-hadi.workers.dev/" />
+  <link rel="canonical" href="https://mhbmontazer-a11y.github.io/madreseh/" />
   <link rel="manifest" href="manifest.json" />
   <!-- High-Resolution PWA Icons and Favicon -->
   <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
@@ -2757,7 +2757,7 @@ html.ref-pending::after{content:"";position:fixed;z-index:2147483647;top:50%;lef
     // CLOUD DATABASE SYNC ENGINE (GitHub API Real-Time Backend)
     // =========================================================================
     const CloudSync = {
-      REPO: 'psyeducationhadi-bot/hamrah-bagherololum-copy',
+      REPO: 'mhbmontazer-a11y/madreseh',
       BRANCH: 'main',
       FILE_PATH: 'db.json',
       TOKEN_KEY: 'HAMRAH_ADMIN_GH_TOKEN',
@@ -3031,8 +3031,8 @@ html.ref-pending::after{content:"";position:fixed;z-index:2147483647;top:50%;lef
               <p>هرگونه انتشار تغییرات از پنل مدیریت در هر کدام از دامنه‌ها، پایگاه داده مرکزی مخزن گیت‌هاب را به‌روز کرده و برای کاربران هر دو سایت به‌صورت خودکار و در لحظه اعمال می‌شود.</p>
               <div class="pt-1 flex flex-wrap gap-2 text-[11px]">
                 <button type="button" onclick="navigator.clipboard.writeText('${curToken.replace(/'/g, "\\'")}').then(()=>showToast('کلید دسترسی در کلیپ‌بورد کپی شد. می‌توانید در دامنه دیگر ذخیره فرمایید.','success'))" class="px-2.5 py-1 rounded-lg bg-white border border-sky-300 text-sky-800 font-bold hover:bg-sky-100 transition">📋 کپی کلید دسترسی به کلیپ‌بورد</button>
-                <a href="https://hamrah-bagherololum-copy.psyeducation-hadi.workers.dev/" target="_blank" class="px-2.5 py-1 rounded-lg bg-white border border-sky-300 text-sky-800 font-bold hover:bg-sky-100 transition">☁️ باز کردن دامنه Cloudflare</a>
-                <a href="https://psyeducationhadi-bot.github.io/hamrah-bagherololum-copy/" target="_blank" class="px-2.5 py-1 rounded-lg bg-white border border-sky-300 text-sky-800 font-bold hover:bg-sky-100 transition">🐙 باز کردن دامنه GitHub Pages</a>
+                <a href="https://mhbmontazer-a11y.github.io/madreseh/" target="_blank" class="px-2.5 py-1 rounded-lg bg-white border border-sky-300 text-sky-800 font-bold hover:bg-sky-100 transition">☁️ باز کردن دامنه Cloudflare</a>
+                <a href="https://mhbmontazer-a11y.github.io/madreseh/" target="_blank" class="px-2.5 py-1 rounded-lg bg-white border border-sky-300 text-sky-800 font-bold hover:bg-sky-100 transition">🐙 باز کردن دامنه GitHub Pages</a>
               </div>
             </div>
 
@@ -5894,8 +5894,8 @@ html.ref-pending::after{content:"";position:fixed;z-index:2147483647;top:50%;lef
 
     function openSitemapModal() {
       const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
-        DB.categories.map(c => `  <url><loc>https://hamrah-bagherololum-copy.psyeducation-hadi.workers.dev/category/${c.slug}</loc><priority>0.9</priority></url>`).join('\n') + '\n' +
-        DB.posts.filter(p=>p.status==='published').map(p => `  <url><loc>https://hamrah-bagherololum-copy.psyeducation-hadi.workers.dev/post/${p.slug}</loc><priority>0.8</priority></url>`).join('\n') +
+        DB.categories.map(c => `  <url><loc>https://mhbmontazer-a11y.github.io/madreseh/category/${c.slug}</loc><priority>0.9</priority></url>`).join('\n') + '\n' +
+        DB.posts.filter(p=>p.status==='published').map(p => `  <url><loc>https://mhbmontazer-a11y.github.io/madreseh/post/${p.slug}</loc><priority>0.8</priority></url>`).join('\n') +
         `\n</urlset>`;
       openModal(`
         <div class="space-y-4">
@@ -6683,7 +6683,7 @@ html.ref-pending::after{content:"";position:fixed;z-index:2147483647;top:50%;lef
                   <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center text-xl">🌐</div>
                   <div>
                     <h3 class="font-black text-base text-white">پایگاه داده ابری آنلاین (GitHub Cloud Sync Engine)</h3>
-                    <p class="text-xs text-slate-400 mt-0.5">مخزن متصل: <code class="text-turquoise-300 font-mono">psyeducationhadi-bot/hamrah-bagherololum-copy</code> (شاخه main)</p>
+                    <p class="text-xs text-slate-400 mt-0.5">مخزن متصل: <code class="text-turquoise-300 font-mono">mhbmontazer-a11y/madreseh</code> (شاخه main)</p>
                   </div>
                 </div>
                 <span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-xs font-bold self-start sm:self-auto">
@@ -8332,7 +8332,7 @@ function upgradeAndMigrateDatabaseV3(rawDb) {
     requireSuperAdminApproval: true,
     allowGuestPublicAccess: true,
     retentionPolicyDays: 365,
-    canonicalDomain: 'https://hamrah-bagherololum-copy.psyeducation-hadi.workers.dev'
+    canonicalDomain: 'https://mhbmontazer-a11y.github.io/madreseh'
   };
   base.backupRecords = base.backupRecords || [];
   base.sessions = base.sessions || [];
@@ -8969,7 +8969,7 @@ function updatePageSeoMetadata(title, description, canonicalPath, isNoIndex, sch
     canon.setAttribute('rel', 'canonical');
     document.head.appendChild(canon);
   }
-  const domain = (DB.siteSettings && DB.siteSettings.canonicalDomain) || 'https://hamrah-bagherololum-copy.psyeducation-hadi.workers.dev';
+  const domain = (DB.siteSettings && DB.siteSettings.canonicalDomain) || 'https://mhbmontazer-a11y.github.io/madreseh';
   canon.setAttribute('href', `${domain}/${canonicalPath || ''}`);
 
   let ldScript = document.getElementById('seo-jsonld-script');
@@ -11193,7 +11193,7 @@ registerQuickStudent = function() {
 
 // Fix #16: Real Sitemap.xml & Robots.txt File Generators and Downloaders
 function buildRealSitemapXmlString() {
-  const domain = (DB.siteSettings && DB.siteSettings.canonicalDomain) || 'https://hamrah-bagherololum-copy.psyeducation-hadi.workers.dev';
+  const domain = (DB.siteSettings && DB.siteSettings.canonicalDomain) || 'https://mhbmontazer-a11y.github.io/madreseh';
   const publicPages = ['', 'categories', 'explorer', 'videos', 'podcasts', 'downloads', 'quizzes', 'faq', 'tools', 'majors', 'counselor', 'announcements', 'calendar', 'about', 'contact', 'privacy', 'terms'];
   let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
   publicPages.forEach(p => {
@@ -11210,7 +11210,7 @@ function buildRealSitemapXmlString() {
 }
 
 function buildRealRobotsTxtString() {
-  const domain = (DB.siteSettings && DB.siteSettings.canonicalDomain) || 'https://hamrah-bagherololum-copy.psyeducation-hadi.workers.dev';
+  const domain = (DB.siteSettings && DB.siteSettings.canonicalDomain) || 'https://mhbmontazer-a11y.github.io/madreseh';
   return `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /#/admin\nDisallow: /student-portal\nDisallow: /#/student-portal\nDisallow: /quiz-results\nDisallow: /#/quiz-results\n\nSitemap: ${domain}/sitemap.xml\n`;
 }
 
@@ -18516,8 +18516,8 @@ details p{margin:8px 0 0;color:var(--mu);max-width:70ch}
 .b{background:linear-gradient(135deg,var(--gold),color-mix(in srgb,var(--gold) 65%,var(--co)));box-shadow:0 10px 26px -10px color-mix(in srgb,var(--gold) 70%,transparent)}
 .b:disabled{opacity:.6;cursor:wait}
 .hero h1{background-image:var(--hg)}
-.sh h2{background-image:linear-gradient(100deg,var(--g1) 15%,var(--ac))}
-.sh::before{content:"";display:block;width:56px;height:6px;border-radius:6px;background:var(--ac);margin-bottom:18px}
+.sh h2{background-image:linear-gradient(100deg,var(--g1) 15%,var(--ac,var(--g2)))}
+.sh::before{content:"";display:block;width:56px;height:6px;border-radius:6px;background:var(--ac,var(--gold));margin-bottom:18px}
 #grades{--ac:var(--sk)}#cats{--ac:var(--li)}#library{--ac:var(--co)}#tests{--ac:var(--aq)}#tools{--ac:var(--gold)}#fields{--ac:var(--pk)}#faq{--ac:var(--sk)}#counselor{--ac:var(--aq)}
 #cats,#tests,#fields{background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--ac) 6%,transparent) 35%,transparent)}
 .orb::before{content:"";position:absolute;inset:6%;border-radius:50%;background:conic-gradient(var(--gold),var(--co),var(--pk),var(--li),var(--sk),var(--aq),var(--gold));filter:blur(48px);opacity:.4;animation:sp 40s linear infinite}
@@ -18665,7 +18665,7 @@ html.reading-mode body #app-viewport :is(.bg-softyellow-300,.bg-softyellow-400,.
   function fillCats(q){
     q = nm((q || '').trim()); const g = $('#cg'); if (!g) return; g.classList.toggle('f', !!q);
     const l = cats().filter(c => !q || nm(c.title).includes(q) || nm(c.description).includes(q) || (c.subcategories || []).some(s => nm(s.title).includes(q)));
-    $('#em').hidden = l.length > 0; g.innerHTML = l.map((c, i) => catCard(c, cats().indexOf(c))).join('');
+    const em = $('#em'); if (em) em.hidden = l.length > 0; g.innerHTML = l.map((c, i) => catCard(c, cats().indexOf(c))).join('');
   }
   const catsBlock = (title, sub) => `<div class="sh"><h2>${title}</h2><p>${sub}</p></div><input class="sq" id="sq" type="search" placeholder="جست‌وجو در موضوعات، مثلاً «استرس»" aria-label="جست‌وجو"><div class="cg" id="cg"></div><p class="mu" id="em" hidden>موضوعی پیدا نشد. عبارت دیگری را امتحان کن.</p>`;
 
@@ -18720,13 +18720,13 @@ html.reading-mode body #app-viewport :is(.bg-softyellow-300,.bg-softyellow-400,.
     else { const m = qa.indexOf(Math.max(...qa)); b.innerHTML = `<p class="res">${Y[m][0]}</p><p>${Y[m][1]}</p><button class="b g" onclick="qi0()">دوباره</button>`; } };
   window.qi0 = () => { qi = 0; qa = [0,0,0]; refQuiz(); };
   window.refSearch = function(q){
-    q = nm((q || '').trim()); const u = $('#rs'); if (!q) { u.hidden = true; return; }
+    q = nm((q || '').trim()); const u = $('#rs'); if (!u) return; if (!q) { u.hidden = true; return; }
     const IX = []; cats().forEach(c => { IX.push([clean(c.title), 'دسته‌بندی', `navigateTo('category', {id: '${c.id}'})`]); (c.subcategories || []).forEach(s => IX.push([s.title, clean(c.title), `navigateTo('category', {id: '${c.id}', subId: '${s.id}'})`])); });
     posts().forEach(p => IX.push([p.title, 'مطلب', `navigateTo('post', {id: '${p.id}'})`]));
     G.forEach(g => IX.push([g[0], 'مسیر پایه‌ها', `navigateTo('explorer', {grade: '${g[3]}'})`])); IX.push(['وقت مشاوره', 'مشاور', 'openCounselorModal()']);
     const m = IX.filter(x => nm(x[0]).includes(q)).slice(0, 7);
     u.innerHTML = m.length ? m.map(x => `<li><button onclick="${x[2]};document.getElementById('rs').hidden=true">${'<span>' + esc(x[0]) + '</span><small>' + esc(x[1]) + '</small>'}</button></li>`).join('') : `<li class="mu" style="padding:10px 14px">چیزی پیدا نشد. <a href="#" style="color:var(--gold)" onclick="navigateTo('explorer', {q: '${esc(q)}'});return false">جست‌وجو در کتابخانه</a></li>`;
-    u.hidden = false;
+    if (u) u.hidden = false;
   };
   function initHome(){
     const C = cats(), P = posts();
@@ -18755,7 +18755,7 @@ html.reading-mode body #app-viewport :is(.bg-softyellow-300,.bg-softyellow-400,.
     const h = $('.hero'); if (h) { const r2 = h.getBoundingClientRect(); h.style.setProperty('--hx', e.clientX - r2.left + 'px'); h.style.setProperty('--hy', e.clientY - r2.top + 'px'); } }); }, {passive: true});
 
   // ---------- list / single category ----------
-  function catsPage(){ return `<div id="ref-cats"><section class="sec" style="padding-top:50px"><div class="w">${catsBlock('هرچه برای موفقیتت لازم است، یک‌جا', fa(cats().length) + ' موضوع تخصصی. جست‌وجو کن یا مرور کن.')}</div></section><div style="height:40px"></div></div>`; }
+  function catsPage(){ return `<div id="ref-cats"><section class="sec" style="padding-top:50px;--ac:var(--li)"><div class="w">${catsBlock('هرچه برای موفقیتت لازم است، یک‌جا', fa(cats().length) + ' موضوع تخصصی. جست‌وجو کن یا مرور کن.')}</div></section><div style="height:40px"></div></div>`; }
   function oneCat(){
     const P = STATE.viewParams || {}, c = catOf(P.id); if (!c.id) return catsPage();
     const subs = tops(c), col = CL[cidx(c.id) % 6], all = posts().filter(p => p.categoryId === c.id);
