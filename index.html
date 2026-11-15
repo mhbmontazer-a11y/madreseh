@@ -7904,7 +7904,7 @@ function upgradeAndMigrateDatabaseV3(rawDb) {
       grade: 'تنها مشاور و مدیر مجاز سامانه',
       active: true,
       salt: 'sec_salt_9f82b71e',
-      passwordHash: 'pbkdf2_v3$sec_salt_9f82b71e$27fb9660e010ff8f',
+      passwordHash: 'pbkdf2_v3$sec_salt_9f82b71e$4511dc35ca01ecbe',
       twoFactorEnabled: false,
       failedAttempts: 0,
       lockedUntil: 0,
@@ -14842,7 +14842,7 @@ function enforceSoleCounselorBarkhori() {
     grade: 'تنها مشاور و مدیر مجاز سامانه',
     active: true,
     salt: 'sec_salt_9f82b71e',
-    passwordHash: 'pbkdf2_v3$sec_salt_9f82b71e$27fb9660e010ff8f',
+    passwordHash: 'pbkdf2_v3$sec_salt_9f82b71e$4511dc35ca01ecbe',
     twoFactorEnabled: false,
     failedAttempts: 0,
     lockedUntil: 0,
@@ -14905,7 +14905,7 @@ AuthService.isSuperAdmin = function() {
 const _origAuthLogin = AuthService.login.bind(AuthService);
 AuthService.login = function(username, password, twoFactorCode) {
   const clean = String(username || '').trim().toLowerCase();
-  const mappedUser = (clean === 'barkhori' || clean === 'محمد هادی برخوری مهنی') ? 'admin' : username;
+  const mappedUser = (clean === 'barkhori' || clean === 'admin' || clean === 'hadi' || clean === 'محمد هادی برخوری مهنی') ? 'hadi_admin' : username;
   return _origAuthLogin(mappedUser, password, twoFactorCode);
 };
 

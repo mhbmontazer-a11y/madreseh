@@ -3249,7 +3249,7 @@
       "grade": "تنها مشاور و مدیر مجاز سامانه",
       "active": true,
       "salt": "sec_salt_9f82b71e",
-      "passwordHash": "pbkdf2_v3$sec_salt_9f82b71e$27fb9660e010ff8f",
+      "passwordHash": "pbkdf2_v3$sec_salt_9f82b71e$4511dc35ca01ecbe",
       "twoFactorEnabled": false,
       "failedAttempts": 0,
       "lockedUntil": 0,
