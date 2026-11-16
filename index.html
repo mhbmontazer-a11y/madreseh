@@ -830,6 +830,10 @@ html.ref-pending::after{content:"";position:fixed;z-index:2147483647;top:50%;lef
           <button type="button" onclick="navigateTo('explorer')" id="nav-explorer" class="px-3 py-2 rounded-xl hover:bg-slate-100 hover:text-navy-900 transition">کتابخانه محتوا</button>
           <button type="button" onclick="navigateTo('quizzes')" id="nav-quizzes" class="px-3 py-2 rounded-xl hover:bg-slate-100 hover:text-navy-900 transition">آزمون‌های خودارزیابی</button>
           <button type="button" onclick="navigateTo('faq')" id="nav-faq" class="px-3 py-2 rounded-xl hover:bg-slate-100 hover:text-navy-900 transition">سؤالات پرتکرار</button>
+          <button type="button" onclick="navigateTo('study-plan')" id="nav-study-plan" class="px-3 py-2 rounded-xl hover:bg-slate-100 hover:text-navy-900 transition flex items-center gap-1">
+            <span class="text-xs">📅</span>
+            <span>برنامه‌های مطالعاتی</span>
+          </button>
           <button type="button" onclick="navigateTo('tools')" id="nav-tools" class="px-3 py-2 rounded-xl hover:bg-slate-100 hover:text-navy-900 transition">جعبه ابزار دانش‌آموز</button>
           <button type="button" onclick="navigateTo('majors')" id="nav-majors" class="px-3 py-2 rounded-xl hover:bg-slate-100 hover:text-navy-900 transition">رشته‌ها و مشاغل</button>
         </nav>
@@ -908,6 +912,13 @@ html.ref-pending::after{content:"";position:fixed;z-index:2147483647;top:50%;lef
         <button type="button" onclick="navigateTo('explorer');toggleMobileMenu(false);" class="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-right">📚 کتابخانه محتوا</button>
         <button type="button" onclick="navigateTo('quizzes');toggleMobileMenu(false);" class="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-right">🧭 آزمون‌های خودارزیابی</button>
         <button type="button" onclick="navigateTo('faq');toggleMobileMenu(false);" class="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-right">❓ سؤالات پرتکرار</button>
+        <button type="button" onclick="navigateTo('study-plan');toggleMobileMenu(false);" class="p-2.5 rounded-xl bg-turquoise-50 hover:bg-turquoise-100 text-turquoise-900 text-right font-black col-span-2 flex items-center justify-between">
+          <span class="flex items-center gap-1.5">
+            <span>📅</span>
+            <span>برنامه‌های مطالعاتی هر پایه و رشته</span>
+          </span>
+          <span class="text-[10px] bg-turquoise-600 text-white px-2 py-0.5 rounded-md">تجربی • انسانی • ریاضی</span>
+        </button>
         <button type="button" onclick="navigateTo('tools');toggleMobileMenu(false);" class="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-right">⏱️ ابزارهای دانش‌آموز</button>
         <button type="button" onclick="navigateTo('majors');toggleMobileMenu(false);" class="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-right">🎓 رشته‌ها و مشاغل</button>
         <button type="button" onclick="openCounselorModal();toggleMobileMenu(false);" class="p-2.5 rounded-xl bg-turquoise-50 text-turquoise-800 hover:bg-turquoise-100 text-right">👨‍🏫 معرفی مشاور</button>
@@ -7871,6 +7882,10 @@ function doPost(e) {
         case 'majors':
           viewport.innerHTML = renderMajorsView();
           break;
+        case 'study-plan':
+        case 'study-plans':
+          viewport.innerHTML = renderStudyPlanView();
+          break;
         case 'about':
           if (typeof openAboutModal === 'function') openAboutModal();
           viewport.innerHTML = renderHomeView();
@@ -9486,6 +9501,7 @@ navigateTo = function(view, params, skipHashUpdate) {
     else if (view === 'faq') hashTarget = '#/faq';
     else if (view === 'tools') hashTarget = p.tab ? `#/tools/${encodeURIComponent(p.tab)}` : '#/tools';
     else if (view === 'majors') hashTarget = '#/majors';
+    else if (view === 'study-plan' || view === 'study-plans') hashTarget = `#/study-plan/${encodeURIComponent(p.grade || '10')}/${encodeURIComponent(p.major || 'tajrobi')}`;
     else if (view === 'counselor') hashTarget = '#/counselor';
     else if (view === 'announcements') hashTarget = '#/announcements';
     else if (view === 'calendar') hashTarget = '#/calendar';
@@ -9544,6 +9560,7 @@ function handleHashChangeRoute() {
   if (head === 'faq') return navigateTo('faq', {}, true);
   if (head === 'tools') return navigateTo('tools', { tab: arg1 || 'timer' }, true);
   if (head === 'majors') return navigateTo('majors', {}, true);
+  if (head === 'study-plan' || head === 'study-plans') return navigateTo('study-plan', { grade: arg1 || '10', major: parts[2] || 'tajrobi' }, true);
   if (head === 'counselor') return navigateTo('counselor', {}, true);
   if (head === 'announcements') return navigateTo('announcements', {}, true);
   if (head === 'calendar') return navigateTo('calendar', {}, true);
@@ -20005,23 +20022,32 @@ html.reading-mode body #app-viewport :is(.bg-softyellow-300,.bg-softyellow-400,.
   </div>
 </section>
 
-<!-- 3. GRADE-LEVEL ROADMAP -->
-<section class="sec" id="grades"><div class="w"><div class="sh"><h2>مسیر هر پایه، روشن و قدم‌به‌قدم</h2><p>پایه‌ات را انتخاب کن تا نقشه راه همان سال را ببینی.</p></div><div class="tabs" id="gt" role="tablist"></div><div class="c" id="gp"></div></div></section>
+<!-- 3. GRADE-LEVEL STUDY PLANS -->
+<section class="sec" id="grades">
+  <div class="w">
+    <div class="sh" style="margin-bottom:20px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px">
+      <div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-turquoise-500/10 text-turquoise-600 text-xs font-bold border border-turquoise-500/20 mb-2">
+          <span>📅 برنامه‌ریزی راهبردی و هفتگی</span>
+        </div>
+        <h2>برنامه مطالعاتی اختصاصی هر پایه و رشته</h2>
+        <p>پایه تحصیلی‌ات را انتخاب کن، سپس روی رشته خودت (تجربی، انسانی یا ریاضی) کلیک کن تا جدول برنامه هفتگی و راهنمای مطالعاتی ویژه خودت را ببینی:</p>
+      </div>
+      <div>
+        <button type="button" onclick="navigateTo('tools', {tab: 'timer'})" class="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-navy-900 font-bold text-xs transition flex items-center gap-1.5 border border-slate-200 shadow-sm">
+          <span>⏱️</span>
+          <span>میز کار و تایمر پومودورو</span>
+        </button>
+      </div>
+    </div>
+    <div class="tabs" id="gt" role="tablist"></div>
+    <div id="gp" style="margin-top:20px"></div>
+  </div>
+</section>
 
 <!-- 4. MEDIA FORMAT QUICK-SWITCH BAR & ALL 18 CATEGORIES BENTO GRID -->
 <section class="sec" id="cats">
   <div class="w">
-    <!-- Format Hub -->
-    <div style="margin-bottom:28px">
-      <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none">
-        <button class="ch" onclick="navigateTo('explorer', {format: 'all'})" style="font-weight:800;border-color:var(--gold);color:var(--gold)">✨ همه قالب‌های محتوایی</button>
-        <button class="ch" onclick="navigateTo('explorer', {format: 'article'})">📄 مقالات و راهنماها</button>
-        <button class="ch" onclick="navigateTo('explorer', {format: 'video'})">🎬 ویدئوهای آموزشی</button>
-        <button class="ch" onclick="navigateTo('explorer', {format: 'audio'})">🎧 پادکست‌های صوتی</button>
-        <button class="ch" onclick="navigateTo('explorer', {format: 'download'})">📥 جزوه‌ها و جداول دانلودی</button>
-        <button class="ch" onclick="navigateTo('faq')">❓ سؤالات پرتکرار دانش‌آموزان</button>
-      </div>
-    </div>
     ${catsBlock('هرچه برای موفقیتت لازم است، یک‌جا', fa(C.length) + ' موضوع تخصصی. جست‌وجو کن یا مرور کن.')}
   </div>
 </section>
@@ -20057,8 +20083,142 @@ html.reading-mode body #app-viewport :is(.bg-softyellow-300,.bg-softyellow-400,.
 
   // ---------- home runtime ----------
   let G_i = 0, qi = 0, qa = [0,0,0];
-  window.refGrade = function(i){ G_i = i; document.querySelectorAll('#gt button').forEach((b, j) => b.setAttribute('aria-selected', i === j)); const g = G[i];
-    $('#gp').innerHTML = `<div><h3>${g[0]}</h3><p class="mu" style="margin:6px 0 14px">${g[1]}</p><button class="b" onclick="navigateTo('explorer', {grade: '${g[3]}'})">مطالب این پایه ←</button></div><ul>${g[2].map(x => `<li>${x}</li>`).join('')}</ul>`; };
+  window.refGrade = function(i){
+    G_i = i;
+    document.querySelectorAll('#gt button').forEach((b, j) => b.setAttribute('aria-selected', i === j));
+    const gradeCodes = ['10', '11', '12'];
+    const gradeLabels = ['پایه دهم', 'پایه یازدهم', 'پایه دوازدهم و کنکور'];
+    const gradeShort = ['دهم', 'یازدهم', 'دوازدهم'];
+    const gradeSubtitles = [
+      'پایه‌سازی قوی، تسلط بر امتحانات نهایی و تمرین مهارت حل مسئله از ابتدای دوره دوم متوسطه.',
+      'سال تثبیت معدل نهایی، ارتقای تراز آزمون‌های آزمایشی و مرور هدفمند مباحث پایه دهم.',
+      'ماراتن نهایی ۶۰ درصدی و کنکور سراسری، جمع‌بندی مباحث پایه و شبیه‌سازی شرایط کنکور.'
+    ];
+    const gradeHours = [
+      { tajrobi: '۲۸ الی ۳۴ ساعت در هفته', ensani: '۲۶ الی ۳۲ ساعت در هفته', riazi: '۲۸ الی ۳۴ ساعت در هفته' },
+      { tajrobi: '۳۵ الی ۴۲ ساعت در هفته', ensani: '۳۲ الی ۳۸ ساعت در هفته', riazi: '۳۵ الی ۴۲ ساعت در هفته' },
+      { tajrobi: '۴۵ الی ۵۵ ساعت در هفته', ensani: '۴۰ الی ۵۰ ساعت در هفته', riazi: '۴۵ الی ۵۵ ساعت در هفته' }
+    ];
+
+    const gCode = gradeCodes[i] || '10';
+    const gLabel = gradeLabels[i] || 'پایه دهم';
+    const gSub = gradeSubtitles[i] || '';
+    const gH = gradeHours[i] || gradeHours[0];
+    const gS = gradeShort[i] || 'دهم';
+
+    const gpEl = $('#gp');
+    if (!gpEl) return;
+
+    gpEl.innerHTML = `
+      <div class="space-y-6">
+        <!-- Grade Header Banner -->
+        <div class="bg-gradient-to-r from-navy-950 via-navy-900 to-indigo-950 text-white rounded-3xl p-6 sm:p-7 border border-navy-800 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="space-y-1.5 max-w-2xl">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-turquoise-500/20 text-turquoise-300 text-xs font-bold border border-turquoise-400/30">
+              <span>🎯 راهنمای انتخاب رشته و دریافت برنامه مطالعاتی</span>
+            </div>
+            <h3 class="text-xl sm:text-2xl font-black text-white">برنامه مطالعاتی راهبردی ${SecurityEngine.escapeHtml(gLabel)}</h3>
+            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">${SecurityEngine.escapeHtml(gSub)}</p>
+          </div>
+          <div class="shrink-0 flex items-center gap-2">
+            <span class="text-xs font-bold text-turquoise-300 bg-white/10 px-3.5 py-2 rounded-xl backdrop-blur-sm">
+              👇 رشته خود را انتخاب کنید:
+            </span>
+          </div>
+        </div>
+
+        <!-- 3 Majors Grid (تجربی، انسانی، ریاضی) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <!-- 1. Tajrobi -->
+          <div class="bg-white rounded-3xl p-6 border-2 border-emerald-500/30 hover:border-emerald-500 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group shadow-sm">
+            <div class="space-y-4">
+              <div class="flex items-center justify-between">
+                <span class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl font-black shadow-inner">🧬</span>
+                <span class="px-3 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-200">علوم تجربی</span>
+              </div>
+              <div>
+                <h4 class="text-lg font-black text-navy-900 group-hover:text-emerald-700 transition">برنامه مطالعاتی تجربی</h4>
+                <p class="text-xs text-slate-500 mt-1 font-semibold">${SecurityEngine.escapeHtml(gLabel)} — ویژه داوطلبان پزشکی، دندانپزشکی و داروسازی</p>
+              </div>
+              <ul class="space-y-2 text-xs text-slate-600 border-t border-slate-100 pt-3 font-medium">
+                <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✔</span><span>تمرکز عمیق روی زیست‌شناسی و شیمی تخصصی</span></li>
+                <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✔</span><span>پارت‌های منظم حل مسئله فیزیک و ریاضی تجربی</span></li>
+                <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✔</span><span>پوشش کامل تشریحی‌خوانی امتحانات نهایی</span></li>
+              </ul>
+              <div class="bg-emerald-50/70 p-3 rounded-2xl border border-emerald-100 flex items-center justify-between text-xs">
+                <span class="text-slate-600 font-bold">ساعت مطالعه هدف:</span>
+                <span class="font-black text-emerald-800">${SecurityEngine.escapeHtml(gH.tajrobi)}</span>
+              </div>
+            </div>
+            <div class="pt-5">
+              <button type="button" onclick="navigateTo('study-plan', {grade: '${gCode}', major: 'tajrobi'})" class="w-full py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs transition shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2">
+                <span>مشاهده برنامه ${SecurityEngine.escapeHtml(gS)} تجربی</span>
+                <span>←</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. Ensani -->
+          <div class="bg-white rounded-3xl p-6 border-2 border-amber-500/30 hover:border-amber-500 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group shadow-sm">
+            <div class="space-y-4">
+              <div class="flex items-center justify-between">
+                <span class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl font-black shadow-inner">⚖️</span>
+                <span class="px-3 py-1 rounded-full text-xs font-black bg-amber-100 text-amber-900 border border-amber-200">علوم انسانی</span>
+              </div>
+              <div>
+                <h4 class="text-lg font-black text-navy-900 group-hover:text-amber-700 transition">برنامه مطالعاتی انسانی</h4>
+                <p class="text-xs text-slate-500 mt-1 font-semibold">${SecurityEngine.escapeHtml(gLabel)} — ویژه داوطلبان حقوق، روان‌شناسی و فرهنگیان</p>
+              </div>
+              <ul class="space-y-2 text-xs text-slate-600 border-t border-slate-100 pt-3 font-medium">
+                <li class="flex items-center gap-2"><span class="text-amber-500 font-bold">✔</span><span>تسلط بر علوم و فنون ادبی، عروض و قافیه</span></li>
+                <li class="flex items-center gap-2"><span class="text-amber-500 font-bold">✔</span><span>درک مفهومی فلسفه و منطق و روان‌شناسی</span></li>
+                <li class="flex items-center gap-2"><span class="text-amber-500 font-bold">✔</span><span>تقویت برگ برنده: ریاضی و آمار و عربی اختصاصی</span></li>
+              </ul>
+              <div class="bg-amber-50/70 p-3 rounded-2xl border border-amber-100 flex items-center justify-between text-xs">
+                <span class="text-slate-600 font-bold">ساعت مطالعه هدف:</span>
+                <span class="font-black text-amber-900">${SecurityEngine.escapeHtml(gH.ensani)}</span>
+              </div>
+            </div>
+            <div class="pt-5">
+              <button type="button" onclick="navigateTo('study-plan', {grade: '${gCode}', major: 'ensani'})" class="w-full py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-navy-950 font-black text-xs transition shadow-md shadow-amber-500/20 flex items-center justify-center gap-2">
+                <span>مشاهده برنامه ${SecurityEngine.escapeHtml(gS)} انسانی</span>
+                <span>←</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 3. Riazi -->
+          <div class="bg-white rounded-3xl p-6 border-2 border-sky-500/30 hover:border-sky-500 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group shadow-sm">
+            <div class="space-y-4">
+              <div class="flex items-center justify-between">
+                <span class="w-12 h-12 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center text-2xl font-black shadow-inner">📐</span>
+                <span class="px-3 py-1 rounded-full text-xs font-black bg-sky-100 text-sky-900 border border-sky-200">ریاضی و فیزیک</span>
+              </div>
+              <div>
+                <h4 class="text-lg font-black text-navy-900 group-hover:text-sky-700 transition">برنامه مطالعاتی ریاضی</h4>
+                <p class="text-xs text-slate-500 mt-1 font-semibold">${SecurityEngine.escapeHtml(gLabel)} — ویژه داوطلبان مهندسی و علوم پایه</p>
+              </div>
+              <ul class="space-y-2 text-xs text-slate-600 border-t border-slate-100 pt-3 font-medium">
+                <li class="flex items-center gap-2"><span class="text-sky-500 font-bold">✔</span><span>مهارت تحلیلی حسابان، هندسه و گسسته</span></li>
+                <li class="flex items-center gap-2"><span class="text-sky-500 font-bold">✔</span><span>پارت‌های متوالی حل مسئله تشریحی و تستی فیزیک</span></li>
+                <li class="flex items-center gap-2"><span class="text-sky-500 font-bold">✔</span><span>استراتژی حل سریع مسائل شیمی ریاضی</span></li>
+              </ul>
+              <div class="bg-sky-50/70 p-3 rounded-2xl border border-sky-100 flex items-center justify-between text-xs">
+                <span class="text-slate-600 font-bold">ساعت مطالعه هدف:</span>
+                <span class="font-black text-sky-900">${SecurityEngine.escapeHtml(gH.riazi)}</span>
+              </div>
+            </div>
+            <div class="pt-5">
+              <button type="button" onclick="navigateTo('study-plan', {grade: '${gCode}', major: 'riazi'})" class="w-full py-3 rounded-2xl bg-sky-600 hover:bg-sky-500 text-white font-black text-xs transition shadow-md shadow-sky-600/20 flex items-center justify-center gap-2">
+                <span>مشاهده برنامه ${SecurityEngine.escapeHtml(gS)} ریاضی</span>
+                <span>←</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  };
   window.refQuiz = function(a){ if (a !== undefined) { qa[a]++; qi++; } const b = $('#qb'); if (!b) return;
     if (qi < 3) { const q = Z[qi]; b.innerHTML = `<p class="mu" style="margin:0">سؤال ${fa(qi + 1)} از ۳</p><p style="margin:4px 0"><b>${q[0]}</b></p>` + q[1].map((o, j) => `<button class="qo" onclick="refQuiz(${j})">${o}</button>`).join(''); }
     else { const m = qa.indexOf(Math.max(...qa)); b.innerHTML = `<p class="res">${Y[m][0]}</p><p>${Y[m][1]}</p><button class="b g" onclick="qi0()">دوباره</button>`; } };
@@ -20197,6 +20357,586 @@ html.reading-mode body #app-viewport :is(.bg-softyellow-300,.bg-softyellow-400,.
 })();
 
 // ==========================================
+
+// =========================================================================
+// DEDICATED STUDY PLAN ENGINE & VIEW RENDERER (All 9 Grade x Major Plans)
+// =========================================================================
+const STUDY_PLANS_DATABASE = {
+  // ------------------------- GRADE 10 -------------------------
+  '10_tajrobi': {
+    gradeCode: '10',
+    gradeLabel: 'پایه دهم',
+    majorCode: 'tajrobi',
+    majorLabel: 'علوم تجربی',
+    majorIcon: '🧬',
+    themeColor: '#10b981',
+    badgeClass: 'bg-emerald-100 text-emerald-900 border-emerald-300',
+    headerGradient: 'from-navy-950 via-navy-900 to-teal-950',
+    title: 'برنامه مطالعاتی راهبردی پایه دهم تجربی',
+    subtitle: 'پایه‌سازی قوی در زیست و شیمی، تسلط بر امتحانات نهایی و مهارت تست‌زنی اولیه',
+    counselorQuote: '«زیست‌شناسی دهم پایه کل زیست‌شناسی کنکور است؛ متن کتاب درسی را خط‌به‌خط بخوانید و برای شیمی و فیزیک از هم‌اکنون دست‌به‌قلم شوید و مسائل را تا انتها حل کنید.»',
+    weeklyHours: '۲۸ الی ۳۴ ساعت در هفته (۴ تا ۵ ساعت روزهای مدرسه • ۷ تا ۸ ساعت روزهای تعطیل)',
+    examSplit: '۶۰٪ تشریحی و امتحانات نهایی • ۴۰٪ تستی و مهارت سنجش',
+    prioritySubjects: [
+      { name: 'زیست‌شناسی ۱', note: 'مهم‌ترین درس رشته تجربی؛ روزانه حداقل ۹۰ دقیقه متن‌خوانی، شکل‌خوانی و تست مفهومی.' },
+      { name: 'شیمی ۱', note: 'تسلط کامل بر موازنه، استوکیومتری اولیه و جدول تناوبی عناصر؛ حل تمرینات پایان فصل کتاب.' },
+      { name: 'فیزیک ۱ و ریاضی ۱', note: 'دست‌به‌قلم شدن برای حل مسائل فیزیک و یادگیری عمیق مثلثات و الگوهای ریاضی دهم.' },
+      { name: 'فارسی و عربی نهایی', note: 'ضریب بسیار بالا در سوابق تحصیلی امتحانات نهایی؛ روتین شبانه ۲۰ دقیقه‌ای.' }
+    ],
+    schedule: [
+      { day: 'شنبه', p1: 'زیست‌شناسی ۱ (گفتار ۱ و ۲ فصل جاری)', p2: 'فیزیک ۱ (حل تمرین و مفاهیم مبحثی)', p3: 'فارسی ۱ (قلمرو زبانی و فکری)', p4: 'تست آموزشی زیست (۲۵ تست)', p5: 'مرور شبانه فرمول‌های فیزیک + لغات زبان', target: '۴ ساعت • ۲۵ تست' },
+      { day: 'یکشنبه', p1: 'شیمی ۱ (مفاهیم و ساختار اتم)', p2: 'ریاضی ۱ (مجموعه‌ها و معادلات)', p3: 'عربی زبان قرآن ۱ (قواعد و ترجمه)', p4: 'تست شیمی ۱ (۲۰ تست تالیفی)', p5: 'مرور جدول تناوبی و فرمول‌های شیمی', target: '۴.۵ ساعت • ۲۰ تست' },
+      { day: 'دوشنبه', p1: 'زیست‌شناسی ۱ (متن‌خوانی و حاشیه‌نویسی)', p2: 'فیزیک ۱ (حل مسائل پایان فصل کتاب)', p3: 'زبان انگلیسی ۱ (گرامر و کلوزتست)', p4: 'تست ریاضی ۱ (۲۰ تست آموزشی)', p5: 'مرور زیست‌شناسی امروز (۲۰ دقیقه)', target: '۴ ساعت • ۲۰ تست' },
+      { day: 'سه‌شنبه', p1: 'شیمی ۱ (استوکیومتری و موازنه)', p2: 'ریاضی ۱ (حل تمرینات تکمیلی)', p3: 'دین و زندگی ۱ (پیام آیات و اندیشه)', p4: 'تست فیزیک ۱ (۲۵ تست مبحثی)', p5: 'مرور واژگان فارسی و قواعد عربی', target: '۴.۵ ساعت • ۲۵ تست' },
+      { day: 'چهارشنبه', p1: 'زیست‌شناسی ۱ (شکل‌خوانی و نکات نموداری)', p2: 'شیمی ۱ (تست‌های واکنشی و تشریحی)', p3: 'جغرافیا / نگارش ۱ (تشریحی نهایی)', p4: 'تست پوششی دروس اختصاصی (۳۰ تست)', p5: 'جمع‌بندی یادداشت‌ها و فرمول‌های هفته', target: '۴ ساعت • ۳۰ تست' },
+      { day: 'پنجشنبه', p1: 'ایستگاه جبرانی (عقب‌افتادگی‌های طول هفته)', p2: 'آزمون شبیه‌ساز کوچک یا کوئیز هفتگی', p3: 'مرور دروس عمومی با ضریب نهایی بالا', p4: 'تست زمان‌دار ترکیبی زیست و شیمی', p5: 'بررسی نقاط ضعف کوئیز و یادداشت‌برداری', target: '۶.۵ ساعت • ۶۰ تست' },
+      { day: 'جمعه', p1: 'تحلیل کارنامه و رفع اشکال کامل آزمون', p2: 'استراحت فعال، ورزش و تفریح خانوادگی', p3: 'مطالعه آزاد، پادکست‌های انگیزشی مشاور', p4: 'برنامه‌ریزی و شخصی‌سازی هفته پیش‌رو', p5: 'آماده‌سازی وسایل و خواب سر ساعت (۲۲:۳۰)', target: '۳ ساعت مطالعه مفید + ریکاوری' }
+    ]
+  },
+
+  '10_ensani': {
+    gradeCode: '10',
+    gradeLabel: 'پایه دهم',
+    majorCode: 'ensani',
+    majorLabel: 'علوم انسانی',
+    majorIcon: '⚖️',
+    themeColor: '#f59e0b',
+    badgeClass: 'bg-amber-100 text-amber-900 border-amber-300',
+    headerGradient: 'from-navy-950 via-navy-900 to-amber-950',
+    title: 'برنامه مطالعاتی راهبردی پایه دهم انسانی',
+    subtitle: 'تسلط عمیق بر دروس مهارتی (فنون و منطق)، اقتصاد کنکور و تثبیت معدل نهایی',
+    counselorQuote: '«فنون ادبی و منطق دهم مهارت‌محور هستند و حفظ‌کردنی نیستند؛ هر روز تست تقطیع عروض و تمرین گزاره‌های منطقی حل کنید تا در سال دوازدهم بدون استرس باشید.»',
+    weeklyHours: '۲۶ الی ۳۲ ساعت در هفته (۳.۵ تا ۴.۵ ساعت روزهای مدرسه • ۶.۵ تا ۷.۵ ساعت روزهای تعطیل)',
+    examSplit: '۶۵٪ تشریحی و امتحانات نهایی • ۳۵٪ تستی و مهارت حل تست',
+    prioritySubjects: [
+      { name: 'علوم و فنون ادبی ۱', note: 'عروض و قافیه مهارتی است؛ روزانه حداقل ۲۰ دقیقه تمرین تقطیع شعر و سماعی.' },
+      { name: 'منطق دهم', note: 'درک عمیق مفاهیم؛ از حفظ کردن کورکورانه فرمول‌ها پرهیز و با مثال‌های روزمره یاد بگیرید.' },
+      { name: 'اقتصاد دهم', note: 'تک‌کتابی در کنکور با ۱۵ سوال سرنوشت‌ساز؛ تسلط کامل بر مسائل ریاضی اقتصاد و گراف‌ها.' },
+      { name: 'عربی اختصاصی و جامعه‌شناسی', note: 'ترجمه، قواعد تعریب و تسلط بر متن جامعه‌شناسی ۱ برای تضمین نمره ۲۰ نهایی.' }
+    ],
+    schedule: [
+      { day: 'شنبه', p1: 'علوم و فنون ادبی ۱ (عروض و تاریخ ادبیات)', p2: 'منطق (تعریف‌ها و مغالطات)', p3: 'عربی ۱ (قواعد و ترجمه)', p4: 'تست آموزشی فنون (۲۰ تست)', p5: 'روتین شبانه لغت و تاریخ ادبیات', target: '۴ ساعت • ۲۰ تست' },
+      { day: 'یکشنبه', p1: 'اقتصاد دهم (مسائل حسابداری و تورم)', p2: 'جامعه‌شناسی ۱ (متن‌خوانی تشریحی)', p3: 'فارسی ۱ (قلمرو فکری و زبانی)', p4: 'حل مسائل اقتصاد (۱۵ مسئله تشریحی و تستی)', p5: 'مرور نکات اصطلاحات جامعه‌شناسی', target: '۴ ساعت • ۱۵ تست' },
+      { day: 'دوشنبه', p1: 'ریاضی و آمار ۱ (معادلات و الگوها)', p2: 'علوم و فنون ادبی ۱ (آرایه‌های ادبی)', p3: 'زبان انگلیسی ۱ (لغات و متون)', p4: 'تست منطق (۲۰ تست مفهومی)', p5: 'مرور اوزان عروضی فنون ۱۰', target: '۴ ساعت • ۲۰ تست' },
+      { day: 'سه‌شنبه', p1: 'تاریخ ۱ / جغرافیا ۱ (تسلط تشریحی نهایی)', p2: 'منطق (قیاس و استدلال)', p3: 'دین و زندگی ۱ (پیام آیات نهایی)', p4: 'تست ریاضی و آمار ۱ (۱۵ تست)', p5: 'مرور قواعد ترجمه عربی دهم', target: '۴ ساعت • ۱۵ تست' },
+      { day: 'چهارشنبه', p1: 'اقتصاد (بخش تئوری و مفاهیم)', p2: 'علوم و فنون ادبی ۱ (تقطیع هجایی)', p3: 'جامعه‌شناسی ۱ (حل نمونه سوال نهایی)', p4: 'تست ترکیبی اقتصاد و فنون (۲۵ تست)', p5: 'خلاصه‌نویسی مباحث طول هفته', target: '۴ ساعت • ۲۵ تست' },
+      { day: 'پنجشنبه', p1: 'ایستگاه جبرانی (پارت‌های مطالعه‌نشده)', p2: 'کوئیز هفتگی و حل سوالات تشریحی امتحانی', p3: 'مرور دروس عمومی با ضریب نهایی بالا', p4: 'تمرین ویژه تست‌های زمان‌دار منطق و فنون', p5: 'تحلیل اشکالات کوئیز و ثبت در دفتر خودآموز', target: '۶ ساعت • ۵۰ تست' },
+      { day: 'جمعه', p1: 'تحلیل کارنامه و برطرف کردن نقاط ضعف', p2: 'استراحت و تفریح، ورزش و تنفس ذهن', p3: 'کتاب‌خوانی آزاد یا پادکست‌های مشاوره‌ای', p4: 'برنامه‌ریزی دقیق هفته پیش‌رو', p5: 'خواب منظم و آرامش شبانه', target: '۳ ساعت مطالعه مفید + استراحت' }
+    ]
+  },
+
+  '10_riazi': {
+    gradeCode: '10',
+    gradeLabel: 'پایه دهم',
+    majorCode: 'riazi',
+    majorLabel: 'ریاضی و فیزیک',
+    majorIcon: '📐',
+    themeColor: '#0284c7',
+    badgeClass: 'bg-sky-100 text-sky-900 border-sky-300',
+    headerGradient: 'from-navy-950 via-navy-900 to-sky-950',
+    title: 'برنامه مطالعاتی راهبردی پایه دهم ریاضی',
+    subtitle: 'تسلط عمیق بر ریاضی ۱ و هندسه ۱، تفکر تحلیلی فیزیک و پایه‌سازی کنکور',
+    counselorQuote: '«ریاضی ۱ و هندسه ۱ پایه و ریشه حسابان و هندسه سال‌های بعد است؛ نگاه کردن به پاسخ‌نامه را کنار بگذارید و تا وقتی خودتان مسئله را به جواب نهایی نرسانده‌اید، تسلیم نشوید.»',
+    weeklyHours: '۲۸ الی ۳۴ ساعت در هفته (۴ تا ۵ ساعت روزهای مدرسه • ۷ تا ۸ ساعت روزهای تعطیل)',
+    examSplit: '۶۰٪ تشریحی و امتحانات نهایی • ۴۰٪ تستی و مهارت حل مسئله',
+    prioritySubjects: [
+      { name: 'ریاضی ۱ و هندسه ۱', note: 'یادگیری اثبات‌ها و قضایا؛ حل تمامی تمرین‌ها و فعالیت‌های کتاب درسی.' },
+      { name: 'فیزیک ۱', note: 'تبدیل یکاها، کار و انرژی و ویژگی‌های فیزیکی مواد؛ حل گام‌به‌گام مسائل تشریحی.' },
+      { name: 'شیمی ۱', note: 'موازنه، آرایش الکترونی و استوکیومتری؛ پایه‌ریزی درصد بالای شیمی کنکور.' },
+      { name: 'دروس عمومی نهایی', note: 'فارسی ۱، عربی ۱ و دین و زندگی ۱؛ کسب نمره ۲۰ برای ساخت تراز سوابق تحصیلی.' }
+    ],
+    schedule: [
+      { day: 'شنبه', p1: 'ریاضی ۱ (مجموعه، الگو و دنباله)', p2: 'فیزیک ۱ (فصل اندازه‌گیری و کار و انرژی)', p3: 'فارسی ۱ (قلمرو زبانی و آرایه‌ها)', p4: 'تست آموزشی ریاضی ۱ (۲۵ تست)', p5: 'مرور فرمول‌های فیزیک و واژگان زبان', target: '۴.۵ ساعت • ۲۵ تست' },
+      { day: 'یکشنبه', p1: 'هندسه ۱ (مفاهیم اولیه، قضیه تالس)', p2: 'شیمی ۱ (ساختار اتم و جدول تناوبی)', p3: 'عربی زبان قرآن ۱ (قواعد و ترجمه)', p4: 'تست شیمی ۱ (۲۰ تست تالیفی)', p5: 'مرور قضایای هندسه ۱ و اثبات‌ها', target: '۴.۵ ساعت • ۲۰ تست' },
+      { day: 'دوشنبه', p1: 'فیزیک ۱ (حل مسائل پایه‌ای و مفهومی)', p2: 'ریاضی ۱ (معادله درجه دوم و سهمی)', p3: 'زبان انگلیسی ۱ (گرامر و کلوزتست)', p4: 'تست هندسه ۱ (۲۰ تست تشریحی-تستی)', p5: 'مرور ریاضی و فرمول‌های امروز', target: '۴ ساعت • ۲۰ تست' },
+      { day: 'سه‌شنبه', p1: 'شیمی ۱ (پیوندهای شیمیایی و فرمول‌نویسی)', p2: 'هندسه ۱ (تشابه و کاربردهای آن)', p3: 'دین و زندگی ۱ (پیام آیات و اندیشه)', p4: 'تست فیزیک ۱ (۲۵ تست مبحثی)', p5: 'مرور لغات فارسی و اصطلاحات شیمی', target: '۴.۵ ساعت • ۲۵ تست' },
+      { day: 'چهارشنبه', p1: 'ریاضی ۱ (مثلثات و اتحادها)', p2: 'فیزیک ۱ (فشار و ویژگی‌های ماده)', p3: 'نگارش / جغرافیا ۱ (تشریحی نهایی)', p4: 'تست پوششی ریاضی و شیمی (۳۰ تست)', p5: 'جمع‌بندی یادداشت‌ها و فلش‌کارت‌ها', target: '۴ ساعت • ۳۰ تست' },
+      { day: 'پنجشنبه', p1: 'ایستگاه جبرانی (تکمیل پارت‌های مطالعه‌نشده)', p2: 'آزمون شبیه‌ساز تشریحی و تستی هفتگی', p3: 'مرور دروس عمومی با بالاترین ضریب نهایی', p4: 'تست زمان‌دار هندسه و فیزیک', p5: 'تحلیل دقیق اشکالات کوئیز در دفتر خودآموز', target: '۶.۵ ساعت • ۶۰ تست' },
+      { day: 'جمعه', p1: 'تحلیل کارنامه و رفع اشکال کامل آزمون', p2: 'استراحت فعال، ورزش، هوای آزاد و تفریح', p3: 'پادکست مشاوره‌ای و مطالعه کتاب‌های غیردرسی', p4: 'چیدمان برنامه مطالعه برای هفته پیش‌رو', p5: 'خواب سر ساعت و آرامش قبل از شروع هفته', target: '۳ ساعت مطالعه مفید + ریکاوری' }
+    ]
+  },
+
+  // ------------------------- GRADE 11 -------------------------
+  '11_tajrobi': {
+    gradeCode: '11',
+    gradeLabel: 'پایه یازدهم',
+    majorCode: 'tajrobi',
+    majorLabel: 'علوم تجربی',
+    majorIcon: '🧬',
+    themeColor: '#10b981',
+    badgeClass: 'bg-emerald-100 text-emerald-900 border-emerald-300',
+    headerGradient: 'from-navy-950 via-navy-900 to-teal-950',
+    title: 'برنامه مطالعاتی راهبردی پایه یازدهم تجربی',
+    subtitle: 'تثبیت معدل نهایی یازدهم، تسلط بر ژنتیک و فیزیک ۲ و مرور ایستگاهی دهم',
+    counselorQuote: '«یازدهم سال سرنوشت‌ساز سوابق تحصیلی است؛ امتحانات نهایی یازدهم سهم مستقیمی در ورود به دانشگاه دارد. برنامه باید دو بال داشته باشد: نمره ۲۰ نهایی و پایه‌سازی تستی کنکور.»',
+    weeklyHours: '۳۵ الی ۴۲ ساعت در هفته (۵ تا ۶ ساعت روزهای مدرسه • ۸ تا ۹ ساعت روزهای تعطیل)',
+    examSplit: '۵۵٪ تشریحی و امتحانات نهایی • ۴۵٪ تستی و مرور ترکیبی',
+    prioritySubjects: [
+      { name: 'زیست‌شناسی ۲', note: 'دستگاه‌های عصبی، ایمنی، حواس و ژنتیک گیاهی؛ تسلط بر خط‌به‌خط کتاب درسی و تصاویر.' },
+      { name: 'شیمی ۲', note: 'شیمی آلی (کربن‌ها)، ترمودینامیک و سینتیک؛ روزانه حل حداقل ۱۰ مسئله بازده درصدی و استوکیومتری.' },
+      { name: 'فیزیک ۲ و ریاضی ۲', note: 'الکتریسیته ساکن و جاری، مغناطیس و تابع؛ حل تمرینات تستی کتاب‌های تست استاندارد.' },
+      { name: 'دروس نهایی عمومی', note: 'فارسی ۲، عربی ۲، دین و زندگی ۲ و زبان انگلیسی ۲؛ کسب تراز عالی در سوابق تحصیلی.' }
+    ],
+    schedule: [
+      { day: 'شنبه', p1: 'زیست‌شناسی ۲ (تنظیم عصبی و حواس)', p2: 'شیمی ۲ (قدر هدایای زمینی و نفت)', p3: 'فارسی ۲ (قلمرو فکری و زیبایی‌شناسی)', p4: 'تست آموزشی زیست ۲ (۳۰ تست)', p5: 'مرور روتین شبانه فرمول‌ها و نکات زیست', target: '۵.۵ ساعت • ۳۰ تست' },
+      { day: 'یکشنبه', p1: 'فیزیک ۲ (الکتریسیته ساکن و میدان)', p2: 'ریاضی ۲ (هندسه تحلیلی و معادله درجه دو)', p3: 'عربی ۲ (قواعد، ثلاثی مزید و ترجمه)', p4: 'تست فیزیک ۲ (۲۵ تست مبحثی)', p5: 'مرور نکات شیمی ۲ و فرمول‌های ساختاری', target: '۵.۵ ساعت • ۲۵ تست' },
+      { day: 'دوشنبه', p1: 'زیست‌شناسی ۲ (دستگاه حرکتی و ترشحات)', p2: 'شیمی ۲ (شیمی آلی و آلکان‌ها)', p3: 'زبان انگلیسی ۲ (واژگان و متن‌خوانی)', p4: 'تست ریاضی ۲ (۲۵ تست محاسباتی)', p5: 'ایستگاه مرور دهم: زیست دهم (فصل گوارش)', target: '۵.۵ ساعت • ۳۵ تست' },
+      { day: 'سه‌شنبه', p1: 'ریاضی ۲ (تابع و اعمال جبری روی توابع)', p2: 'فیزیک ۲ (مدارهای الکتریکی و قانون اهم)', p3: 'دین و زندگی ۲ (پیام آیات نهایی)', p4: 'تست زیست ۲ (۳۵ تست ترکیبی)', p5: 'ایستگاه مرور دهم: فیزیک دهم (کار و انرژی)', target: '۵.۵ ساعت • ۳۵ تست' },
+      { day: 'چهارشنبه', p1: 'زیست‌شناسی ۲ (تنظیم شیمیایی و هورمون‌ها)', p2: 'شیمی ۲ (مسائل بازده درصدی و خلوص)', p3: 'انسان و محیط زیست / زمین‌شناسی', p4: 'تست شیمی ۲ (۲۵ تست زمان‌دار)', p5: 'خلاصه‌نویسی و جمع‌بندی نکات هفته', target: '۵ ساعت • ۳۵ تست' },
+      { day: 'پنجشنبه', p1: 'ایستگاه جبرانی (پارت‌های مطالعه‌نشده)', p2: 'شرکت در آزمون آزمایشی یا کوئیز جامع', p3: 'مرور عمیق امتحانات نهایی دروس عمومی', p4: 'تست پوششی پایه دهم (۴۰ تست)', p5: 'تحلیل دقیق اشکالات آزمون در دفتر خودآموز', target: '۸ ساعت • ۸۰ تست' },
+      { day: 'جمعه', p1: 'تحلیل کامل کارنامه و دسته‌بندی اشتباهات', p2: 'استراحت و ورزش، تجدید قوا و تفریح', p3: 'مرور خلاصه‌ها و فلش‌کارت‌های هفتگی', p4: 'تنظیم برنامه شخصی‌سازی‌شده هفته آینده', p5: 'خواب منظم سر ساعت ۲۳:۰۰', target: '۴ ساعت مطالعه مفید + ریکاوری' }
+    ]
+  },
+
+  '11_ensani': {
+    gradeCode: '11',
+    gradeLabel: 'پایه یازدهم',
+    majorCode: 'ensani',
+    majorLabel: 'علوم انسانی',
+    majorIcon: '⚖️',
+    themeColor: '#f59e0b',
+    badgeClass: 'bg-amber-100 text-amber-900 border-amber-300',
+    headerGradient: 'from-navy-950 via-navy-900 to-amber-950',
+    title: 'برنامه مطالعاتی راهبردی پایه یازدهم انسانی',
+    subtitle: 'تسلط بر روان‌شناسی تک‌کتابی، فلسفه ۱، فنون ۲ و تثبیت معدل امتحانات نهایی',
+    counselorQuote: '«روان‌شناسی یازدهم تک‌کتابی و رتبه‌ساز کنکور است؛ متن فلسفه ۱ نیازمند تفکر نقادانه است. با برنامه منظم و روزانه، هم نمره ۲۰ نهایی و هم درصد بالای ۸۰ کنکور را تضمین کنید.»',
+    weeklyHours: '۳۲ الی ۳۸ ساعت در هفته (۴.۵ تا ۵.۵ ساعت روزهای مدرسه • ۷ تا ۸ ساعت روزهای تعطیل)',
+    examSplit: '۶۰٪ تشریحی و امتحانات نهایی • ۴۰٪ تستی و مهارت حل تست',
+    prioritySubjects: [
+      { name: 'روان‌شناسی یازدهم', note: 'درس فوق‌العاده رتبه‌ساز کنکور؛ خط‌به‌خط متن و آزمایش‌ها را مفهومی بخوانید.' },
+      { name: 'فلسفه ۱ و منطق', note: 'فلسفه یازدهم را عمیق بخوانید و بین منطق دهم و فلسفه پیوند برقرار کنید.' },
+      { name: 'علوم و فنون ادبی ۲', note: 'تاریخ ادبیات قرون ۷ تا ۱۱، عروض همسان و ناهمسان و اختیارات شاعری.' },
+      { name: 'ریاضی و آمار ۲ و عربی ۲', note: 'معادله درجه دو و تابع در ریاضی؛ قواعد و درک مطلب عربی تخصصی.' }
+    ],
+    schedule: [
+      { day: 'شنبه', p1: 'علوم و فنون ۲ (عروض ناهمسان و اختیارات)', p2: 'روان‌شناسی (فصل جاری و مفاهیم تفکر)', p3: 'عربی اختصاصی ۲ (قواعد و ترجمه)', p4: 'تست آموزشی روان‌شناسی (۲۵ تست)', p5: 'روتین شبانه تاریخ ادبیات و لغات', target: '۵ ساعت • ۲۵ تست' },
+      { day: 'یکشنبه', p1: 'فلسفه ۱ (چیستی فلسفه و معرفت‌شناسی)', p2: 'جامعه‌شناسی ۲ (فرهنگ و نظام جهانی)', p3: 'فارسی ۲ (قلمرو زبانی و ادبی)', p4: 'تست فنون ۲ (۲۵ تست اختیارات)', p5: 'مرور نکات اصطلاحات فلسفی', target: '۵ ساعت • ۲۵ تست' },
+      { day: 'دوشنبه', p1: 'ریاضی و آمار ۲ (آشنایی با تابع و گراف‌ها)', p2: 'تاریخ ۲ / جغرافیا ۲ (تشریحی نهایی)', p3: 'زبان انگلیسی ۲ (گرامر و واژگان)', p4: 'تست فلسفه ۱ (۲۰ تست مفهومی)', p5: 'ایستگاه مرور دهم: اقتصاد دهم (حل مسئله)', target: '۵ ساعت • ۳۰ تست' },
+      { day: 'سه‌شنبه', p1: 'روان‌شناسی (حافظه و یادگیری)', p2: 'علوم و فنون ۲ (آرایه‌های لف‌ونشر و ایهام)', p3: 'دین و زندگی ۲ (پیام آیات نهایی)', p4: 'تست ریاضی و آمار ۲ (۲۰ تست)', p5: 'ایستگاه مرور دهم: منطق دهم (قیاس‌ها)', target: '۵ ساعت • ۳۰ تست' },
+      { day: 'چهارشنبه', p1: 'جامعه‌شناسی ۲ (بخش تشریحی نهایی)', p2: 'فلسفه ۱ (دیدگاه فلاسفه اسلامی)', p3: 'انسان و محیط زیست (نهایی)', p4: 'تست جامع ترکیبی دروس اختصاصی (۳۵ تست)', p5: 'خلاصه‌نویسی مباحث طول هفته', target: '۴.۵ ساعت • ۳۵ تست' },
+      { day: 'پنجشنبه', p1: 'ایستگاه جبرانی (عقب‌افتادگی‌های طول هفته)', p2: 'کوئیز جامع هفتگی و حل سوالات امتحان نهایی', p3: 'مرور دروس عمومی با ضریب نهایی بالا', p4: 'تست پوششی پایه دهم انسانی (۴۰ تست)', p5: 'تحلیل دقیق پاسخ‌ها و ثبت نکات در خودآموز', target: '۷.۵ ساعت • ۷۰ تست' },
+      { day: 'جمعه', p1: 'تحلیل کامل اشکالات و آزمون', p2: 'استراحت و تفریح فعال، ورزش و آرامش', p3: 'مرور فلش‌کارت‌ها و خلاصه‌نویسی‌ها', p4: 'برنامه‌ریزی دقیق هفته آینده', p5: 'خواب منظم سر ساعت ۲۳:۰۰', target: '۳.۵ ساعت مطالعه مفید + ریکاوری' }
+    ]
+  },
+
+  '11_riazi': {
+    gradeCode: '11',
+    gradeLabel: 'پایه یازدهم',
+    majorCode: 'riazi',
+    majorLabel: 'ریاضی و فیزیک',
+    majorIcon: '📐',
+    themeColor: '#0284c7',
+    badgeClass: 'bg-sky-100 text-sky-900 border-sky-300',
+    headerGradient: 'from-navy-950 via-navy-900 to-sky-950',
+    title: 'برنامه مطالعاتی راهبردی پایه یازدهم ریاضی',
+    subtitle: 'تسلط بر حسابان ۱، هندسه ۲ و آمار، فیزیک ۲ و کسب تراز ممتاز در امتحانات نهایی',
+    counselorQuote: '«حسابان ۱ پل مستقیم به حسابان ۲ دوازدهم است؛ اگر روی مثلثات و حد حسابان ۱ مسلط شوید، نیمی از مسیر دوازدهم را از پیش طی کرده‌اید. دست به قلم شدن روزانه، تنها راز موفقیت رشته ریاضی است.»',
+    weeklyHours: '۳۵ الی ۴۲ ساعت در هفته (۵ تا ۶ ساعت روزهای مدرسه • ۸ تا ۹ ساعت روزهای تعطیل)',
+    examSplit: '۵۵٪ تشریحی و امتحانات نهایی • ۴۵٪ تستی و مهارت حل مسئله',
+    prioritySubjects: [
+      { name: 'حسابان ۱', note: 'مثلثات، توابع و معادلات درجه دو؛ حل تمرین‌های کتاب و تست‌های کنکور سراسری.' },
+      { name: 'هندسه ۲ و آمار و احتمال', note: 'دایره و تبدیل‌های هندسی؛ آمار و احتمال تک‌کتابی و پرنکته در کنکور.' },
+      { name: 'فیزیک ۲ و شیمی ۲', note: 'الکتریسیته، مغناطیس و القا؛ شیمی آلی و استوکیومتری یازدهم.' },
+      { name: 'دروس نهایی عمومی', note: 'فارسی ۲، دین و زندگی ۲، زبان و عربی؛ تضمین نمره ۲۰ برای ساخت سوابق تحصیلی.' }
+    ],
+    schedule: [
+      { day: 'شنبه', p1: 'حسابان ۱ (مثلثات و روابط تکمیلی)', p2: 'فیزیک ۲ (الکتریسیته ساکن و خازن‌ها)', p3: 'فارسی ۲ (قلمرو زبانی و ادبی)', p4: 'تست آموزشی حسابان ۱ (۲۵ تست)', p5: 'مرور روتین فرمول‌های مثلثات و فیزیک', target: '۵.۵ ساعت • ۲۵ تست' },
+      { day: 'یکشنبه', p1: 'هندسه ۲ (دایره و زوایای محاطی)', p2: 'شیمی ۲ (شیمی آلی و هیدروکربن‌ها)', p3: 'عربی زبان قرآن ۲ (قواعد و ترجمه)', p4: 'تست هندسه ۲ (۲۰ تست تالیفی)', p5: 'مرور قضایای هندسه ۲ و اثبات‌ها', target: '۵.۵ ساعت • ۲۰ تست' },
+      { day: 'دوشنبه', p1: 'آمار و احتمال (احتمال شرطی و متغیر تصادفی)', p2: 'فیزیک ۲ (جریان الکتریکی و مدارها)', p3: 'زبان انگلیسی ۲ (گرامر و ریدینگ)', p4: 'تست فیزیک ۲ (۲۵ تست محاسباتی)', p5: 'ایستگاه مرور دهم: ریاضی دهم (معادله و تابع)', target: '۵.۵ ساعت • ۳۵ تست' },
+      { day: 'سه‌شنبه', p1: 'حسابان ۱ (تابع و حد و پیوستگی)', p2: 'شیمی ۲ (آنتالپی و گرماشیمی)', p3: 'دین و زندگی ۲ (پیام آیات نهایی)', p4: 'تست آمار و احتمال (۲۵ تست)', p5: 'ایستگاه مرور دهم: فیزیک دهم (کار و انرژی)', target: '۵.۵ ساعت • ۳۵ تست' },
+      { day: 'چهارشنبه', p1: 'هندسه ۲ (تبدیل‌های هندسی و تجانس)', p2: 'فیزیک ۲ (میدان مغناطیسی و نیروی لورنتس)', p3: 'انسان و محیط زیست / زمین‌شناسی', p4: 'تست شیمی ۲ (۲۵ تست زمان‌دار)', p5: 'خلاصه‌نویسی و جمع‌بندی فرمول‌های هفته', target: '۵ ساعت • ۳۰ تست' },
+      { day: 'پنجشنبه', p1: 'ایستگاه جبرانی (پارت‌های مطالعه‌نشده)', p2: 'آزمون آزمایشی یا شبیه‌ساز کوئیز هفتگی', p3: 'مرور تشریحی دروس عمومی با ضریب نهایی بالا', p4: 'تست پوششی پایه دهم ریاضی (۴۰ تست)', p5: 'تحلیل دقیق اشکالات کوئیز در دفتر خودآموز', target: '۸ ساعت • ۷۵ تست' },
+      { day: 'جمعه', p1: 'تحلیل کارنامه و رفع اشکال کامل آزمون', p2: 'استراحت فعال، ورزش، تفریح و هوای آزاد', p3: 'مرور خلاصه‌ها و دفتر فرمول‌های هفتگی', p4: 'برنامه‌ریزی دقیق برای هفته پیش‌رو', p5: 'خواب منظم سر ساعت ۲۳:۰۰', target: '۴ ساعت مطالعه مفید + ریکاوری' }
+    ]
+  },
+
+  // ------------------------- GRADE 12 -------------------------
+  '12_tajrobi': {
+    gradeCode: '12',
+    gradeLabel: 'پایه دوازدهم و کنکور',
+    majorCode: 'tajrobi',
+    majorLabel: 'علوم تجربی',
+    majorIcon: '🧬',
+    themeColor: '#10b981',
+    badgeClass: 'bg-emerald-100 text-emerald-900 border-emerald-300',
+    headerGradient: 'from-navy-950 via-navy-900 to-teal-950',
+    title: 'برنامه مطالعاتی جامع پایه دوازدهم و کنکور تجربی',
+    subtitle: 'استراتژی فتح همزمان امتحانات نهایی ۶۰٪ و کنکور سراسری اردیبهشت و تیر',
+    counselorQuote: '«دوازدهم سال ماراتن است نه دوی سرعت؛ صبح‌ها متون امتحانات نهایی را تشریحی و خط‌به‌خط مسلط شوید و بعدازظهرها سرعت تست‌زنی کنکور را ارتقا دهید. جمعه‌های آزمون و تحلیل دقیق، کلید رتبه زیر ۱۰۰۰ است.»',
+    weeklyHours: '۴۵ الی ۵۵ ساعت در هفته (۶ تا ۷ ساعت روزهای مدرسه • ۱۰ تا ۱۱ ساعت روزهای تعطیل)',
+    examSplit: '۵۰٪ تشریحی نهایی • ۵۰٪ تستی کنکور سراسری و مرور پایه‌ها',
+    prioritySubjects: [
+      { name: 'زیست‌شناسی ۳ و مرور پایه', note: 'مهم‌ترین درس با ضریب ۱۲ در کنکور؛ روزانه حداقل ۲ ساعت مطالعه خط‌به‌خط، شکل‌ها و تست زمان‌دار.' },
+      { name: 'شیمی ۳ و شیمی پایه', note: 'اسید و باز، الکتروشیمی و تعادل؛ حل روزانه مسائل استوکیومتری و تسلط بر متن حفظی.' },
+      { name: 'فیزیک ۳ و ریاضی ۳', note: 'نوسان و موج، فیزیک اتمی و هسته‌ای؛ کاربرد مشتق و حد و پیوستگی در ریاضی.' },
+      { name: 'دروس عمومی نهایی دوازدهم', note: 'فارسی ۳، عربی ۳، دین و زندگی ۳، زبان ۳، سلامت و بهداشت، هویت اجتماعی (تضمین معدل بالای ۱۹.۵).' }
+    ],
+    schedule: [
+      { day: 'شنبه', p1: 'زیست‌شناسی ۳ (مولکول‌های اطلاعاتی و ژنتیک)', p2: 'شیمی ۳ (الکتروشیمی و اکسایش-کاهش)', p3: 'فارسی ۳ نهایی (قلمروها و ابیات تشریحی)', p4: 'تست زمان‌دار زیست‌شناسی (۴۰ تست)', p5: 'روتین شبانه واژگان و حفظیات شیمی', target: '۷ ساعت • ۴۵ تست' },
+      { day: 'یکشنبه', p1: 'فیزیک ۳ (حرکت‌شناسی و دینامیک)', p2: 'ریاضی ۳ (تابع و حد و پیوستگی)', p3: 'عربی ۳ نهایی (قواعد، معتل و متون)', p4: 'تست فیزیک ۳ (۳۵ تست کنکور)', p5: 'مرور پایه: زیست دهم (فصل گوارش و قلب)', target: '۷.۵ ساعت • ۴۵ تست' },
+      { day: 'دوشنبه', p1: 'زیست‌شناسی ۳ (انتقال اطلاعات و بیان ژن)', p2: 'شیمی ۳ (اسیدها و بازها و تعادل)', p3: 'دین و زندگی ۳ نهایی (پیام آیات و اندیشه)', p4: 'تست ریاضی ۳ (۳۵ تست کنکور)', p5: 'مرور پایه: شیمی یازدهم (شیمی آلی)', target: '۷ ساعت • ۵۰ تست' },
+      { day: 'سه‌شنبه', p1: 'فیزیک ۳ (نوسان و امواج مکانیکی)', p2: 'ریاضی ۳ (مشتق و کاربرد مشتق)', p3: 'زبان انگلیسی ۳ نهایی (ردینگ و لغت)', p4: 'تست زیست ۳ (۴۰ تست ترکیبی)', p5: 'مرور پایه: فیزیک دهم و یازدهم', target: '۷.۵ ساعت • ۵۰ تست' },
+      { day: 'چهارشنبه', p1: 'زیست‌شناسی ۳ (فتوسنتز و تنفس سلولی)', p2: 'شیمی ۳ (شیمی پاک‌کننده‌ها و صابون‌ها)', p3: 'سلامت و بهداشت / هویت اجتماعی نهایی', p4: 'تست جامع شیمی کنکور (۳۰ تست)', p5: 'خلاصه‌نویسی و آزمونک شبانه', target: '۷ ساعت • ۴۵ تست' },
+      { day: 'پنجشنبه', p1: 'ایستگاه جبرانی (عقب‌افتادگی‌های طول هفته)', p2: 'شبیه‌سازی یک دفترچه کنکور یا آزمون آزمایشی', p3: 'مرور تشریحی دروس عمومی با بالاترین ضریب نهایی', p4: 'تست‌های زمان‌دار و بررسی تک‌به‌تک گزینه‌ها', p5: 'ثبت دقیق نکات تستی در دفتر خودآموز کنکور', target: '۱۰ ساعت • ۱۰۰ تست' },
+      { day: 'جمعه', p1: 'شرکت در آزمون آزمایشی سراسری (قلم‌چی/ماز/گاج)', p2: 'تحلیل دقیق و خط‌به‌خط تمام سوالات دفترچه', p3: 'استراحت فعال، ورزش، ریکاوری و تنفس ذهن', p4: 'چیدمان برنامه هفتگی متناسب با بودجه‌بندی آزمون بعد', p5: 'آماده‌سازی وسایل و خواب آرام سر ساعت ۲۳:۰۰', target: '۵ ساعت آزمون و تحلیل + استراحت' }
+    ]
+  },
+
+  '12_ensani': {
+    gradeCode: '12',
+    gradeLabel: 'پایه دوازدهم و کنکور',
+    majorCode: 'ensani',
+    majorLabel: 'علوم انسانی',
+    majorIcon: '⚖️',
+    themeColor: '#f59e0b',
+    badgeClass: 'bg-amber-100 text-amber-900 border-amber-300',
+    headerGradient: 'from-navy-950 via-navy-900 to-amber-950',
+    title: 'برنامه مطالعاتی جامع پایه دوازدهم و کنکور انسانی',
+    subtitle: 'استراتژی کسب رتبه زیر ۱۰۰۰، تسلط بر فلسفه ۲ و فنون ۳ و معدل ۲۰ نهایی',
+    counselorQuote: '«فلسفه و منطق با هم ۳۰ تست در کنکور دارند؛ ریاضی و آمار برگ برنده رتبه تک‌رقمی و دورقمی است. با مطالعه روزانه متون نهایی و حل تست‌های سراسری ادوار گذشته، پیروزی شما حتمی است.»',
+    weeklyHours: '۴۰ الی ۵۰ ساعت در هفته (۵.۵ تا ۶.۵ ساعت روزهای مدرسه • ۹ تا ۱۰ ساعت روزهای تعطیل)',
+    examSplit: '۵۰٪ تشریحی نهایی • ۵۰٪ تستی کنکور سراسری و پایه‌ها',
+    prioritySubjects: [
+      { name: 'فلسفه ۲ و منطق و فلسفه پایه', note: 'بسیار مفهومی و رتبه‌ساز؛ روزانه تمرین تست‌های دام‌دار و ارتباط بین نظرات فلاسفه.' },
+      { name: 'علوم و فنون ادبی ۳', note: 'عروض ناهمسان، اختیارات زبانی و وزنی و سبک‌شناسی؛ تسلط کامل بر تقطیع سماعی.' },
+      { name: 'ریاضی و آمار ۳ و عربی ۳', note: 'آمار و احتمال و الگوها؛ ترجمه و درک مطلب عربی تخصصی کنکور.' },
+      { name: 'عمومی‌های نهایی دوازدهم', note: 'فارسی ۳، دین و زندگی ۳، زبان ۳، سلامت و بهداشت، علوم اجتماعی (سهم ۶۰٪ قطعی).' }
+    ],
+    schedule: [
+      { day: 'شنبه', p1: 'علوم و فنون ۳ (عروض و قافیه و سبک‌شناسی)', p2: 'فلسفه ۲ (وجود و ماهیت و علیت)', p3: 'فارسی ۳ نهایی (قلمروها و تحلیل شعر)', p4: 'تست زمان‌دار فنون ۳ (۳۵ تست)', p5: 'روتین شبانه تاریخ ادبیات و لغات', target: '۶.۵ ساعت • ۴۰ تست' },
+      { day: 'یکشنبه', p1: 'جامعه‌شناسی ۳ (نظم جهانی و انقلاب)', p2: 'عربی اختصاصی ۳ (قواعد، معتل و اعراب)', p3: 'دین و زندگی ۳ نهایی (پیام آیات و اندیشه)', p4: 'تست فلسفه ۲ (۳۰ تست مفهومی)', p5: 'مرور پایه: روان‌شناسی یازدهم (تک‌کتابی)', target: '۷ ساعت • ۴۵ تست' },
+      { day: 'دوشنبه', p1: 'ریاضی و آمار ۳ (شمارش، احتمال و آمار)', p2: 'تاریخ ۳ / جغرافیا ۳ (تشریحی نهایی)', p3: 'زبان انگلیسی ۳ نهایی (ریدینگ و کلوزتست)', p4: 'تست ریاضی و آمار ۳ (۳۰ تست محاسباتی)', p5: 'مرور پایه: اقتصاد دهم (حل مسئله)', target: '۶.۵ ساعت • ۴۰ تست' },
+      { day: 'سه‌شنبه', p1: 'فلسفه ۲ (فلسفه در جهان اسلام و معاصر)', p2: 'علوم و فنون ۳ (آرایه‌های ادبی و ایهام)', p3: 'سلامت و بهداشت / هویت اجتماعی نهایی', p4: 'تست عربی اختصاصی کنکور (۳۰ تست)', p5: 'مرور پایه: منطق دهم (قیاس و احکام قضایا)', target: '۷ ساعت • ۴۵ تست' },
+      { day: 'چهارشنبه', p1: 'جامعه‌شناسی ۳ (حل نمونه سوالات نهایی)', p2: 'علوم و فنون ۳ (تاریخ ادبیات معاصر)', p3: 'فارسی ۳ نهایی (قلمرو فکری و حفظ شعر)', p4: 'تست جامع ترکیبی دروس انسانی (۴۰ تست)', p5: 'خلاصه‌نویسی و رفع اشکال‌های هفتگی', target: '۶.۵ ساعت • ۴۰ تست' },
+      { day: 'پنجشنبه', p1: 'ایستگاه جبرانی (عقب‌افتادگی‌های طول هفته)', p2: 'شبیه‌سازی یک دفترچه کنکور انسانی سراسری', p3: 'مرور تشریحی دروس عمومی با ضریب نهایی بالا', p4: 'تست پوششی دروس پایه انسانی (۵۰ تست)', p5: 'ثبت اشکالات در دفتر خودآموز کنکور', target: '۹.۵ ساعت • ۹۰ تست' },
+      { day: 'جمعه', p1: 'شرکت در آزمون آزمایشی سراسری یا شبیه‌ساز', p2: 'تحلیل دقیق تک‌به‌تک سوالات پاسخ‌نامه', p3: 'استراحت فعال، ورزش، تفریح و آرامش ذهن', p4: 'برنامه‌ریزی دقیق هفته پیش‌رو با مشاور', p5: 'خواب منظم سر ساعت ۲۳:۰۰', target: '۵ ساعت آزمون و تحلیل + استراحت' }
+    ]
+  },
+
+  '12_riazi': {
+    gradeCode: '12',
+    gradeLabel: 'پایه دوازدهم و کنکور',
+    majorCode: 'riazi',
+    majorLabel: 'ریاضی و فیزیک',
+    majorIcon: '📐',
+    themeColor: '#0284c7',
+    badgeClass: 'bg-sky-100 text-sky-900 border-sky-300',
+    headerGradient: 'from-navy-950 via-navy-900 to-sky-950',
+    title: 'برنامه مطالعاتی جامع پایه دوازدهم و کنکور ریاضی',
+    subtitle: 'استراتژی فتح حسابان ۲، فیزیک ۳، گسسته و هندسه ۳ و تضمین معدل نهایی',
+    counselorQuote: '«ترکیب حسابان ۲، ریاضیات گسسته و هندسه ۳ نیازمند نظم آهنین است؛ روزانه تست‌های زمان‌دار و شب‌ها تشریحی‌نویسی امتحان نهایی داشته باشید تا صندلی برترین دانشگاه‌های مهندسی از آن شما شود.»',
+    weeklyHours: '۴۵ الی ۵۵ ساعت در هفته (۶ تا ۷ ساعت روزهای مدرسه • ۱۰ تا ۱۱ ساعت روزهای تعطیل)',
+    examSplit: '۵۰٪ تشریحی نهایی • ۵۰٪ تستی کنکور سراسری و مرور پایه‌ها',
+    prioritySubjects: [
+      { name: 'حسابان ۲ و ریاضی پایه', note: 'حد بی‌نهایت، مشتق، کاربرد مشتق و بهینه‌سازی؛ حل حداقل ۳۰ تست روزانه.' },
+      { name: 'گسسته و هندسه ۳', note: 'نظریه اعداد، گراف، ترکیبیات و مقاطع مخروطی؛ یادگیری اثبات‌ها و الگوهای حل مسئله.' },
+      { name: 'فیزیک ۳ و شیمی ۳', note: 'حرکت، نوسان، صوت و فیزیک اتمی؛ الکتروشیمی و اسیدها و بازها در شیمی کنکور.' },
+      { name: 'عمومی‌های نهایی دوازدهم', note: 'فارسی ۳، دین و زندگی ۳، زبان ۳، سلامت و بهداشت، هویت اجتماعی (سهم ۶۰٪ قطعی).' }
+    ],
+    schedule: [
+      { day: 'شنبه', p1: 'حسابان ۲ (تابع و معادلات مثلثاتی)', p2: 'فیزیک ۳ (حرکت بر خط راست و نمودارها)', p3: 'فارسی ۳ نهایی (قلمروها و تحلیل متون)', p4: 'تست زمان‌دار حسابان ۲ (۳۵ تست)', p5: 'روتین شبانه فرمول‌های مثلثات و مشتق', target: '۷ ساعت • ۴۵ تست' },
+      { day: 'یکشنبه', p1: 'ریاضیات گسسته (بخش‌پذیری و نظریه اعداد)', p2: 'شیمی ۳ (اکسایش-کاهش و خوردگی)', p3: 'عربی ۳ نهایی (قواعد، معتل و ترجمه)', p4: 'تست فیزیک ۳ (۳۵ تست کنکور)', p5: 'مرور پایه: حسابان ۱ (مثلثات و تابع)', target: '۷.۵ ساعت • ۴۵ تست' },
+      { day: 'دوشنبه', p1: 'هندسه ۳ (ماتریس، جبر خطی و مقاطع مخروطی)', p2: 'حسابان ۲ (مشتق و آهنگ تغییرات)', p3: 'دین و زندگی ۳ نهایی (پیام آیات و اندیشه)', p4: 'تست گسسته (۳۰ تست تحلیلی)', p5: 'مرور پایه: فیزیک یازدهم (مدار و مغناطیس)', target: '۷ ساعت • ۴۵ تست' },
+      { day: 'سه‌شنبه', p1: 'فیزیک ۳ (دینامیک و قوانین نیوتون)', p2: 'شیمی ۳ (اسیدها و بازها و محاسبات pH)', p3: 'زبان انگلیسی ۳ نهایی (گرامر و ریدینگ)', p4: 'تست هندسه ۳ (۳۰ تست کنکور)', p5: 'مرور پایه: آمار و احتمال یازدهم', target: '۷.۵ ساعت • ۵۰ تست' },
+      { day: 'چهارشنبه', p1: 'حسابان ۲ (کاربرد مشتق و بهینه‌سازی)', p2: 'فیزیک ۳ (نوسان و موج مکانیکی)', p3: 'سلامت و بهداشت / هویت اجتماعی نهایی', p4: 'تست جامع شیمی کنکور (۳۰ تست محاسباتی)', p5: 'خلاصه‌نویسی فرمول‌ها و نکات تستی', target: '۷ ساعت • ۴۵ تست' },
+      { day: 'پنجشنبه', p1: 'ایستگاه جبرانی (عقب‌افتادگی‌های طول هفته)', p2: 'شبیه‌سازی یک دفترچه کنکور ریاضی سراسری', p3: 'مرور تشریحی دروس عمومی با ضریب نهایی بالا', p4: 'تست‌های زمان‌دار هندسه و گسسته', p5: 'ثبت اشکالات در دفتر خودآموز کنکور ریاضی', target: '۱۰ ساعت • ۱۰۰ تست' },
+      { day: 'جمعه', p1: 'شرکت در آزمون آزمایشی سراسری (قلم‌چی/گزینه‌دو/گاج)', p2: 'تحلیل دقیق و خط‌به‌خط دفترچه آزمون', p3: 'استراحت فعال، ورزش، تفریح و تنفس ذهن', p4: 'تنظیم برنامه هفتگی متناسب با بودجه آزمون بعد', p5: 'آماده‌سازی وسایل و خواب سر ساعت ۲۳:۰۰', target: '۵ ساعت آزمون و تحلیل + استراحت' }
+    ]
+  }
+};
+
+function renderStudyPlanView() {
+  const p = STATE.viewParams || {};
+  let grade = String(p.grade || '10');
+  if (!['10', '11', '12'].includes(grade)) grade = '10';
+
+  let major = String(p.major || 'tajrobi').toLowerCase();
+  if (!['tajrobi', 'ensani', 'riazi'].includes(major)) major = 'tajrobi';
+
+  const planKey = `${grade}_${major}`;
+  const plan = STUDY_PLANS_DATABASE[planKey] || STUDY_PLANS_DATABASE['10_tajrobi'];
+
+  updatePageSeoMetadata(
+    `${plan.title} — همراه باقرالعلوم`,
+    `برنامه مطالعاتی راهبردی، هفتگی و روزانه ${plan.gradeLabel} ${plan.majorLabel} با جدول ۷ روزه، ساعات مطالعه هدف و توصیه‌های مشاور رسمی دبیرستان نمونه دولتی باقرالعلوم`,
+    `study-plan/${grade}/${major}`,
+    false
+  );
+
+  const gradeTabs = [
+    { code: '10', label: 'پایه دهم' },
+    { code: '11', label: 'پایه یازدهم' },
+    { code: '12', label: 'پایه دوازدهم و کنکور' }
+  ];
+
+  const majorTabs = [
+    { code: 'tajrobi', label: 'علوم تجربی', icon: '🧬' },
+    { code: 'ensani', label: 'علوم انسانی', icon: '⚖️' },
+    { code: 'riazi', label: 'ریاضی و فیزیک', icon: '📐' }
+  ];
+
+  return `
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in text-right" dir="rtl">
+      <!-- 1. Breadcrumb -->
+      <nav class="flex items-center gap-2 text-xs font-bold text-navy-900 bg-white px-4 py-3 rounded-2xl border border-slate-200 shadow-sm overflow-x-auto">
+        <button type="button" onclick="navigateTo('home')" class="text-turquoise-700 hover:underline">🏠 صفحه اصلی</button>
+        <span>←</span>
+        <button type="button" onclick="navigateTo('home');setTimeout(()=>document.getElementById('grades')?.scrollIntoView({behavior:'smooth'}),150)" class="text-slate-600 hover:text-navy-900">برنامه‌های مطالعاتی</button>
+        <span>←</span>
+        <span class="text-navy-900 font-extrabold">${SecurityEngine.escapeHtml(plan.gradeLabel)}</span>
+        <span>←</span>
+        <span class="text-turquoise-700 font-black">${SecurityEngine.escapeHtml(plan.majorLabel)}</span>
+      </nav>
+
+      <!-- 2. Interactive Grade & Major Switcher Bar -->
+      <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-4">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <!-- Grade Switcher -->
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-xs font-black text-slate-500 ml-1">انتخاب پایه:</span>
+            ${gradeTabs.map(g => `
+              <button type="button" onclick="navigateTo('study-plan', {grade: '${g.code}', major: '${major}'})" class="px-3.5 py-1.5 rounded-xl text-xs font-black transition ${g.code === grade ? 'bg-navy-900 text-white shadow-md' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}">
+                ${SecurityEngine.escapeHtml(g.label)}
+              </button>
+            `).join('')}
+          </div>
+
+          <!-- Major Switcher -->
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-xs font-black text-slate-500 ml-1">انتخاب رشته:</span>
+            ${majorTabs.map(m => `
+              <button type="button" onclick="navigateTo('study-plan', {grade: '${grade}', major: '${m.code}'})" class="px-3.5 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 ${m.code === major ? 'bg-turquoise-600 text-white shadow-md' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}">
+                <span>${m.icon}</span>
+                <span>${SecurityEngine.escapeHtml(m.label)}</span>
+              </button>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Main Hero Banner for Selected Study Plan -->
+      <div class="bg-gradient-to-r ${plan.headerGradient} text-white rounded-3xl p-6 sm:p-10 border border-navy-800 shadow-2xl relative overflow-hidden">
+        <div class="relative z-10 space-y-5">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="px-3 py-1 rounded-full text-xs font-black bg-white/10 text-turquoise-300 border border-turquoise-400/30 flex items-center gap-1.5">
+                <span>${plan.majorIcon}</span>
+                <span>${SecurityEngine.escapeHtml(plan.gradeLabel)} • ${SecurityEngine.escapeHtml(plan.majorLabel)}</span>
+              </span>
+              <span class="px-3 py-1 rounded-full text-xs font-bold bg-navy-800/80 text-slate-300 border border-navy-700">دبیرستان نمونه دولتی باقرالعلوم</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 no-print">
+              <button type="button" onclick="window.print()" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition flex items-center gap-1.5 border border-white/20 shadow-sm" title="چاپ یا ذخیره PDF">
+                <span>🖨️</span>
+                <span>چاپ برنامه (PDF)</span>
+              </button>
+              <button type="button" onclick="navigateTo('tools', {tab: 'timer'})" class="px-3.5 py-2 rounded-xl bg-turquoise-500 hover:bg-turquoise-400 text-navy-950 font-black text-xs transition flex items-center gap-1.5 shadow-md">
+                <span>⏱️</span>
+                <span>ورود به تایمر مطالعه</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="space-y-2 max-w-3xl">
+            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-tight">
+              ${SecurityEngine.escapeHtml(plan.title)}
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed font-medium">
+              ${SecurityEngine.escapeHtml(plan.subtitle)}
+            </p>
+          </div>
+
+          <!-- Counselor Highlight Quote -->
+          <div class="p-4 sm:p-5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 text-xs sm:text-sm text-slate-100 flex items-start gap-3">
+            <span class="text-2xl shrink-0">💡</span>
+            <div>
+              <p class="font-bold text-turquoise-300 mb-1">توصیه راهبردی مشاور مدرسه:</p>
+              <p class="leading-relaxed font-semibold">${SecurityEngine.escapeHtml(plan.counselorQuote)}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Key Strategic Metrics (4 Cards) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-2">
+          <div class="flex items-center gap-2 text-turquoise-700 font-bold">
+            <span class="text-xl">⏱️</span>
+            <span>ساعت مطالعه هدف:</span>
+          </div>
+          <p class="text-slate-700 font-black leading-snug">${SecurityEngine.escapeHtml(plan.weeklyHours)}</p>
+          <p class="text-[11px] text-slate-500 font-medium">تطابق با بیوریتم مغز در ایام مدرسه و تعطیلات</p>
+        </div>
+
+        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-2">
+          <div class="flex items-center gap-2 text-indigo-700 font-bold">
+            <span class="text-xl">⚖️</span>
+            <span>نسبت تستی و تشریحی:</span>
+          </div>
+          <p class="text-slate-700 font-black leading-snug">${SecurityEngine.escapeHtml(plan.examSplit)}</p>
+          <p class="text-[11px] text-slate-500 font-medium">پوشش همزمان تراز سوابق تحصیلی و مهارت کنکور</p>
+        </div>
+
+        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-2">
+          <div class="flex items-center gap-2 text-emerald-700 font-bold">
+            <span class="text-xl">🔄</span>
+            <span>سیستم ایستگاه جبرانی:</span>
+          </div>
+          <p class="text-slate-700 font-black leading-snug">پنجشنبه‌ها و جمعه‌ها زمان ریکاوری</p>
+          <p class="text-[11px] text-slate-500 font-medium">عدم انتقال عقب‌افتادگی‌ها به هفته‌های بعد</p>
+        </div>
+
+        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-2">
+          <div class="flex items-center gap-2 text-amber-700 font-bold">
+            <span class="text-xl">👨‍🏫</span>
+            <span>پشتیبانی و رفع اشکال:</span>
+          </div>
+          <p class="text-slate-700 font-black leading-snug">مشاور دبیرستان نمونه دولتی باقرالعلوم</p>
+          <div class="pt-1">
+            <button type="button" onclick="openAskCounselorModal()" class="text-turquoise-700 hover:underline font-extrabold flex items-center gap-1">
+              <span>ثبت پیام برای مشاور</span>
+              <span>←</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Full 7-Day Interactive Weekly Schedule Table -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+          <div>
+            <h2 class="text-xl font-black text-navy-900 flex items-center gap-2">
+              <span>📅</span>
+              <span>جدول زمان‌بندی و برنامه هفتگی مطالعه (شنبه تا جمعه)</span>
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">پارت‌های مطالعه استاندارد ۵۰ دقیقه‌ای + ۱۰ دقیقه استراحت فعال (تکنیک پومودورو)</p>
+          </div>
+          <div class="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-xl shrink-0">
+            <span>نسخه استاندارد مشاوره دبیرستان</span>
+          </div>
+        </div>
+
+        <!-- Responsive Schedule Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-right text-xs border-collapse min-w-[700px]">
+            <thead>
+              <tr class="bg-slate-100 text-navy-950 font-black border-b border-slate-200">
+                <th class="py-3 px-3.5 rounded-tr-2xl w-24">روز</th>
+                <th class="py-3 px-3.5">پارت ۱ (بعدازظهر)</th>
+                <th class="py-3 px-3.5">پارت ۲ (عصر)</th>
+                <th class="py-3 px-3.5">پارت ۳ (غروب)</th>
+                <th class="py-3 px-3.5">پارت ۴ (شب)</th>
+                <th class="py-3 px-3.5">پارت ۵ (مرور شبانه)</th>
+                <th class="py-3 px-3.5 rounded-tl-2xl w-32 text-center">هدف روزانه</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 font-medium">
+              ${plan.schedule.map((row, idx) => {
+                const isWeekend = row.day === 'پنجشنبه' || row.day === 'جمعه';
+                const rowBg = isWeekend ? (row.day === 'جمعه' ? 'bg-emerald-50/40' : 'bg-amber-50/30') : (idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/60');
+                const badgeColor = row.day === 'جمعه' ? 'bg-emerald-100 text-emerald-900' : (row.day === 'پنجشنبه' ? 'bg-amber-100 text-amber-900' : 'bg-navy-900 text-white');
+
+                return `
+                  <tr class="${rowBg} hover:bg-turquoise-50/40 transition">
+                    <td class="py-3 px-3.5 font-black text-navy-900">
+                      <span class="inline-block px-2.5 py-1 rounded-lg text-xs ${badgeColor}">${SecurityEngine.escapeHtml(row.day)}</span>
+                    </td>
+                    <td class="py-3 px-3.5 text-slate-800 font-semibold">${SecurityEngine.escapeHtml(row.p1)}</td>
+                    <td class="py-3 px-3.5 text-slate-800 font-semibold">${SecurityEngine.escapeHtml(row.p2)}</td>
+                    <td class="py-3 px-3.5 text-slate-800 font-semibold">${SecurityEngine.escapeHtml(row.p3)}</td>
+                    <td class="py-3 px-3.5 text-slate-800 font-semibold">${SecurityEngine.escapeHtml(row.p4)}</td>
+                    <td class="py-3 px-3.5 text-slate-600 text-[11px]">${SecurityEngine.escapeHtml(row.p5)}</td>
+                    <td class="py-3 px-3.5 text-center font-bold text-turquoise-800 bg-slate-50/80 rounded-xl">${SecurityEngine.escapeHtml(row.target || '')}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Table Legend / Explanations -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs bg-slate-50 p-4 rounded-2xl border border-slate-200/80 text-slate-600">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-navy-900 shrink-0"></span>
+            <span><b>روزهای شنبه تا چهارشنبه:</b> پارت‌های بعد از تعطیلی مدرسه</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-amber-400 shrink-0"></span>
+            <span><b>پنجشنبه‌ها:</b> ایستگاه جبرانی و تست‌های زمان‌دار</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-emerald-500 shrink-0"></span>
+            <span><b>جمعه‌ها:</b> آزمون آزمایشی، تحلیل و ریکاوری ذهنی</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Priority Subjects & Strategy Guide -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-5">
+        <h3 class="text-lg font-black text-navy-900 flex items-center gap-2">
+          <span>🎯</span>
+          <span>دروس محوری و اولویت‌های راهبردی ${SecurityEngine.escapeHtml(plan.gradeLabel)} ${SecurityEngine.escapeHtml(plan.majorLabel)}</span>
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+          ${plan.prioritySubjects.map((sub, i) => `
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 hover:border-turquoise-400 transition space-y-1.5">
+              <div class="flex items-center gap-2 text-navy-900 font-black text-sm">
+                <span class="w-6 h-6 rounded-lg bg-navy-900 text-turquoise-300 flex items-center justify-center text-xs font-mono font-black">${JalaliDateEngine.toPersianDigits(i + 1)}</span>
+                <h4>${SecurityEngine.escapeHtml(sub.name)}</h4>
+              </div>
+              <p class="text-slate-600 leading-relaxed font-medium">${SecurityEngine.escapeHtml(sub.note)}</p>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- 7. Golden Rules of Study Plan Success -->
+      <div class="bg-gradient-to-l from-navy-900 via-navy-950 to-navy-900 text-white rounded-3xl p-6 sm:p-8 border border-navy-800 shadow-xl space-y-4">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">🏆</span>
+          <h3 class="text-lg font-black text-white">۴ اصل طلایی برای موفقیت در اجرای این برنامه</h3>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs pt-1">
+          <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1.5">
+            <h5 class="font-bold text-turquoise-300">۱. قانون ۸۰ درصد</h5>
+            <p class="text-slate-300 leading-relaxed text-[11px]">اگر ۸۰٪ برنامه را در طول هفته پیاده کردید، عملکردتان عالی است؛ کمال‌گرایی افراطی را کنار بگذارید.</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1.5">
+            <h5 class="font-bold text-turquoise-300">۲. ایستگاه جبرانی</h5>
+            <p class="text-slate-300 leading-relaxed text-[11px]">اگر پارت درسی جا ماند، به روزهای بعد منتقل نکنید؛ پنجشنبه عصر وقت جبران است.</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1.5">
+            <h5 class="font-bold text-turquoise-300">۳. خواب و عملکرد مغز</h5>
+            <p class="text-slate-300 leading-relaxed text-[11px]">حداقل ۷ ساعت خواب شبانه الزامی است؛ تثبیت حافظه بلندمدت منحصراً در خواب عمیق اتفاق می‌افتد.</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1.5">
+            <h5 class="font-bold text-turquoise-300">۴. تحلیل بلافاصله تست</h5>
+            <p class="text-slate-300 leading-relaxed text-[11px]">تست زدن بدون تحلیل و یادداشت اشتباهات، اتلاف وقت است؛ همیشه سوالات غلط و نزده را ریشه‌یابی کنید.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8. Interactive Actions & Counselor Consultation CTA -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 no-print">
+        <div class="space-y-1.5 max-w-xl">
+          <h3 class="text-lg font-black text-navy-900">نیاز به شخصی‌سازی این برنامه متناسب با شرایط خود داری؟</h3>
+          <p class="text-xs text-slate-500 leading-relaxed">هر دانش‌آموز نقاط قوت و ضعف متفاوتی دارد. برای تنظیم ساعات مطالعه یا افزودن پارت‌های تقویتی می‌توانید مستقیم با مشاور مدرسه در ارتباط باشید.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-3 shrink-0">
+          <button type="button" onclick="openAskCounselorModal()" class="px-5 py-3 rounded-2xl bg-navy-900 hover:bg-navy-800 text-white font-black text-xs transition shadow-md flex items-center gap-2">
+            <span>✍️</span>
+            <span>ارسال سؤال برای مشاور</span>
+          </button>
+          <button type="button" onclick="openRubikaChat()" class="px-5 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90 text-white font-black text-xs transition shadow-md flex items-center gap-2">
+            <span>💬</span>
+            <span>چت با مشاور در روبیکا</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 // Admin Compass Engine & Management Workflows
 // ==========================================
 function renderAdminCompassPanelHtml() {
