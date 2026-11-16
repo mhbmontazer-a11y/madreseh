@@ -5982,6 +5982,7 @@ html.ref-pending::after{content:"";position:fixed;z-index:2147483647;top:50%;lef
         { id: 'content', label: '📚 مدیریت تمام مطالب', badge: DB.posts.length },
         { id: 'editor', label: '✍️ افزودن / ویرایش مطلب', badge: 'CMS' },
         { id: 'categories', label: '📂 مدیریت دسته‌ها و زیرعنوان‌ها', badge: DB.categories.length },
+        { id: 'compass', label: '🧭 قطب‌نمای سریع دغدغه‌ها', badge: (DB.quickCompass?.items || []).length || '۸' },
         { id: 'faqs', label: '❓ سؤالات دانش‌آموزان و FAQ', badge: pendingQuestions.length || '' },
         { id: 'quizzes', label: '🧭 مدیریت و ساخت آزمون‌ها', badge: DB.quizzes.length },
         { id: 'users', label: '👥 کاربران و سطوح دسترسی', badge: DB.users.length },
@@ -6772,6 +6773,8 @@ html.ref-pending::after{content:"";position:fixed;z-index:2147483647;top:50%;lef
             </div>
           </div>
         `;
+      } else if (tab === 'compass') {
+        mainPanelHtml = renderAdminCompassPanelHtml();
       } else if (tab === 'backup') {
         mainPanelHtml = `
           <div class="space-y-6">
@@ -12699,7 +12702,10 @@ renderAdminView = function() {
           🛡️ صف تأیید نهایی مدیر کل و تاریخچه نسخه‌ها (${JalaliDateEngine.toPersianDigits(pendingCount)} مورد منتظر)
         </button>
         <button type="button" onclick="navigateTo('admin', {tab: 'site-modules'})" class="px-3.5 py-1.5 rounded-xl font-bold transition ${tab === 'site-modules' ? 'bg-turquoise-500 text-navy-950' : 'bg-navy-800 text-slate-200 hover:bg-navy-700'}">
-          🗓️ مدیریت اطلاعیه‌ها، تقویم، نکات و تنظیمات
+          🗓️ اطلاعیه‌ها، تقویم و تنظیمات
+        </button>
+        <button type="button" onclick="navigateTo('admin', {tab: 'compass'})" class="px-3.5 py-1.5 rounded-xl font-bold transition ${tab === 'compass' ? 'bg-turquoise-500 text-navy-950' : 'bg-navy-800 text-slate-200 hover:bg-navy-700'}">
+          🧭 مدیریت قطب‌نمای سریع (${JalaliDateEngine.toPersianDigits((DB.quickCompass?.items || []).length || 8)} دغدغه)
         </button>
         <button type="button" onclick="navigateTo('admin', {tab: 'media-lib'})" class="px-3.5 py-1.5 rounded-xl font-bold transition ${tab === 'media-lib' ? 'bg-turquoise-500 text-navy-950' : 'bg-navy-800 text-slate-200 hover:bg-navy-700'}">
           🖼️ کتابخانه رسانه و فایل‌ها (${JalaliDateEngine.toPersianDigits((DB.media || []).length + (DB.attachments || []).length)})
@@ -14444,8 +14450,154 @@ function propagateCounselorNameChange(oldName, newName) {
 }
 
 // Synchronize Top Announcement Bar, Main Header & Main Footer DOM with DB.siteSettings
+
+// --- Dynamic Quick Compass Settings & Engine ---
+function getInitialCompassSettings() {
+  return {
+    enabled: true,
+    title: '🧭 قطب‌نمای سریع: همین الان تو چه وضعیتی هستی؟',
+    subtitle: 'روی دغدغه یا وضعیت فعلی‌ات کلیک کن تا کوتاه‌ترین مسیر حل مسئله را ببینی:',
+    items: [
+      {
+        id: 'cmp-1',
+        icon: '🔥',
+        title: 'حوصله شروع درس رو ندارم و مدام عقب می‌ندازم!',
+        badge: 'قانون ۲ دقیقه + پادکست رهایی از اهمال‌کاری ←',
+        targetType: 'category',
+        targetValue: 'cat-15',
+        colorVar: 'var(--co)'
+      },
+      {
+        id: 'cmp-2',
+        icon: '📅',
+        title: 'برنامه‌م به هم ریخته و می‌خوام اصولی برنامه‌ریزی کنم',
+        badge: 'فرمول تستی/تشریحی + جدول خام برنامه ←',
+        targetType: 'category',
+        targetValue: 'cat-4',
+        colorVar: 'var(--gold)'
+      },
+      {
+        id: 'cmp-3',
+        icon: '🏅',
+        title: 'می‌خوام تو امتحانات نهایی نمره ۲۰ بگیرم',
+        badge: 'کلیدواژه‌نویسی نهایی + بارم‌بندی خرداد ←',
+        targetType: 'category',
+        targetValue: 'cat-7',
+        colorVar: 'var(--aq)'
+      },
+      {
+        id: 'cmp-4',
+        icon: '📝',
+        title: 'تو جلسه آزمون وقت کم میارم یا بی‌دقتی می‌کنم',
+        badge: 'ویدئوی ضربدر و منها + استراتژی بازگشت ←',
+        targetType: 'category',
+        targetValue: 'cat-6',
+        colorVar: 'var(--sk)'
+      },
+      {
+        id: 'cmp-5',
+        icon: '📱',
+        title: 'گوشی و فضای مجازی تمرکزم رو نابود کرده!',
+        badge: 'پروتکل سم‌زدایی دوپامین + تمرکز عمیق ←',
+        targetType: 'category',
+        targetValue: 'cat-13',
+        colorVar: 'var(--li)'
+      },
+      {
+        id: 'cmp-6',
+        icon: '🌿',
+        title: 'استرس دارم و نیاز به آرامش فوری ذهن دارم',
+        badge: 'تمرین ۶۰ ثانیه‌ای تنفس مربعی (۴-۴-۴-۴) ←',
+        targetType: 'modal',
+        targetValue: 'zenBreathing',
+        colorVar: 'var(--aq)'
+      },
+      {
+        id: 'cmp-7',
+        icon: '🛟',
+        title: 'از بودجه‌بندی عقب افتادم و تراز آزمونم افت کرده',
+        badge: 'پروتکل جبران اورژانسی + اولویت‌بندی بودجه ←',
+        targetType: 'category',
+        targetValue: 'cat-18',
+        colorVar: 'var(--co)'
+      },
+      {
+        id: 'cmp-8',
+        icon: '🧭',
+        title: 'نمی‌دونم سبک یادگیری و نقاط قوت من چیه',
+        badge: '۹ آزمون خودشناسی و استعدادیابی آنی ←',
+        targetType: 'view',
+        targetValue: 'quizzes',
+        colorVar: 'var(--pk)'
+      }
+    ]
+  };
+}
+
+function ensureCompleteCompassSettings() {
+  if (!DB.quickCompass || !Array.isArray(DB.quickCompass.items)) {
+    DB.quickCompass = getInitialCompassSettings();
+  }
+  return DB.quickCompass;
+}
+
+function renderQuickCompassSection() {
+  const routerEl = document.getElementById('router');
+  if (!routerEl) return;
+  const cfg = ensureCompleteCompassSettings();
+
+  if (cfg.enabled === false) {
+    routerEl.style.display = 'none';
+    return;
+  }
+  routerEl.style.display = '';
+
+  const isLive = (typeof LiveVisualCMS !== 'undefined' && LiveVisualCMS.isActive());
+
+  routerEl.innerHTML = `
+    <div class="w">
+      <div class="sh" style="margin-bottom:16px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px">
+        <div>
+          <h2>${SecurityEngine.escapeHtml(cfg.title || '🧭 قطب‌نمای سریع: همین الان تو چه وضعیتی هستی؟')}</h2>
+          <p>${SecurityEngine.escapeHtml(cfg.subtitle || 'روی دغدغه یا وضعیت فعلی‌ات کلیک کن تا کوتاه‌ترین مسیر حل مسئله را ببینی:')}</p>
+        </div>
+        ${isLive ? `<button type="button" onclick="navigateTo('admin', {tab: 'compass'})" class="live-cms-control px-3 py-1.5 rounded-xl bg-turquoise-500 text-navy-950 font-black text-xs shadow">✏️ ویرایش قطب‌نما در پنل مدیریت</button>` : ''}
+      </div>
+      <div class="need-router-grid">
+        ${(cfg.items || []).map(item => {
+          let clickAttr = '';
+          if (item.targetType === 'category') {
+            clickAttr = `onclick="navigateTo('category', {id: '${SecurityEngine.escapeHtml(item.targetValue)}'})"`;
+          } else if (item.targetType === 'modal') {
+            if (item.targetValue === 'zenBreathing') clickAttr = `onclick="openBreathingZenModal()"`;
+            else if (item.targetValue === 'askCounselor') clickAttr = `onclick="openAskCounselorModal()"`;
+            else clickAttr = `onclick="openBreathingZenModal()"`;
+          } else if (item.targetType === 'view') {
+            clickAttr = `onclick="navigateTo('${SecurityEngine.escapeHtml(item.targetValue)}')`;
+          } else if (item.targetType === 'url') {
+            clickAttr = `onclick="window.open('${SecurityEngine.escapeHtml(item.targetValue)}', '_blank')"`;
+          } else {
+            clickAttr = `onclick="navigateTo('category', {id: '${SecurityEngine.escapeHtml(item.targetValue)}'})"`;
+          }
+
+          const iconHtml = item.icon ? `<span style="margin-left:4px">${SecurityEngine.escapeHtml(item.icon)}</span>` : '';
+          const colorStyle = item.colorVar ? `--pill-color:${item.colorVar}` : '--pill-color:var(--co)';
+
+          return `
+            <div class="need-pill" style="${colorStyle}" ${clickAttr}>
+              <div style="font-weight:900;font-size:15px;color:var(--tx)">${iconHtml}${SecurityEngine.escapeHtml(item.title)}</div>
+              <div class="np-badge">${SecurityEngine.escapeHtml(item.badge)}</div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
 function syncStaticShellWithSiteSettings() {
   const s = ensureCompleteSiteSettings();
+  renderQuickCompassSection();
   const isLive = LiveVisualCMS.isActive();
 
   // 1. Update Top Announcement Bar (#top-announcement-bar)
@@ -20020,6 +20172,486 @@ html.reading-mode body #app-viewport :is(.bg-softyellow-300,.bg-softyellow-400,.
   { const T0 = performance.now(), pr = document.createElement('div'); pr.className = 'pl-[13px]'; pr.style.cssText = 'position:absolute;left:-9999px;top:0'; document.body.appendChild(pr);
     const poll = () => { if (getComputedStyle(pr).paddingLeft === '13px' || performance.now() - T0 > 700) { loaded = true; pr.remove(); go(); } else setTimeout(poll, 40); }; poll(); }
 })();
+
+// ==========================================
+// Admin Compass Engine & Management Workflows
+// ==========================================
+function renderAdminCompassPanelHtml() {
+  const cfg = ensureCompleteCompassSettings();
+  const items = cfg.items || [];
+  const categories = (DB.categories || []).filter(c => c.active !== false);
+
+  return `
+    <div class="space-y-6">
+      <!-- 1. Header Banner -->
+      <div class="bg-gradient-to-l from-navy-950 via-navy-900 to-indigo-950 text-white rounded-3xl p-6 sm:p-8 border border-navy-800 shadow-xl relative overflow-hidden">
+        <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-turquoise-500/20 text-turquoise-300 text-xs font-bold border border-turquoise-400/30 mb-2">
+              <span class="w-2 h-2 rounded-full bg-turquoise-400 animate-ping"></span>
+              <span>مدیریت هوشمند قطب‌نمای سریع دغدغه‌ها (Bento Router)</span>
+            </div>
+            <h2 class="text-xl sm:text-2xl font-black text-white">🧭 شخصی‌سازی دغدغه‌های فوری دانش‌آموزان</h2>
+            <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl font-medium">افزودن دغدغه جدید، ویرایش متون و آیکون‌ها، تغییر مقاصد هدایت و تنظیم اولویت نمایش در صفحه اصلی</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" onclick="adminResetCompassDefaults()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition flex items-center gap-1.5">
+              <span>🔄 بازنشانی به ۸ دغدغه پیش‌فرض</span>
+            </button>
+            <button type="button" onclick="navigateTo('home');setTimeout(()=>document.getElementById('router')?.scrollIntoView({behavior:'smooth'}),200)" class="px-4 py-2.5 rounded-xl bg-turquoise-500 hover:bg-turquoise-400 text-navy-950 font-black text-xs shadow transition flex items-center gap-1.5">
+              <span>👁️ مشاهده در صفحه اصلی</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Section Title & Visibility Settings -->
+      <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4 text-xs">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <h3 class="text-base font-black text-navy-900">⚙️ تنظیمات کلی و عنوان بخش قطب‌نما</h3>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" id="compass-set-enabled" ${cfg.enabled !== false ? 'checked' : ''} class="w-4 h-4 accent-turquoise-600 rounded" />
+            <span class="font-bold text-slate-700">نمایش بخش قطب‌نما در صفحه اصلی سایت</span>
+          </label>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">عنوان اصلی بخش قطب‌نما:</label>
+            <input id="compass-set-title" type="text" value="${SecurityEngine.escapeHtml(cfg.title || '🧭 قطب‌نمای سریع: همین الان تو چه وضعیتی هستی؟')}" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 font-bold text-navy-900" />
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">زیرعنوان و متن راهنما:</label>
+            <input id="compass-set-subtitle" type="text" value="${SecurityEngine.escapeHtml(cfg.subtitle || 'روی دغدغه یا وضعیت فعلی‌ات کلیک کن تا کوتاه‌ترین مسیر حل مسئله را ببینی:')}" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 font-semibold" />
+          </div>
+        </div>
+        <div class="flex justify-end pt-1">
+          <button type="button" onclick="adminSaveCompassGeneralSettings()" class="px-5 py-2 rounded-xl bg-navy-900 hover:bg-navy-800 text-white font-bold transition shadow">✓ ذخیره تغییرات عنوان و وضعیت</button>
+        </div>
+      </div>
+
+      <!-- 3. Add New Pain-Point Card -->
+      <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4 text-xs">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <h3 class="text-base font-black text-navy-900">➕ افزودن دغدغه جدید به قطب‌نمای سریع</h3>
+          <span class="text-slate-400 font-semibold">تعداد فعلی: ${JalaliDateEngine.toPersianDigits(items.length)} دغدغه</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+          <!-- Title -->
+          <div class="sm:col-span-6">
+            <label class="block font-bold text-slate-700 mb-1">عنوان دغدغه / وضعیت دانش‌آموز:</label>
+            <input id="compass-new-title" type="text" placeholder="مثلاً: خواب‌آلودگی بعدازظهرها مانع درسم میشه" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 font-bold" />
+          </div>
+
+          <!-- Icon / Emoji -->
+          <div class="sm:col-span-2">
+            <label class="block font-bold text-slate-700 mb-1">اموجی / آیکون:</label>
+            <input id="compass-new-icon" type="text" value="🔥" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 font-bold text-center text-base" />
+          </div>
+
+          <!-- Color Theme -->
+          <div class="sm:col-span-4">
+            <label class="block font-bold text-slate-700 mb-1">تم رنگی کارت:</label>
+            <select id="compass-new-color" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 font-bold">
+              <option value="var(--co)" selected>🔥 مرجانی آتشین (Coral / Fire)</option>
+              <option value="var(--gold)">⚡ طلایی پرانرژی (Warm Gold)</option>
+              <option value="var(--aq)">💎 فیروزه‌ای آرامش‌بخش (Turquoise)</option>
+              <option value="var(--sk)">🌊 آبی آسمانی (Sky Blue)</option>
+              <option value="var(--li)">🌱 سبز لیمویی تمرکز (Lime Green)</option>
+              <option value="var(--pk)">💜 صورتی / بنفش هوشمند (Purple / Rose)</option>
+            </select>
+          </div>
+
+          <!-- Badge text -->
+          <div class="sm:col-span-6">
+            <label class="block font-bold text-slate-700 mb-1">متن راهکار و بج (زیر کارت):</label>
+            <input id="compass-new-badge" type="text" placeholder="مثلاً: پروتکل ریتم شبانه‌روزی و مدیریت خواب ←" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 font-semibold" />
+          </div>
+
+          <!-- Target Type -->
+          <div class="sm:col-span-3">
+            <label class="block font-bold text-slate-700 mb-1">نوع اقدام و مقصد:</label>
+            <select id="compass-new-target-type" onchange="toggleCompassTargetFields('new')" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 font-bold">
+              <option value="category" selected>📂 دسته‌بندی موضوعی</option>
+              <option value="modal">🧘 باز کردن مدال اختصاصی</option>
+              <option value="view">🧭 بخش آزمون‌ها / ابزارها</option>
+              <option value="url">🌐 لینک خارجی</option>
+            </select>
+          </div>
+
+          <!-- Target Value (Category select or custom) -->
+          <div class="sm:col-span-3" id="compass-new-target-cat-box">
+            <label class="block font-bold text-slate-700 mb-1">انتخاب دسته‌بندی مقصد:</label>
+            <select id="compass-new-target-cat" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 font-bold">
+              ${categories.map(c => `<option value="${c.id}">${SecurityEngine.escapeHtml(c.title)}</option>`).join('')}
+            </select>
+          </div>
+
+          <div class="sm:col-span-3 hidden" id="compass-new-target-modal-box">
+            <label class="block font-bold text-slate-700 mb-1">انتخاب مدال:</label>
+            <select id="compass-new-target-modal" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 font-bold">
+              <option value="zenBreathing">🌿 تمرین ۶۰ ثانیه‌ای تنفس جعبه‌ای</option>
+              <option value="askCounselor">✉️ ارسال پیام و سؤال برای مشاور</option>
+            </select>
+          </div>
+
+          <div class="sm:col-span-3 hidden" id="compass-new-target-view-box">
+            <label class="block font-bold text-slate-700 mb-1">انتخاب بخش:</label>
+            <select id="compass-new-target-view" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 font-bold">
+              <option value="quizzes">🧭 آزمون‌های خودشناسی و هدایت تحصیلی</option>
+              <option value="tools">🛠️ جعبه ابزار و برنامه‌ریزی</option>
+              <option value="explorer">📚 کاوشگر تمام مطالب</option>
+              <option value="categories">📂 نقشه موضوعی دسته‌ها</option>
+            </select>
+          </div>
+
+          <div class="sm:col-span-3 hidden" id="compass-new-target-url-box">
+            <label class="block font-bold text-slate-700 mb-1">آدرس اینترنتی (URL):</label>
+            <input id="compass-new-target-url" type="text" placeholder="https://..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 font-mono text-left" dir="ltr" />
+          </div>
+        </div>
+
+        <!-- Quick Emojis -->
+        <div class="flex items-center gap-1.5 flex-wrap pt-1 text-[11px] text-slate-500">
+          <span class="font-bold">اموجی‌های پرکاربرد:</span>
+          ${['🔥', '📅', '🏅', '📝', '📱', '🌿', '🛟', '🧭', '💡', '🎯', '⚡', '😴', '🧠', '☕', '📖', '⏰'].map(e => `
+            <button type="button" onclick="document.getElementById('compass-new-icon').value='${e}'" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-sm flex items-center justify-center transition">${e}</button>
+          `).join('')}
+        </div>
+
+        <div class="flex justify-end pt-2">
+          <button type="button" onclick="adminAddCompassItem()" class="px-6 py-2.5 rounded-xl bg-turquoise-600 hover:bg-turquoise-500 text-white font-black transition shadow flex items-center gap-2">
+            <span>➕ ثبت و افزودن به قطب‌نما</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 4. Live List of Concerns (Manage, Reorder, Edit, Delete) -->
+      <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4 text-xs">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div>
+            <h3 class="text-base font-black text-navy-900">📋 دغدغه‌های فعال در قطب‌نمای سریع (${JalaliDateEngine.toPersianDigits(items.length)})</h3>
+            <p class="text-[11px] text-slate-500 mt-0.5">ترتیب قرارگیری سطرها در این لیست، عیناً اولویت نمایش در صفحه اصلی سایت است.</p>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          ${items.map((item, idx) => {
+            let targetLabel = '';
+            if (item.targetType === 'category') {
+              const cat = categories.find(c => c.id === item.targetValue);
+              targetLabel = `📂 دسته‌بندی: ${cat ? cat.title : item.targetValue}`;
+            } else if (item.targetType === 'modal') {
+              targetLabel = item.targetValue === 'zenBreathing' ? '🌿 تمرین تنفس جعبه‌ای' : '✉️ مدال سؤال مشاور';
+            } else if (item.targetType === 'view') {
+              targetLabel = `🧭 صفحه داخلی: ${item.targetValue}`;
+            } else if (item.targetType === 'url') {
+              targetLabel = `🌐 پیوند خارجی: ${item.targetValue}`;
+            } else {
+              targetLabel = `📂 دسته‌بندی: ${item.targetValue}`;
+            }
+
+            return `
+              <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-3 hover:border-turquoise-300 transition">
+                <!-- Preview Pill -->
+                <div class="flex items-start gap-3 min-w-0 flex-1">
+                  <span class="w-7 h-7 rounded-lg bg-navy-900 text-white font-mono font-bold flex items-center justify-center text-xs shrink-0">${idx + 1}</span>
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <span class="text-base">${SecurityEngine.escapeHtml(item.icon || '🧭')}</span>
+                      <h4 class="font-black text-navy-900 text-sm">${SecurityEngine.escapeHtml(item.title)}</h4>
+                    </div>
+                    <div class="flex items-center gap-2 mt-1.5 flex-wrap">
+                      <span class="px-2.5 py-0.5 rounded-md bg-white border border-slate-200 text-slate-700 font-bold text-[11px]">${SecurityEngine.escapeHtml(item.badge)}</span>
+                      <span class="px-2 py-0.5 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 font-bold text-[10px]">${SecurityEngine.escapeHtml(targetLabel)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Actions: Reorder, Edit, Delete -->
+                <div class="flex items-center gap-1.5 shrink-0 self-end md:self-center">
+                  <button type="button" onclick="adminMoveCompassItem('${item.id}', -1)" ${idx === 0 ? 'disabled class="opacity-30 cursor-not-allowed"' : 'class="hover:bg-slate-200"'} class="w-8 h-8 rounded-lg bg-white border border-slate-200 font-bold text-xs flex items-center justify-center transition" title="انتقال به بالا">↑</button>
+                  <button type="button" onclick="adminMoveCompassItem('${item.id}', 1)" ${idx === items.length - 1 ? 'disabled class="opacity-30 cursor-not-allowed"' : 'class="hover:bg-slate-200"'} class="w-8 h-8 rounded-lg bg-white border border-slate-200 font-bold text-xs flex items-center justify-center transition" title="انتقال به پایین">↓</button>
+                  <button type="button" onclick="openEditCompassItemModal('${item.id}')" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-navy-950 font-bold text-xs transition flex items-center gap-1">
+                    <span>✏️ ویرایش</span>
+                  </button>
+                  <button type="button" onclick="adminDeleteCompassItem('${item.id}')" class="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs transition" title="حذف این دغدغه">
+                    <span>🗑️ حذف</span>
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+window.toggleCompassTargetFields = function(prefix) {
+  const isNew = prefix === 'new';
+  const typeEl = document.getElementById(isNew ? 'compass-new-target-type' : 'edit-cmp-type');
+  if (!typeEl) return;
+  const t = typeEl.value;
+
+  const catBox = document.getElementById(isNew ? 'compass-new-target-cat-box' : 'edit-cmp-cat-box');
+  const modalBox = document.getElementById(isNew ? 'compass-new-target-modal-box' : 'edit-cmp-modal-box');
+  const viewBox = document.getElementById(isNew ? 'compass-new-target-view-box' : 'edit-cmp-view-box');
+  const urlBox = document.getElementById(isNew ? 'compass-new-target-url-box' : 'edit-cmp-url-box');
+
+  if (catBox) catBox.classList.toggle('hidden', t !== 'category');
+  if (modalBox) modalBox.classList.toggle('hidden', t !== 'modal');
+  if (viewBox) viewBox.classList.toggle('hidden', t !== 'view');
+  if (urlBox) urlBox.classList.toggle('hidden', t !== 'url');
+};
+
+window.adminSaveCompassGeneralSettings = function() {
+  const cfg = ensureCompleteCompassSettings();
+  const title = document.getElementById('compass-set-title')?.value.trim();
+  const subtitle = document.getElementById('compass-set-subtitle')?.value.trim();
+  const enabled = Boolean(document.getElementById('compass-set-enabled')?.checked);
+
+  if (title) cfg.title = title;
+  if (subtitle) cfg.subtitle = subtitle;
+  cfg.enabled = enabled;
+
+  logAdminAction('به‌روزرسانی عنوان و تنظیمات قطب‌نمای سریع');
+  saveDatabase(DB, true);
+  renderQuickCompassSection();
+  showToast('✓ عنوان و تنظیمات قطب‌نمای سریع ذخیره شد.', 'success');
+  renderApp();
+};
+
+window.adminAddCompassItem = function() {
+  const cfg = ensureCompleteCompassSettings();
+  const title = document.getElementById('compass-new-title')?.value.trim();
+  const icon = document.getElementById('compass-new-icon')?.value.trim() || '🧭';
+  const badge = document.getElementById('compass-new-badge')?.value.trim() || 'مشاهده راهکار ←';
+  const colorVar = document.getElementById('compass-new-color')?.value || 'var(--co)';
+  const targetType = document.getElementById('compass-new-target-type')?.value || 'category';
+
+  if (!title) {
+    showToast('لطفاً عنوان دغدغه را وارد فرمایید.', 'warning');
+    return;
+  }
+
+  let targetValue = 'cat-4';
+  if (targetType === 'category') {
+    targetValue = document.getElementById('compass-new-target-cat')?.value || 'cat-4';
+  } else if (targetType === 'modal') {
+    targetValue = document.getElementById('compass-new-target-modal')?.value || 'zenBreathing';
+  } else if (targetType === 'view') {
+    targetValue = document.getElementById('compass-new-target-view')?.value || 'quizzes';
+  } else if (targetType === 'url') {
+    targetValue = document.getElementById('compass-new-target-url')?.value.trim() || 'https://google.com';
+  }
+
+  const newItem = {
+    id: 'cmp-' + Date.now(),
+    icon,
+    title,
+    badge,
+    colorVar,
+    targetType,
+    targetValue
+  };
+
+  cfg.items.push(newItem);
+  logAdminAction(`افزودن دغدغه جدید به قطب‌نما: «${title}»`);
+  saveDatabase(DB, true);
+  renderQuickCompassSection();
+  showToast(`✓ دغدغه «${title}» با موفقیت افزوده شد.`, 'success');
+  renderApp();
+};
+
+window.openEditCompassItemModal = function(itemId) {
+  const cfg = ensureCompleteCompassSettings();
+  const item = (cfg.items || []).find(x => x.id === itemId);
+  if (!item) return;
+
+  const categories = (DB.categories || []).filter(c => c.active !== false);
+
+  openModal(`
+    <div class="space-y-4 text-xs">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <h3 class="text-base font-black text-navy-900">✏️ ویرایش دغدغه قطب‌نما: «${SecurityEngine.escapeHtml(item.title)}»</h3>
+        <button type="button" onclick="closeModal()" class="text-slate-400 hover:text-rose-600 font-bold">✕</button>
+      </div>
+
+      <div class="space-y-3">
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+          <div class="sm:col-span-10">
+            <label class="block font-bold text-slate-700 mb-1">عنوان دغدغه:</label>
+            <input id="edit-cmp-title" type="text" value="${SecurityEngine.escapeHtml(item.title)}" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold" />
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block font-bold text-slate-700 mb-1">اموجی:</label>
+            <input id="edit-cmp-icon" type="text" value="${SecurityEngine.escapeHtml(item.icon || '🔥')}" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold text-center text-base" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">متن بج و راهکار (زیر عنوان):</label>
+          <input id="edit-cmp-badge" type="text" value="${SecurityEngine.escapeHtml(item.badge)}" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-semibold" />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">تم رنگی کارت:</label>
+            <select id="edit-cmp-color" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
+              <option value="var(--co)" ${item.colorVar === 'var(--co)' ? 'selected' : ''}>🔥 مرجانی آتشین (Coral / Fire)</option>
+              <option value="var(--gold)" ${item.colorVar === 'var(--gold)' ? 'selected' : ''}>⚡ طلایی پرانرژی (Warm Gold)</option>
+              <option value="var(--aq)" ${item.colorVar === 'var(--aq)' ? 'selected' : ''}>💎 فیروزه‌ای آرامش‌بخش (Turquoise)</option>
+              <option value="var(--sk)" ${item.colorVar === 'var(--sk)' ? 'selected' : ''}>🌊 آبی آسمانی (Sky Blue)</option>
+              <option value="var(--li)" ${item.colorVar === 'var(--li)' ? 'selected' : ''}>🌱 سبز لیمویی تمرکز (Lime Green)</option>
+              <option value="var(--pk)" ${item.colorVar === 'var(--pk)' ? 'selected' : ''}>💜 صورتی / بنفش هوشمند (Purple / Rose)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">نوع اقدام و مقصد:</label>
+            <select id="edit-cmp-type" onchange="toggleCompassTargetFields('edit')" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
+              <option value="category" ${item.targetType === 'category' ? 'selected' : ''}>📂 دسته‌بندی موضوعی</option>
+              <option value="modal" ${item.targetType === 'modal' ? 'selected' : ''}>🧘 باز کردن مدال اختصاصی</option>
+              <option value="view" ${item.targetType === 'view' ? 'selected' : ''}>🧭 بخش آزمون‌ها / ابزارها</option>
+              <option value="url" ${item.targetType === 'url' ? 'selected' : ''}>🌐 لینک خارجی</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Target Destination Fields for Edit -->
+        <div id="edit-cmp-cat-box" class="${item.targetType === 'category' || !item.targetType ? '' : 'hidden'}">
+          <label class="block font-bold text-slate-700 mb-1">دسته‌بندی موضوعی مقصد:</label>
+          <select id="edit-cmp-target-cat" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
+            ${categories.map(c => `<option value="${c.id}" ${item.targetValue === c.id ? 'selected' : ''}>${SecurityEngine.escapeHtml(c.title)}</option>`).join('')}
+          </select>
+        </div>
+
+        <div id="edit-cmp-modal-box" class="${item.targetType === 'modal' ? '' : 'hidden'}">
+          <label class="block font-bold text-slate-700 mb-1">انتخاب مدال مقصد:</label>
+          <select id="edit-cmp-target-modal" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
+            <option value="zenBreathing" ${item.targetValue === 'zenBreathing' ? 'selected' : ''}>🌿 تمرین ۶۰ ثانیه‌ای تنفس جعبه‌ای</option>
+            <option value="askCounselor" ${item.targetValue === 'askCounselor' ? 'selected' : ''}>✉️ ارسال پیام و سؤال برای مشاور</option>
+          </select>
+        </div>
+
+        <div id="edit-cmp-view-box" class="${item.targetType === 'view' ? '' : 'hidden'}">
+          <label class="block font-bold text-slate-700 mb-1">انتخاب بخش مقصد:</label>
+          <select id="edit-cmp-target-view" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
+            <option value="quizzes" ${item.targetValue === 'quizzes' ? 'selected' : ''}>🧭 آزمون‌های خودشناسی و هدایت تحصیلی</option>
+            <option value="tools" ${item.targetValue === 'tools' ? 'selected' : ''}>🛠️ جعبه ابزار و برنامه‌ریزی</option>
+            <option value="explorer" ${item.targetValue === 'explorer' ? 'selected' : ''}>📚 کاوشگر تمام مطالب</option>
+            <option value="categories" ${item.targetValue === 'categories' ? 'selected' : ''}>📂 نقشه موضوعی دسته‌ها</option>
+          </select>
+        </div>
+
+        <div id="edit-cmp-url-box" class="${item.targetType === 'url' ? '' : 'hidden'}">
+          <label class="block font-bold text-slate-700 mb-1">آدرس اینترنتی (URL):</label>
+          <input id="edit-cmp-target-url" type="text" value="${SecurityEngine.escapeHtml(item.targetValue || '')}" placeholder="https://..." class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono text-left" dir="ltr" />
+        </div>
+
+        <!-- Quick Emojis for Edit -->
+        <div class="flex items-center gap-1.5 flex-wrap pt-1 text-[11px] text-slate-500">
+          <span class="font-bold">اموجی‌های پرکاربرد:</span>
+          ${['🔥', '📅', '🏅', '📝', '📱', '🌿', '🛟', '🧭', '💡', '🎯', '⚡', '😴', '🧠', '☕', '📖', '⏰'].map(e => `
+            <button type="button" onclick="document.getElementById('edit-cmp-icon').value='${e}'" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-sm flex items-center justify-center transition">${e}</button>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
+        <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold">انصراف</button>
+        <button type="button" onclick="adminSaveEditedCompassItem('${item.id}')" class="px-5 py-2 rounded-xl bg-turquoise-600 hover:bg-turquoise-500 text-white font-black shadow">✓ ذخیره تغییرات</button>
+      </div>
+    </div>
+  `);
+};
+
+window.adminSaveEditedCompassItem = function(itemId) {
+  const cfg = ensureCompleteCompassSettings();
+  const item = (cfg.items || []).find(x => x.id === itemId);
+  if (!item) return;
+
+  const title = document.getElementById('edit-cmp-title')?.value.trim();
+  const icon = document.getElementById('edit-cmp-icon')?.value.trim() || '🧭';
+  const badge = document.getElementById('edit-cmp-badge')?.value.trim() || 'مشاهده راهکار ←';
+  const colorVar = document.getElementById('edit-cmp-color')?.value || 'var(--co)';
+  const targetType = document.getElementById('edit-cmp-type')?.value || 'category';
+
+  if (!title) {
+    showToast('عنوان دغدغه نمی‌تواند خالی باشد.', 'warning');
+    return;
+  }
+
+  let targetValue = 'cat-4';
+  if (targetType === 'category') {
+    targetValue = document.getElementById('edit-cmp-target-cat')?.value || 'cat-4';
+  } else if (targetType === 'modal') {
+    targetValue = document.getElementById('edit-cmp-target-modal')?.value || 'zenBreathing';
+  } else if (targetType === 'view') {
+    targetValue = document.getElementById('edit-cmp-target-view')?.value || 'quizzes';
+  } else if (targetType === 'url') {
+    targetValue = document.getElementById('edit-cmp-target-url')?.value.trim() || 'https://google.com';
+  }
+
+  item.title = title;
+  item.icon = icon;
+  item.badge = badge;
+  item.colorVar = colorVar;
+  item.targetType = targetType;
+  item.targetValue = targetValue;
+
+  logAdminAction(`ویرایش دغدغه قطب‌نما: «${title}»`);
+  saveDatabase(DB, true);
+  renderQuickCompassSection();
+  closeModal();
+  showToast(`✓ تغییرات دغدغه «${title}» با موفقیت ذخیره شد.`, 'success');
+  renderApp();
+};
+
+window.adminDeleteCompassItem = function(itemId) {
+  const cfg = ensureCompleteCompassSettings();
+  const item = (cfg.items || []).find(x => x.id === itemId);
+  if (!item) return;
+
+  if (!confirm(`آیا از حذف دغدغه «${item.title}» از قطب‌نمای سریع اطمینان دارید؟`)) return;
+
+  cfg.items = cfg.items.filter(x => x.id !== itemId);
+  logAdminAction(`حذف دغدغه «${item.title}» از قطب‌نما`);
+  saveDatabase(DB, true);
+  renderQuickCompassSection();
+  showToast('دغدغه با موفقیت حذف گردید.', 'info');
+  renderApp();
+};
+
+window.adminMoveCompassItem = function(itemId, direction) {
+  const cfg = ensureCompleteCompassSettings();
+  const idx = (cfg.items || []).findIndex(x => x.id === itemId);
+  if (idx === -1) return;
+
+  const targetIdx = idx + direction;
+  if (targetIdx < 0 || targetIdx >= cfg.items.length) return;
+
+  // Swap
+  const temp = cfg.items[idx];
+  cfg.items[idx] = cfg.items[targetIdx];
+  cfg.items[targetIdx] = temp;
+
+  saveDatabase(DB, true);
+  renderQuickCompassSection();
+  renderApp();
+};
+
+window.adminResetCompassDefaults = function() {
+  if (!confirm('آیا مایلید تمام دغدغه‌های قطب‌نما به ۸ دغدغه پیش‌فرض اولیه دبیرستان باقرالعلوم بازگردانی شوند؟')) return;
+  DB.quickCompass = getInitialCompassSettings();
+  logAdminAction('بازنشانی قطب‌نمای سریع به دغدغه‌های پیش‌فرض');
+  saveDatabase(DB, true);
+  renderQuickCompassSection();
+  showToast('✓ قطب‌نمای سریع به ۸ دغدغه پیش‌فرض دبیرستان بازنشانی شد.', 'success');
+  renderApp();
+};
+
 </script>
 
 </body>
