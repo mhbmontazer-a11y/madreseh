@@ -4064,7 +4064,7 @@ html.ref-pending::after{content:"";position:fixed;z-index:2147483647;top:50%;lef
                     <div>
                       <span class="text-xs font-bold text-turquoise-400">معرفی مشاور و اهداف سامانه</span>
                       <h2 class="text-lg sm:text-xl font-black text-white">واحد مشاوره دبیرستان نمونه دولتی پسرانه باقرالعلوم</h2>
-                      <p class="text-xs text-slate-300 mt-0.5">با مسئولیت محمد هادی برخوری مهنی (مشاور رسمی مدرسه و مدیر کل سامانه)</p>
+                      <p class="text-xs text-slate-300 mt-0.5">با مسئولیت محمد هادی برخوری مهنی (مشاور رسمی دبیرستان نمونه دولتی باقرالعلوم)</p>
                     </div>
                   </div>
                   <p class="text-xs sm:text-sm text-slate-200 leading-relaxed">
@@ -7964,8 +7964,8 @@ function upgradeAndMigrateDatabaseV3(rawDb) {
       name: 'استاد محمد هادی برخوری مهنی',
       username: 'hadi_admin',
       roleId: 'role-superadmin',
-      roleLabel: 'مشاور مدرسه و مدیر کل سامانه',
-      grade: 'تنها مشاور و مدیر مجاز سامانه',
+      roleLabel: 'مشاور مدرسه و مدیریت محتوا',
+      grade: 'کادر مشاوره و هدایت تحصیلی',
       active: true,
       salt: 'sec_salt_9f82b71e',
       passwordHash: 'pbkdf2_v3$sec_salt_9f82b71e$4511dc35ca01ecbe',
@@ -11684,7 +11684,7 @@ window.markPostUnderReviewByManager = function(postId) {
 
 window.superAdminApprovePost = function(postId, scheduleDateStr) {
   if (!AuthService.isSuperAdmin()) {
-    showToast('⛔ خطای دسترسی: طبق قانون سامانه، تنها «مدیر کل» مجوز تأیید نهایی و انتشار مطالب را دارد!', 'error');
+    showToast('⛔ خطای دسترسی: طبق مقررات سامانه، «مدیر کل» مجوز تأیید نهایی و انتشار مطالب را دارد!', 'error');
     return;
   }
   const p = (DB.posts || []).find(x => x.id === postId);
@@ -13889,7 +13889,7 @@ function ensureCompleteSiteSettings() {
   if (!s.heroSubtitle) s.heroSubtitle = 'همراه تو در مسیر یادگیری، رشد فردی و رسیدن به آینده‌ای که شایسته آن هستی.';
   if (!s.counselorSectionHeading) s.counselorSectionHeading = 'واحد مشاوره دبیرستان نمونه دولتی پسرانه باقرالعلوم';
   if (!s.counselorLeadName) s.counselorLeadName = 'محمد هادی برخوری مهنی';
-  if (!s.counselorLeadDegree) s.counselorLeadDegree = 'مشاور رسمی مدرسه و مدیر کل سامانه';
+  if (!s.counselorLeadDegree) s.counselorLeadDegree = 'مشاور رسمی دبیرستان نمونه دولتی باقرالعلوم';
   if (!s.counselorMissionText) s.counselorMissionText = 'سامانه «همراه باقرالعلوم» با هدف ایجاد یک مرجع علمی، دائمی و قابل اعتماد برای دانش‌آموزان پایه‌های دهم، یازدهم و دوازدهم طراحی شده است تا هیچ دانش‌آموزی در مسیر برنامه‌ریزی درسی، امتحانات نهایی، کنکور سراسری و سلامت روان احساس تنهایی یا سردرگمی نکند.';
   if (!s.footerSubtitle) s.footerSubtitle = 'واحد مشاوره و هدایت تحصیلی';
   if (!s.footerDescription) s.footerDescription = 'مرجع تخصصی و جامع محتوای مشاوره‌ای، آموزشی، تحصیلی، روان‌شناختی و مهارت‌های زندگی ویژه دانش‌آموزان دبیرستان نمونه دولتی پسرانه باقرالعلوم. هدف ما پرورش نسلی خودآگاه، باانگیزه، هدفمند و مسلط بر مهارت‌های مطالعه و زندگی است.';
@@ -14420,7 +14420,7 @@ renderHomeView = function() {
     SecurityEngine.escapeHtml(s.counselorSectionHeading)
   );
   html = html.replace(
-    'با مسئولیت محمد هادی برخوری مهنی (مشاور رسمی مدرسه و مدیر کل سامانه)',
+    'با مسئولیت محمد هادی برخوری مهنی (مشاور رسمی دبیرستان نمونه دولتی باقرالعلوم)',
     `با مسئولیت ${SecurityEngine.escapeHtml(s.counselorLeadName)} (${SecurityEngine.escapeHtml(s.counselorLeadDegree)})`
   );
   html = html.replace(
@@ -14849,11 +14849,11 @@ renderApp();
 
 // =============================================================================
 // 17. EXCLUSIVE COUNSELOR & SOLE CONTENT MANAGER ENFORCEMENT:
-//     «محمد هادی برخوری مهنی» (تنها مشاور مدرسه و تنها فرد مجاز برای درج و ویرایش محتوا)
+//     «محمد هادی برخوری مهنی» (مشاور مدرسه و مسئول درج و ویرایش محتوا)
 // =============================================================================
 
 const SOLE_COUNSELOR_NAME = 'محمد هادی برخوری مهنی';
-const SOLE_COUNSELOR_TITLE = 'مشاور دبیرستان نمونه دولتی پسرانه باقرالعلوم و مدیر کل سامانه';
+const SOLE_COUNSELOR_TITLE = 'مشاور دبیرستان نمونه دولتی پسرانه باقرالعلوم';
 
 function enforceSoleCounselorBarkhori() {
   if (!DB) return;
@@ -14861,7 +14861,7 @@ function enforceSoleCounselorBarkhori() {
   // 1. Site Settings
   DB.siteSettings = DB.siteSettings || {};
   DB.siteSettings.counselorLeadName = SOLE_COUNSELOR_NAME;
-  DB.siteSettings.counselorLeadDegree = 'مشاور مدرسه و تنها مدیر مجاز سامانه';
+  DB.siteSettings.counselorLeadDegree = 'مشاور مدرسه و مدیریت واحد مشاوره';
   DB.siteSettings.counselorSectionHeading = 'واحد مشاوره دبیرستان نمونه دولتی پسرانه باقرالعلوم';
   DB.siteSettings.counselorMissionText = 'سامانه «همراه باقرالعلوم» تحت مدیریت و نظارت مستقیم استاد محمد هادی برخوری مهنی (مشاور دبیرستان نمونه دولتی پسرانه باقرالعلوم) با هدف ارائه محتوای علمی، مشاوره‌ای، برنامه‌ریزی تحصیلی، کنکور و مهارت‌های زندگی برای دانش‌آموزان پایه‌های دهم، یازدهم و دوازدهم طراحی شده است.';
 
@@ -14871,7 +14871,7 @@ function enforceSoleCounselorBarkhori() {
       id: 'cns-1',
       icon: '🎓',
       name: SOLE_COUNSELOR_NAME,
-      role: 'تنها مشاور رسمی دبیرستان نمونه دولتی پسرانه باقرالعلوم و مدیر کل سامانه',
+      role: 'مشاور دبیرستان نمونه دولتی پسرانه باقرالعلوم',
       bio: 'مسئول واحد مشاوره، هدایت تحصیلی، برنامه‌ریزی کنکور و امتحانات نهایی دبیرستان نمونه دولتی پسرانه باقرالعلوم (پایه‌های دهم، یازدهم و دوازدهم). تمامی مطالب، آزمون‌ها و پاسخ‌های مشاوره‌ای این سامانه منحصراً توسط ایشان تدوین و منتشر می‌گردد.',
       schedule: 'شنبه تا چهارشنبه (ساعت ۷:۳۰ الی ۱۴:۳۰ — اتاق مشاوره دبیرستان)'
     }
@@ -14883,8 +14883,8 @@ function enforceSoleCounselorBarkhori() {
   DB.roles = [
     {
       id: 'role-superadmin',
-      name: 'مشاور مدرسه و مدیر کل سامانه',
-      description: 'تنها فرد مجاز جهت درج مطلب، ویرایش محتوا، مدیریت دسته‌بندی‌ها و پاسخگویی به سؤالات (منحصراً استاد محمد هادی برخوری مهنی)',
+      name: 'مشاور مدرسه و مدیریت محتوا',
+      description: 'مدیریت و درج مطلب، ویرایش محتوا، دسته‌بندی‌ها و پاسخگویی به سؤالات مشاوره‌ای دانش‌آموزان',
       permissions: ['all', 'publish_final', 'manage_users', 'manage_settings', 'review_content', 'manage_categories', 'manage_media', 'create_draft', 'counselor_desk', 'student_tools']
     },
     {
@@ -14902,8 +14902,8 @@ function enforceSoleCounselorBarkhori() {
     name: SOLE_COUNSELOR_NAME,
     username: 'hadi_admin',
     roleId: 'role-superadmin',
-    roleLabel: 'مشاور مدرسه و مدیر کل سامانه',
-    grade: 'تنها مشاور و مدیر مجاز سامانه',
+    roleLabel: 'مشاور مدرسه و مدیریت محتوا',
+    grade: 'کادر مشاوره و هدایت تحصیلی',
     active: true,
     salt: 'sec_salt_9f82b71e',
     passwordHash: 'pbkdf2_v3$sec_salt_9f82b71e$4511dc35ca01ecbe',
@@ -15005,13 +15005,13 @@ adminCreateUser = function() {
   });
   logAdminAction(`ثبت حساب دانش‌آموزی برای «${name}» توسط ${SOLE_COUNSELOR_NAME}`);
   saveDatabase();
-  showToast(`حساب دانش‌آموزی «${name}» ایجاد شد (تنها مدیر و نویسنده مجاز سامانه استاد ${SOLE_COUNSELOR_NAME} است).`, 'success');
+  showToast(`حساب دانش‌آموزی «${name}» ایجاد شد (مشاور و نویسنده سامانه استاد ${SOLE_COUNSELOR_NAME} است).`, 'success');
   renderApp();
 };
 
 adminChangeUserRole = function(userId, newRoleId) {
   if (userId !== 'user-admin-1' && newRoleId === 'role-superadmin') {
-    showToast(`⛔ طبق قانون سامانه، تنها «${SOLE_COUNSELOR_NAME}» مشاور مدرسه و تنها فرد مجاز برای درج و تغییر محتوا در سایت است!`, 'error');
+    showToast(`⛔ طبق مقررات سامانه، «${SOLE_COUNSELOR_NAME}» مسئول مدیریت و تأیید محتوا در سایت است.`, 'error');
     renderApp();
     return;
   }
@@ -15019,7 +15019,7 @@ adminChangeUserRole = function(userId, newRoleId) {
 
 adminDeleteUser = function(userId) {
   if (userId === 'user-admin-1') {
-    showToast(`حساب مدیر کل و تنها مشاور مدرسه (${SOLE_COUNSELOR_NAME}) قابل حذف نیست.`, 'error');
+    showToast(`حساب مشاور مدرسه (${SOLE_COUNSELOR_NAME}) قابل حذف نیست.`, 'error');
     return;
   }
   DB.users = (DB.users || []).filter(x => x.id !== userId);
@@ -15033,7 +15033,7 @@ openCounselorModal = function() {
   const isLive = LiveVisualCMS.isActive();
   const c = (DB.counselorsList && DB.counselorsList[0]) || {
     name: SOLE_COUNSELOR_NAME,
-    role: 'تنها مشاور رسمی دبیرستان نمونه دولتی پسرانه باقرالعلوم و مدیر کل سامانه',
+    role: 'مشاور دبیرستان نمونه دولتی پسرانه باقرالعلوم',
     bio: 'مسئول واحد مشاوره، هدایت تحصیلی، برنامه‌ریزی کنکور و امتحانات نهایی دبیرستان نمونه دولتی پسرانه باقرالعلوم.',
     schedule: s.officeHours || 'شنبه تا چهارشنبه (۷:۳۰ الی ۱۴:۳۰)'
   };
@@ -15054,7 +15054,7 @@ openCounselorModal = function() {
         <div class="flex items-center gap-4">
           <div class="w-16 h-16 rounded-2xl bg-turquoise-500 text-navy-950 flex items-center justify-center text-3xl font-black shrink-0 shadow">🎓</div>
           <div>
-            <span class="px-2.5 py-0.5 rounded-full bg-turquoise-500/20 text-turquoise-300 text-xs font-bold border border-turquoise-400/30">تنها مشاور مدرسه و مدیر کل سامانه</span>
+            <span class="px-2.5 py-0.5 rounded-full bg-turquoise-500/20 text-turquoise-300 text-xs font-bold border border-turquoise-400/30">مشاور مدرسه و مدیریت محتوا</span>
             <h4 class="font-black text-white text-xl mt-1">${SecurityEngine.escapeHtml(c.name)}</h4>
             <p class="text-xs text-turquoise-300 font-bold mt-0.5">${SecurityEngine.escapeHtml(c.role)}</p>
           </div>
@@ -15083,7 +15083,7 @@ renderCounselorPageView = function() {
   const isLive = LiveVisualCMS.isActive();
   const c = (DB.counselorsList && DB.counselorsList[0]) || {
     name: SOLE_COUNSELOR_NAME,
-    role: 'تنها مشاور رسمی دبیرستان نمونه دولتی پسرانه باقرالعلوم و مدیر کل سامانه',
+    role: 'مشاور دبیرستان نمونه دولتی پسرانه باقرالعلوم',
     bio: 'مسئول واحد مشاوره، هدایت تحصیلی، برنامه‌ریزی کنکور و امتحانات نهایی دبیرستان نمونه دولتی پسرانه باقرالعلوم.',
     schedule: s.officeHours || 'شنبه تا چهارشنبه (۷:۳۰ الی ۱۴:۳۰)'
   };
@@ -15093,7 +15093,7 @@ renderCounselorPageView = function() {
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8 animate-fade-in">
       <div class="bg-gradient-to-br from-navy-950 via-navy-900 to-turquoise-900 rounded-3xl p-6 sm:p-10 text-white space-y-5 shadow-xl border border-turquoise-500/30">
         <div class="flex flex-wrap items-center justify-between gap-3">
-          <span class="px-3.5 py-1 rounded-full bg-turquoise-500/20 text-turquoise-300 text-xs font-bold border border-turquoise-400/30">تنها مشاور رسمی مدرسه و مدیر انحصاری سامانه</span>
+          <span class="px-3.5 py-1 rounded-full bg-turquoise-500/20 text-turquoise-300 text-xs font-bold border border-turquoise-400/30">مشاور مدرسه و روان‌شناس</span>
           ${isLive ? `<button type="button" onclick="LiveVisualCMS.openQuickCounselorEditorModal()" class="live-cms-control px-4 py-2 rounded-xl bg-amber-400 text-navy-950 text-xs font-black shadow">✏️ ویرایش زنده مشخصات مشاور</button>` : ''}
         </div>
         <div class="flex flex-col sm:flex-row sm:items-center gap-5">
@@ -16009,7 +16009,7 @@ if (typeof CloudSync !== 'undefined' && CloudSync.fetchFromCloud) {
       ss.schoolName = ss.schoolName || 'دبیرستان نمونه دولتی پسرانه باقرالعلوم';
       ss.versionBadge = ss.versionBadge || 'نسخه جامع';
       ss.counselorLeadName = ss.counselorLeadName || 'محمد هادی برخوری مهنی';
-      ss.counselorLeadDegree = ss.counselorLeadDegree || 'مشاور مدرسه و مدیر کل سامانه';
+      ss.counselorLeadDegree = ss.counselorLeadDegree || 'مشاور مدرسه و مدیریت محتوا';
       ss.counselorPhone = ss.counselorPhone || '09136527398';
       ss.officeHours = ss.officeHours || 'شنبه 7 الی 14';
       ss.schoolAddress = ss.schoolAddress || 'دبیرستان نمونه دولتی پسرانه باقرالعلوم — طبقه اول، واحد مشاوره، روان‌شناسی و هدایت تحصیلی';
