@@ -6384,7 +6384,7 @@
         "id": "cmp-8",
         "icon": "🧭",
         "title": "نمی‌دونم سبک یادگیری و نقاط قوت من چیه",
-        "badge": "۹ آزمون خودشناسی و استعدادیابی ←",
+        "badge": "۹ آزمون استعدادیابی و خودشناسی ←",
         "targetType": "view",
         "targetValue": "quizzes",
         "colorVar": "var(--pk)"
