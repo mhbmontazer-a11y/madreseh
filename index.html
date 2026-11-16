@@ -6449,9 +6449,181 @@ html.ref-pending::after{content:"";position:fixed;z-index:2147483647;top:50%;lef
           </div>
         `;
       } else if (tab === 'faqs') {
+        const allCounselorMessages = (DB.counselorMessages && DB.counselorMessages.length > 0)
+          ? DB.counselorMessages
+          : (DB.studentData?.counselorMessages || []);
+        const pendingMsgCount = allCounselorMessages.filter(m => !m.reply || m.status !== 'answered').length;
+        const answeredMsgCount = allCounselorMessages.length - pendingMsgCount;
+        const sheetsUrlVal = (DB.siteSettings?.googleSheetsWebhookUrl || '').trim();
+
         mainPanelHtml = `
           <div class="space-y-6">
-            <!-- Add New FAQ by Counselor -->
+            <!-- 📊 میز کار اکسل و کارتابل سؤالات دانش‌آموزان (Google Sheets / Excel View) -->
+            <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-5">
+              <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 text-xs font-black">Google Sheets & Excel</span>
+                    <h3 class="text-base sm:text-lg font-black text-navy-900">📊 میز کار اکسل و کارتابل سؤالات دانش‌آموزان</h3>
+                  </div>
+                  <p class="text-xs text-slate-500 mt-1">مشاهده و مدیریت تمامی سؤالات ثبت‌شده دانش‌آموزان با فرمت جدول گسترده، خروجی اکسل و اتصال ابری</p>
+                </div>
+                <!-- Action Buttons: Download Excel, Copy to Sheets, Open Sheets.new -->
+                <div class="flex flex-wrap items-center gap-2">
+                  <button type="button" onclick="exportQuestionsToExcel()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow flex items-center gap-1.5 transition">
+                    <span>📥 دانلود مستقیم فایل اکسل (.xlsx / .csv)</span>
+                  </button>
+                  <button type="button" onclick="copyQuestionsToClipboardForSheets()" class="px-3.5 py-2 rounded-xl bg-navy-900 hover:bg-navy-800 text-white text-xs font-black shadow flex items-center gap-1.5 transition">
+                    <span>📋 کپی جدول برای Google Sheets</span>
+                  </button>
+                  <button type="button" onclick="window.open('https://sheets.new', '_blank')" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border border-slate-300 flex items-center gap-1.5 transition">
+                    <span>🌐 شیت جدید (sheets.new) ↗</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Metric Badges -->
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                  <span class="font-bold text-slate-600">کل سؤالات دریافتی:</span>
+                  <span class="font-black text-navy-900 text-base">${JalaliDateEngine.toPersianDigits(allCounselorMessages.length)} سؤال</span>
+                </div>
+                <div class="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/80 flex items-center justify-between">
+                  <span class="font-bold text-amber-800">در انتظار پاسخ مشاور:</span>
+                  <span class="font-black text-amber-900 text-base">${JalaliDateEngine.toPersianDigits(pendingMsgCount)}</span>
+                </div>
+                <div class="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 flex items-center justify-between">
+                  <span class="font-bold text-emerald-800">پاسخ‌داده‌شده:</span>
+                  <span class="font-black text-emerald-900 text-base">${JalaliDateEngine.toPersianDigits(answeredMsgCount)}</span>
+                </div>
+              </div>
+
+              <!-- Interactive Search Bar -->
+              <div>
+                <input id="faq-sheet-search" type="text" oninput="filterFaqSheetRows(this.value)" placeholder="🔍 جستجوی زنده در نام دانش‌آموز، کد پیگیری، شماره تماس یا موضوع سؤال..." class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold" />
+              </div>
+
+              <!-- Table: Live Spreadsheet View -->
+              <div class="overflow-x-auto rounded-2xl border border-slate-200 shadow-sm max-h-[500px] overflow-y-auto">
+                <table class="w-full text-right text-xs divide-y divide-slate-200">
+                  <thead class="bg-slate-50 text-navy-900 font-black sticky top-0 z-10">
+                    <tr>
+                      <th class="p-3 whitespace-nowrap">#</th>
+                      <th class="p-3 whitespace-nowrap">کد پیگیری</th>
+                      <th class="p-3 whitespace-nowrap">تاریخ ثبت</th>
+                      <th class="p-3 whitespace-nowrap">نام دانش‌آموز</th>
+                      <th class="p-3 whitespace-nowrap">پایه و رشته</th>
+                      <th class="p-3 whitespace-nowrap">شماره تماس</th>
+                      <th class="p-3 whitespace-nowrap">نوع</th>
+                      <th class="p-3 whitespace-nowrap">موضوع و متن سؤال</th>
+                      <th class="p-3 whitespace-nowrap">وضعیت</th>
+                      <th class="p-3 whitespace-nowrap min-w-[280px]">پاسخ مشاور و اقدام</th>
+                    </tr>
+                  </thead>
+                  <tbody id="faq-sheet-tbody" class="divide-y divide-slate-100 bg-white">
+                    ${allCounselorMessages.length === 0 ? `
+                      <tr>
+                        <td colspan="10" class="p-8 text-center text-slate-400">
+                          هنوز سؤالی توسط دانش‌آموزان ثبت نشده است. به محض ارسال سؤال، بلافاصله در این جدول و اکسل درج می‌گردد.
+                        </td>
+                      </tr>
+                    ` : allCounselorMessages.map((msg, idx) => `
+                      <tr class="hover:bg-slate-50/80 transition faq-sheet-row" data-search="${SecurityEngine.escapeHtml(msg.studentName || '')} ${SecurityEngine.escapeHtml(msg.trackingCode || '')} ${SecurityEngine.escapeHtml(msg.phone || '')} ${SecurityEngine.escapeHtml(msg.subject || '')} ${SecurityEngine.escapeHtml(msg.message || '')}">
+                        <td class="p-3 font-mono text-slate-400 text-[11px]">${idx + 1}</td>
+                        <td class="p-3 whitespace-nowrap">
+                          <span class="px-2 py-0.5 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 font-mono font-bold text-[11px]">${SecurityEngine.escapeHtml(msg.trackingCode || msg.id)}</span>
+                        </td>
+                        <td class="p-3 whitespace-nowrap text-slate-500 font-medium">${SecurityEngine.escapeHtml(msg.createdAt || '')}</td>
+                        <td class="p-3 whitespace-nowrap font-extrabold text-navy-900">${SecurityEngine.escapeHtml(msg.studentName || 'دانش‌آموز')}</td>
+                        <td class="p-3 whitespace-nowrap text-slate-600 font-medium">${SecurityEngine.escapeHtml(msg.grade || '')}</td>
+                        <td class="p-3 whitespace-nowrap font-mono text-left" dir="ltr">
+                          ${msg.phone && msg.phone !== 'ثبت‌نشده' ? `
+                            <a href="tel:${SecurityEngine.escapeHtml(msg.phone)}" class="text-turquoise-700 hover:text-turquoise-600 font-bold hover:underline flex items-center gap-1">
+                              <span>📞</span>
+                              <span>${SecurityEngine.escapeHtml(msg.phone)}</span>
+                            </a>
+                          ` : `<span class="text-slate-400">—</span>`}
+                        </td>
+                        <td class="p-3 whitespace-nowrap">
+                          <span class="px-2 py-0.5 rounded-md text-[10px] font-bold ${msg.type === 'private' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}">
+                            ${msg.type === 'private' ? '🔒 محرمانه' : '🌐 عمومی'}
+                          </span>
+                        </td>
+                        <td class="p-3 max-w-xs">
+                          <p class="font-extrabold text-navy-900 truncate">${SecurityEngine.escapeHtml(msg.subject || '')}</p>
+                          <p class="text-slate-600 text-[11px] line-clamp-2 mt-0.5 leading-relaxed">${SecurityEngine.escapeHtml(msg.message || '')}</p>
+                        </td>
+                        <td class="p-3 whitespace-nowrap">
+                          ${msg.status === 'answered' || msg.reply ? `
+                            <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[11px]">✓ پاسخ‌داده‌شده</span>
+                          ` : `
+                            <span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 font-bold text-[11px]">⏳ در انتظار پاسخ</span>
+                          `}
+                        </td>
+                        <td class="p-3">
+                          <div class="space-y-1.5">
+                            <div class="flex gap-1.5">
+                              <input id="reply-inp-${msg.id}" type="text" value="${SecurityEngine.escapeHtml(msg.reply || '')}" placeholder="پاسخ مشاور..." class="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs bg-white" />
+                              <button type="button" onclick="adminReplyStudentMessage('${msg.id}')" class="px-3 py-1.5 rounded-lg bg-turquoise-600 hover:bg-turquoise-500 text-white font-bold text-xs shrink-0 transition">ثبت</button>
+                              <button type="button" onclick="adminDeleteStudentMessage('${msg.id}')" class="px-2 py-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 font-bold text-xs shrink-0 transition" title="حذف">✕</button>
+                            </div>
+                            ${msg.reply ? `<p class="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-200 line-clamp-1">پاسخ ثبت‌شده: ${SecurityEngine.escapeHtml(msg.reply)}</p>` : ''}
+                          </div>
+                        </td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- 🚀 اتصال خودکار و لحظه‌ای به Google Sheets (ابری) -->
+            <div class="bg-gradient-to-br from-white to-indigo-50/40 rounded-3xl p-6 border border-indigo-200/80 shadow-sm space-y-4 text-xs">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-indigo-100 pb-3">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 to-turquoise-500 flex items-center justify-center text-white text-lg shadow-sm shrink-0">
+                    📊
+                  </div>
+                  <div>
+                    <h3 class="text-sm font-black text-navy-900">اتصال آنلاین و خودکار به Google Sheets (سؤالات دانش‌آموزان)</h3>
+                    <p class="text-[11px] text-slate-500 mt-0.5">ارسال آنی هر سؤال به فایل گوگل شیت درایو مشاور در لحظه ثبت توسط دانش‌آموز</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="px-3 py-1 rounded-full text-[11px] font-bold ${sheetsUrlVal ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'}">
+                    ${sheetsUrlVal ? '🟢 متصل به وب‌هوک گوگل شیت' : '⚪ در انتظار تنظیم وب‌هوک'}
+                  </span>
+                </div>
+              </div>
+
+              <div class="space-y-2">
+                <label for="set-sheets-webhook-faq" class="block font-bold text-slate-700">آدرس وب‌هوک Google Apps Script (Web App URL):</label>
+                <div class="flex flex-col sm:flex-row gap-2">
+                  <input id="set-sheets-webhook-faq" type="text" value="${SecurityEngine.escapeHtml(sheetsUrlVal)}" placeholder="https://script.google.com/macros/s/.../exec" class="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-300 font-mono text-left text-xs" dir="ltr" />
+                  <button type="button" onclick="saveFaqSheetsWebhook()" class="px-4 py-2.5 rounded-xl bg-navy-900 hover:bg-navy-800 text-white font-bold shrink-0 transition">ذخیره آدرس</button>
+                  <button type="button" onclick="testGoogleSheetsWebhook('set-sheets-webhook-faq')" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black shrink-0 shadow transition flex items-center justify-center gap-1.5">
+                    <span>🧪 تست زنده اتصال</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- راهنمای فوق‌سریع ۳۰ ثانیه‌ای و کپی اسکریپت آماده -->
+              <div class="p-4 rounded-2xl bg-white border border-indigo-100 space-y-3">
+                <div class="flex items-center justify-between">
+                  <h4 class="font-black text-navy-900 text-xs">⚡ راهنمای اتصال ۱ کلیکی در ۳ مرحله ساده:</h4>
+                  <button type="button" onclick="copyGoogleAppsScriptCode()" class="px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold border border-indigo-200 flex items-center gap-1 text-[11px] transition">
+                    <span>📋 کپی خودکار کد اسکریپت گوگل شیت</span>
+                  </button>
+                </div>
+                <ol class="list-decimal list-inside space-y-1.5 text-slate-600 text-[11px] leading-relaxed">
+                  <li>یک شیت جدید در گوگل باز کنید (با کلیک روی دکمه <a href="https://sheets.new" target="_blank" class="text-turquoise-700 font-bold underline">sheets.new</a>).</li>
+                  <li>از منوی بالای شیت گزینه <b>Extensions > Apps Script</b> را بزنید، کد پیش‌فرض را پاک کرده و دکمه <b>«کپی خودکار کد اسکریپت»</b> بالا را بزنید و در آنجا Paste کنید.</li>
+                  <li>دکمه آبی <b>Deploy > New deployment</b> را بزنید، گزینه <i>Web App</i> را انتخاب، فیلد <i>Who has access</i> را روی <b>Anyone</b> بگذارید و لینک نهایی را در کادر بالا قرار داده و ذخیره کنید. تمام!</li>
+                </ol>
+              </div>
+            </div>
+
+            <!-- Add New FAQ by Counselor (Original) -->
             <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4 text-xs">
               <h3 class="text-base font-black text-navy-900">➕ ثبت سؤال و پاسخ جدید در بانک سؤالات پرتکرار</h3>
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -6464,27 +6636,7 @@ html.ref-pending::after{content:"";position:fixed;z-index:2147483647;top:50%;lef
               <button type="button" onclick="adminAddFaq()" class="px-5 py-2.5 rounded-xl bg-navy-900 text-white font-bold">+ ثبت و انتشار در بانک سؤالات پرتکرار</button>
             </div>
 
-            <!-- Answer Student Submitted Questions -->
-            <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
-              <h3 class="text-base font-black text-navy-900">📩 پاسخ‌گویی به پیام‌ها و سؤالات ارسالی دانش‌آموزان</h3>
-              <div class="space-y-3 text-xs">
-                ${(DB.studentData.counselorMessages || []).map(msg => `
-                  <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
-                    <div class="flex items-center justify-between">
-                      <span class="font-extrabold text-navy-900">${msg.studentName} (${msg.grade}) — موضوع: ${msg.subject}</span>
-                      <span class="text-slate-400">${msg.createdAt}</span>
-                    </div>
-                    <p class="text-slate-700 leading-relaxed">${msg.message}</p>
-                    <div class="flex gap-2">
-                      <input id="reply-inp-${msg.id}" type="text" value="${msg.reply || ''}" placeholder="پاسخ مشاور را اینجا بنویسید..." class="flex-1 px-3 py-2 rounded-xl border border-slate-300 bg-white" />
-                      <button type="button" onclick="adminReplyStudentMessage('${msg.id}')" class="px-4 py-2 rounded-xl bg-turquoise-600 text-white font-bold shrink-0">ثبت پاسخ مشاور</button>
-                    </div>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-
-            <!-- Manage Existing FAQs -->
+            <!-- Manage Existing FAQs (Original) -->
             <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
               <h3 class="text-base font-black text-navy-900">فهرست سؤالات بانک FAQ (${DB.faqs.length.toLocaleString('fa-IR')})</h3>
               <div class="space-y-2.5 text-xs">
@@ -7227,16 +7379,240 @@ html.ref-pending::after{content:"";position:fixed;z-index:2147483647;top:50%;lef
       renderApp();
     }
 
-    function adminReplyStudentMessage(msgId) {
-      const msg = (DB.studentData.counselorMessages || []).find(m => m.id === msgId);
+    window.adminReplyStudentMessage = function(msgId) {
+      const allMsgs = (DB.counselorMessages || []).concat(DB.studentData?.counselorMessages || []);
+      const msg = allMsgs.find(m => m.id === msgId);
       const inp = document.getElementById('reply-inp-' + msgId);
-      if (!msg || !inp || !inp.value.trim()) return;
-      msg.reply = inp.value.trim();
-      msg.status = 'answered';
+      if (!msg || !inp || !inp.value.trim()) {
+        showToast('لطفاً متن پاسخ را بنویسید.', 'warning');
+        return;
+      }
+      const replyText = inp.value.trim();
+      (DB.counselorMessages || []).forEach(m => {
+        if (m.id === msgId) {
+          m.reply = replyText;
+          m.status = 'answered';
+        }
+      });
+      if (DB.studentData && DB.studentData.counselorMessages) {
+        DB.studentData.counselorMessages.forEach(m => {
+          if (m.id === msgId) {
+            m.reply = replyText;
+            m.status = 'answered';
+          }
+        });
+      }
       logAdminAction(`پاسخ به پرسش دانش‌آموز ${msg.studentName}`);
       saveDatabase(DB, true);
-      showToast('پاسخ مشاور ثبت و برای دانش‌آموز ارسال شد.', 'success');
+      showToast('✓ پاسخ مشاور با موفقیت ثبت شد.', 'success');
       renderApp();
+    };
+
+    window.adminDeleteStudentMessage = function(msgId) {
+      if (!confirm('آیا از حذف این سؤال از کارتابل اطمینان دارید؟')) return;
+      DB.counselorMessages = (DB.counselorMessages || []).filter(m => m.id !== msgId);
+      if (DB.studentData && DB.studentData.counselorMessages) {
+        DB.studentData.counselorMessages = DB.studentData.counselorMessages.filter(m => m.id !== msgId);
+      }
+      logAdminAction('حذف پیام دانش‌آموز از کارتابل مشاوره');
+      saveDatabase(DB, true);
+      showToast('پیام از کارتابل حذف شد.', 'info');
+      renderApp();
+    };
+
+    window.exportQuestionsToExcel = function() {
+      const msgs = (DB.counselorMessages && DB.counselorMessages.length > 0)
+        ? DB.counselorMessages
+        : (DB.studentData?.counselorMessages || []);
+
+      if (!msgs || msgs.length === 0) {
+        showToast('هنوز پیامی از دانش‌آموزان ثبت نشده است.', 'info');
+        return;
+      }
+
+      // UTF-8 BOM so Microsoft Excel opens Persian text cleanly
+      let csvContent = '\uFEFF';
+      const headers = ['کد پیگیری', 'تاریخ و ساعت ثبت', 'نام دانش‌آموز', 'پایه و رشته', 'شماره تماس', 'نوع پیام', 'موضوع', 'متن سؤال', 'وضعیت', 'پاسخ مشاور'];
+      csvContent += headers.map(h => `"${h.replace(/"/g, '""')}"`).join(',') + '\r\n';
+
+      msgs.forEach(m => {
+        const row = [
+          m.trackingCode || m.id || '',
+          m.createdAt || '',
+          m.studentName || 'دانش‌آموز',
+          m.grade || '',
+          m.phone || 'ثبت‌نشده',
+          m.type === 'private' ? 'محرمانه' : 'عمومی',
+          m.subject || '',
+          (m.message || '').replace(/\r?\n/g, ' '),
+          m.status === 'answered' ? 'پاسخ داده شده' : 'در انتظار بررسی',
+          (m.reply || '').replace(/\r?\n/g, ' ')
+        ];
+        csvContent += row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',') + '\r\n';
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const fileDate = (typeof JalaliDateEngine !== 'undefined' && JalaliDateEngine.nowDate)
+        ? JalaliDateEngine.nowDate().replace(/\//g, '-')
+        : '1405';
+      link.setAttribute('href', url);
+      link.setAttribute('download', `soalat_moshavereh_bagherololum_${fileDate}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      showToast('✓ فایل اکسل سؤالات با موفقیت دانلود شد.', 'success');
+    };
+
+    window.copyQuestionsToClipboardForSheets = function() {
+      const msgs = (DB.counselorMessages && DB.counselorMessages.length > 0)
+        ? DB.counselorMessages
+        : (DB.studentData?.counselorMessages || []);
+
+      if (!msgs || msgs.length === 0) {
+        showToast('هنوز سؤالی برای کپی وجود ندارد.', 'info');
+        return;
+      }
+
+      const headers = ['کد پیگیری', 'تاریخ و ساعت ثبت', 'نام دانش‌آموز', 'پایه و رشته', 'شماره تماس', 'نوع پیام', 'موضوع', 'متن سؤال', 'وضعیت', 'پاسخ مشاور'];
+      let tsvContent = headers.join('\t') + '\n';
+
+      msgs.forEach(m => {
+        const row = [
+          m.trackingCode || m.id || '',
+          m.createdAt || '',
+          m.studentName || 'دانش‌آموز',
+          m.grade || '',
+          m.phone || 'ثبت‌نشده',
+          m.type === 'private' ? 'محرمانه' : 'عمومی',
+          (m.subject || '').replace(/\t/g, ' '),
+          (m.message || '').replace(/\t/g, ' ').replace(/\r?\n/g, ' '),
+          m.status === 'answered' ? 'پاسخ داده شده' : 'در انتظار بررسی',
+          (m.reply || '').replace(/\t/g, ' ').replace(/\r?\n/g, ' ')
+        ];
+        tsvContent += row.join('\t') + '\n';
+      });
+
+      fallbackCopyText(tsvContent, '✓ جدول سؤالات در کلیپ‌بورد کپی شد (آماده جای‌گذاری در Google Sheets با Ctrl+V)');
+    };
+
+    window.filterFaqSheetRows = function(query) {
+      const q = (query || '').trim().toLowerCase();
+      const rows = document.querySelectorAll('.faq-sheet-row');
+      rows.forEach(r => {
+        const text = (r.getAttribute('data-search') || '').toLowerCase();
+        if (!q || text.includes(q)) {
+          r.style.display = '';
+        } else {
+          r.style.display = 'none';
+        }
+      });
+    };
+
+    window.saveFaqSheetsWebhook = function() {
+      const inp = document.getElementById('set-sheets-webhook-faq');
+      if (!inp) return;
+      DB.siteSettings = DB.siteSettings || {};
+      DB.siteSettings.googleSheetsWebhookUrl = inp.value.trim();
+      logAdminAction('به‌روزرسانی وب‌هوک گوگل شیت سامانه');
+      saveDatabase(DB, true);
+      showToast('✓ آدرس وب‌هوک Google Sheets با موفقیت ذخیره شد.', 'success');
+      renderApp();
+    };
+
+    window.testGoogleSheetsWebhook = function(inputElementId) {
+      const idToFind = inputElementId || 'set-sheets-webhook-faq';
+      const inpVal = document.getElementById(idToFind)?.value?.trim() || document.getElementById('set-sheets-webhook')?.value?.trim();
+      const sheetsUrl = (inpVal !== undefined && inpVal !== '') ? inpVal : (DB.siteSettings?.googleSheetsWebhookUrl || '').trim();
+
+      if (!sheetsUrl) {
+        showToast('لطفاً ابتدا آدرس وب‌هوک Google Sheets را در کادر وارد کنید.', 'warning');
+        return;
+      }
+
+      const testPayload = {
+        trackingCode: 'BAQ-TEST-' + Math.floor(1000 + Math.random() * 9000),
+        dateFa: (typeof JalaliDateEngine !== 'undefined') ? JalaliDateEngine.nowDateTime() : '۱۴۰۵/۰۸/۲۵',
+        studentName: 'تست خودکار اتصال سامانه',
+        grade: 'واحد مشاوره دبیرستان باقرالعلوم',
+        phone: '۰۹۰۰۰۰۰۰۰۰۰',
+        category: 'تست اتصال سیستمی',
+        subject: 'بررسی ارتباط زنده سایت با گوگل شیت',
+        message: 'این ردیف جهت تأیید اتصال خودکار ارسال شده است. نمایش این سطر در گوگل شیت یعنی اتصال ۱۰۰٪ برقرار است!',
+        type: 'تست خودکار'
+      };
+
+      showToast('در حال ارسال تست زنده به Google Sheets...', 'info');
+
+      try {
+        fetch(sheetsUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(testPayload)
+        }).then(function() {
+          showToast('✓ داده تستی با موفقیت به Google Sheets مخابره شد! فایل گوگل شیت خود را چک کنید.', 'success');
+        }).catch(function(err) {
+          console.error(err);
+          showToast('ارسال انجام شد. لطفاً گوگل شیت خود را بررسی فرمایید.', 'info');
+        });
+      } catch(e) {
+        showToast('خطا در برقراری ارتباط با وب‌هوک: ' + e.message, 'error');
+      }
+    };
+
+    window.copyGoogleAppsScriptCode = function() {
+      const scriptCode = `// اسکریپت خودکار دریافت سؤالات سامانه همراه باقرالعلوم در Google Sheets
+function doPost(e) {
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow(["کد پیگیری", "تاریخ و زمان", "نام دانش‌آموز", "پایه و رشته", "شماره تماس", "نوع پیام", "موضوع", "متن سؤال", "وضعیت"]);
+    }
+    var data = JSON.parse(e.postData.contents);
+    sheet.appendRow([
+      data.trackingCode || '',
+      data.dateFa || '',
+      data.studentName || '',
+      data.grade || '',
+      data.phone || '',
+      data.type || '',
+      data.subject || '',
+      data.message || '',
+      'در انتظار پاسخ مشاور'
+    ]);
+    return ContentService.createTextOutput(JSON.stringify({status: "ok"})).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({status: "error", error: err.toString()})).setMimeType(ContentService.MimeType.JSON);
+  }
+}`;
+      fallbackCopyText(scriptCode, '✓ کد اسکریپت گوگل شیت با موفقیت کپی شد! در Apps Script جای‌گذاری فرمایید.');
+    };
+
+    function fallbackCopyText(text, successMsg) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function() {
+          showToast(successMsg || 'کپی در کلیپ‌بورد انجام شد.', 'success');
+        }).catch(function() {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          showToast(successMsg || 'کپی در کلیپ‌بورد انجام شد.', 'success');
+        });
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast(successMsg || 'کپی در کلیپ‌بورد انجام شد.', 'success');
+      }
     }
 
     function toggleFaqApprove(faqId) {
@@ -11044,7 +11420,7 @@ submitStudentQuestionModal = function() {
       fetch(sheetsUrl, {
         method: 'POST',
         mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({
           trackingCode: trackingCode,
           dateFa: nowDate,
@@ -12518,8 +12894,17 @@ renderAdminView = function() {
                 <input id="set-counselor-phone" type="text" value="${SecurityEngine.escapeHtml(DB.siteSettings?.counselorPhone || '۰۲۱-۳۳۴۴۵۵۶۶ (داخلی ۱۰۸)')}" class="w-full px-3 py-2 rounded-xl border border-slate-300" />
                 <label class="block font-bold text-slate-600">ساعات مراجعه حضوری:</label>
                 <input id="set-office-hours" type="text" value="${SecurityEngine.escapeHtml(DB.siteSettings?.officeHours || 'شنبه تا چهارشنبه ۷:۳۰ الی ۱۴:۳۰')}" class="w-full px-3 py-2 rounded-xl border border-slate-300" />
+
+                <label class="block font-bold text-slate-600">💬 آدرس یا آی‌دی چت روبیکای مشاور (روش اول ارتباط):</label>
+                <input id="set-counselor-rubika" type="text" value="${SecurityEngine.escapeHtml(DB.siteSettings?.counselorRubikaUrl || 'https://rubika.ir/hadi_barkhori')}" placeholder="https://rubika.ir/..." class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono text-left" dir="ltr" />
+
+                <label class="block font-bold text-slate-600">📊 وب‌هوک اتصال خودکار به Google Sheets (روش دوم ارتباط):</label>
+                <div class="flex gap-2">
+                  <input id="set-sheets-webhook" type="text" value="${SecurityEngine.escapeHtml(DB.siteSettings?.googleSheetsWebhookUrl || '')}" placeholder="https://script.google.com/macros/s/.../exec" class="flex-1 px-3 py-2 rounded-xl border border-slate-300 font-mono text-left" dir="ltr" />
+                  <button type="button" onclick="testGoogleSheetsWebhook('set-sheets-webhook')" class="px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shrink-0">🧪 تست</button>
+                </div>
               </div>
-              <button type="button" onclick="adminSaveSiteSettings()" class="w-full py-2.5 rounded-xl bg-emerald-600 text-white font-bold">✓ ذخیره تنظیمات سایت</button>
+              <button type="button" onclick="adminSaveSiteSettings()" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition shadow">✓ ذخیره تمام تنظیمات سایت و اتصالات</button>
             </div>
           </div>
         </div>
