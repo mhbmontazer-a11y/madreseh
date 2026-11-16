@@ -19362,12 +19362,13 @@ a{color:inherit;text-decoration:none}
 .tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
 .tabs button{font:inherit;text-align:start;cursor:pointer;color:var(--tx);background:var(--s);border:1px solid var(--ln);border-radius:16px;padding:14px 18px;font:400 24px/1.3 Lalezar,sans-serif;transition:border-color .2s,background .2s}
 .tabs button[aria-selected=true]{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 14%,transparent)}
-#gp{display:grid;grid-template-columns:1fr 1.2fr;gap:24px;align-items:center}
-#gp h3{font-size:34px}
+#gp{display:block!important;background:none!important;border:none!important;padding:0!important;box-shadow:none!important}
+#gp h3{font-size:inherit}
 #gp ul,.fl{list-style:none;margin:0;padding:0}
-#gp li{padding:10px 0 10px 0;border-bottom:1px solid var(--ln);display:flex;gap:10px}
-#gp li:last-child{border:0}
-#gp li::before{content:"✓";color:var(--aq);font-weight:900}
+#gp li{padding:0;border:0;display:flex;gap:6px}
+#gp li::before{content:none!important}
+.sp-cards-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;width:100%}
+@media(max-width:768px){.sp-cards-grid{overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:10px}.sp-cards-grid>div{min-width:215px;scroll-snap-align:start}}
 .sq{width:100%;max-width:420px;font:inherit;color:var(--tx);background:var(--s);border:1px solid var(--ln);border-radius:14px;padding:10px 16px;margin-bottom:18px}
 .cg,.lg4,.fg{display:grid;gap:16px}
 .cg{grid-template-columns:repeat(auto-fill,minmax(310px,1fr))}
@@ -19457,8 +19458,8 @@ details p{margin:8px 0 0;color:var(--mu);max-width:70ch}
 .tabs b{font:400 60px/1 Lalezar,sans-serif;color:var(--ac)}
 .tabs span{font:400 22px/1.3 Lalezar,sans-serif}
 .tabs button[aria-selected=true]{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 14%,transparent)}
-#gp{background:linear-gradient(135deg,color-mix(in srgb,var(--ac) 14%,var(--s)),var(--s))}
-#gp li::before{color:var(--ac)}
+/* #gp background neutralized */
+#gp{background:none!important}
 .cg{grid-template-columns:repeat(6,1fr)}
 .cg .cat{grid-column:span 2;min-height:230px;overflow:hidden;background:linear-gradient(160deg,color-mix(in srgb,var(--c) 17%,var(--s)),var(--s) 60%)}
 .cg .cat:nth-child(1){grid-column:span 4}.cg .cat:nth-child(6){grid-column:span 6}
@@ -20090,9 +20091,9 @@ html.reading-mode body #app-viewport :is(.bg-softyellow-300,.bg-softyellow-400,.
     const gradeLabels = ['پایه دهم', 'پایه یازدهم', 'پایه دوازدهم و کنکور'];
     const gradeShort = ['دهم', 'یازدهم', 'دوازدهم'];
     const gradeHours = [
-      { tajrobi: '۲۸ الی ۳۴ ساعت در هفته', ensani: '۲۶ الی ۳۲ ساعت در هفته', riazi: '۲۸ الی ۳۴ ساعت در هفته' },
-      { tajrobi: '۳۵ الی ۴۲ ساعت در هفته', ensani: '۳۲ الی ۳۸ ساعت در هفته', riazi: '۳۵ الی ۴۲ ساعت در هفته' },
-      { tajrobi: '۴۵ الی ۵۵ ساعت در هفته', ensani: '۴۰ الی ۵۰ ساعت در هفته', riazi: '۴۵ الی ۵۵ ساعت در هفته' }
+      { tajrobi: '۲۸ تا ۳۴ ساعت', ensani: '۲۶ تا ۳۲ ساعت', riazi: '۲۸ تا ۳۴ ساعت' },
+      { tajrobi: '۳۵ تا ۴۲ ساعت', ensani: '۳۲ تا ۳۸ ساعت', riazi: '۳۵ تا ۴۲ ساعت' },
+      { tajrobi: '۴۵ تا ۵۵ ساعت', ensani: '۴۰ تا ۵۰ ساعت', riazi: '۴۵ تا ۵۵ ساعت' }
     ];
 
     const gCode = gradeCodes[i] || '10';
@@ -20104,216 +20105,189 @@ html.reading-mode body #app-viewport :is(.bg-softyellow-300,.bg-softyellow-400,.
     if (!gpEl) return;
 
     gpEl.innerHTML = `
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">
+      <div class="sp-cards-grid animate-fade-in" style="margin-top:10px">
         <!-- 1. Tajrobi Card -->
-        <div class="relative bg-white rounded-3xl p-6 sm:p-7 border-2 border-emerald-500/20 hover:border-emerald-500 shadow-lg hover:shadow-2xl hover:shadow-emerald-500/15 transition-all duration-300 flex flex-col justify-between group overflow-hidden">
-          <div class="absolute top-0 right-0 left-0 h-1.5 bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-600"></div>
+        <div class="relative bg-white rounded-2xl p-4 sm:p-5 border-2 border-emerald-500/25 hover:border-emerald-500 shadow-sm hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-200 flex flex-col justify-between group overflow-hidden">
+          <div class="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-emerald-400 to-teal-600"></div>
           
-          <div class="space-y-5">
-            <!-- Header Row -->
-            <div class="flex items-center justify-between pt-1">
-              <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-100/90 text-emerald-600 border border-emerald-200/80 flex items-center justify-center text-3xl font-black shadow-inner group-hover:scale-105 transition-transform duration-300">
+          <div class="space-y-3 pt-0.5">
+            <div class="flex items-center justify-between">
+              <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center text-xl font-black shadow-inner">
                 🧬
               </div>
-              <span class="px-3 py-1 rounded-full text-xs font-black bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm shadow-emerald-600/30">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-600 text-white shadow-sm">
                 علوم تجربی
               </span>
             </div>
 
-            <!-- Title & Target Majors -->
             <div>
-              <h3 class="text-xl font-black text-navy-950 group-hover:text-emerald-700 transition">
+              <h3 class="text-base sm:text-lg font-black text-navy-950 group-hover:text-emerald-700 transition leading-snug">
                 برنامه مطالعاتی تجربی ${SecurityEngine.escapeHtml(gS)}
               </h3>
-              <p class="text-xs text-slate-500 mt-1 font-semibold">
-                ${SecurityEngine.escapeHtml(gLabel)} • راهبردی و هفتگی
+              <p class="text-[11px] text-slate-400 font-bold mt-0.5">
+                ${SecurityEngine.escapeHtml(gLabel)} • راهبردی هفتگی
               </p>
-              <div class="flex flex-wrap gap-1.5 mt-2.5">
-                <span class="px-2.5 py-0.5 rounded-lg bg-emerald-50 text-emerald-800 text-[11px] font-bold border border-emerald-100">🩺 پزشکی</span>
-                <span class="px-2.5 py-0.5 rounded-lg bg-emerald-50 text-emerald-800 text-[11px] font-bold border border-emerald-100">🦷 دندانپزشکی</span>
-                <span class="px-2.5 py-0.5 rounded-lg bg-emerald-50 text-emerald-800 text-[11px] font-bold border border-emerald-100">💊 داروسازی</span>
+              <div class="flex flex-wrap gap-1 mt-2">
+                <span class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 text-[10px] font-bold">🩺 پزشکی</span>
+                <span class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 text-[10px] font-bold">🦷 دندانپزشکی</span>
+                <span class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 text-[10px] font-bold">💊 داروسازی</span>
               </div>
             </div>
 
-            <!-- Strategy Highlights -->
-            <ul class="space-y-2 text-xs text-slate-600 border-t border-slate-100 pt-3.5 font-medium leading-relaxed">
-              <li class="flex items-start gap-2">
-                <span class="text-emerald-600 font-black mt-0.5">✓</span>
-                <span><b>دروس محوری:</b> زیست‌شناسی، شیمی، فیزیک و ریاضی تجربی</span>
+            <ul class="space-y-1.5 text-[11px] text-slate-600 border-t border-slate-100 pt-2.5 font-medium leading-relaxed">
+              <li class="flex items-center gap-1.5">
+                <span class="text-emerald-600 font-black text-xs">✓</span>
+                <span>زیست‌شناسی، شیمی، فیزیک و ریاضی</span>
               </li>
-              <li class="flex items-start gap-2">
-                <span class="text-emerald-600 font-black mt-0.5">✓</span>
-                <span><b>روش اجرا:</b> متن‌خوانی خط‌به‌خط، شکل‌خوانی و تست‌های ترکیبی</span>
+              <li class="flex items-center gap-1.5">
+                <span class="text-emerald-600 font-black text-xs">✓</span>
+                <span>متن‌خوانی دقیق + تست‌های مفهومی</span>
               </li>
-              <li class="flex items-start gap-2">
-                <span class="text-emerald-600 font-black mt-0.5">✓</span>
-                <span><b>توازن امتحانی:</b> پوشش کامل امتحانات نهایی + مهارت سنجش</span>
+              <li class="flex items-center gap-1.5">
+                <span class="text-emerald-600 font-black text-xs">✓</span>
+                <span>توازن نهایی ۶۰٪ و سنجش تستی</span>
               </li>
             </ul>
 
-            <!-- Hourly Metrics Box -->
-            <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-100/90 space-y-1.5 text-xs">
+            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100 space-y-1 text-[11px]">
               <div class="flex items-center justify-between">
-                <span class="text-slate-500 font-bold flex items-center gap-1.5">
+                <span class="text-slate-400 font-bold flex items-center gap-1">
                   <span>⏱️</span>
                   <span>ساعت مطالعه هدف:</span>
                 </span>
-                <span class="font-black text-emerald-700">${SecurityEngine.escapeHtml(gH.tajrobi)}</span>
-              </div>
-              <div class="flex items-center justify-between text-[11px] text-slate-400 pt-0.5 border-t border-slate-200/50">
-                <span>تقویم مطالعاتی:</span>
-                <span class="font-bold text-slate-600">شنبه تا جمعه (۷ روزه)</span>
+                <span class="font-black text-emerald-700">${SecurityEngine.escapeHtml(gH.tajrobi)} در هفته</span>
               </div>
             </div>
           </div>
 
-          <!-- Action Button -->
-          <div class="pt-5">
-            <button type="button" onclick="navigateTo('study-plan', {grade: '${gCode}', major: 'tajrobi'})" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-600 text-white font-black text-xs sm:text-sm transition-all duration-200 shadow-md shadow-emerald-600/25 flex items-center justify-center gap-2 group-hover:gap-3">
-              <span>مشاهده برنامه مطالعاتی تجربی</span>
-              <span class="text-base transition-transform group-hover:-translate-x-1">←</span>
+          <div class="pt-3.5">
+            <button type="button" onclick="navigateTo('study-plan', {grade: '${gCode}', major: 'tajrobi'})" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs transition shadow-sm flex items-center justify-center gap-1.5">
+              <span>مشاهده برنامه تجربی</span>
+              <span class="text-sm">←</span>
             </button>
           </div>
         </div>
 
         <!-- 2. Ensani Card -->
-        <div class="relative bg-white rounded-3xl p-6 sm:p-7 border-2 border-amber-500/20 hover:border-amber-500 shadow-lg hover:shadow-2xl hover:shadow-amber-500/15 transition-all duration-300 flex flex-col justify-between group overflow-hidden">
-          <div class="absolute top-0 right-0 left-0 h-1.5 bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600"></div>
+        <div class="relative bg-white rounded-2xl p-4 sm:p-5 border-2 border-amber-500/25 hover:border-amber-500 shadow-sm hover:shadow-xl hover:shadow-amber-500/10 transition-all duration-200 flex flex-col justify-between group overflow-hidden">
+          <div class="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-amber-400 to-orange-600"></div>
           
-          <div class="space-y-5">
-            <!-- Header Row -->
-            <div class="flex items-center justify-between pt-1">
-              <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-100/90 text-amber-600 border border-amber-200/80 flex items-center justify-center text-3xl font-black shadow-inner group-hover:scale-105 transition-transform duration-300">
+          <div class="space-y-3 pt-0.5">
+            <div class="flex items-center justify-between">
+              <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center text-xl font-black shadow-inner">
                 ⚖️
               </div>
-              <span class="px-3 py-1 rounded-full text-xs font-black bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-sm shadow-amber-500/30">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500 text-white shadow-sm">
                 علوم انسانی
               </span>
             </div>
 
-            <!-- Title & Target Majors -->
             <div>
-              <h3 class="text-xl font-black text-navy-950 group-hover:text-amber-700 transition">
+              <h3 class="text-base sm:text-lg font-black text-navy-950 group-hover:text-amber-700 transition leading-snug">
                 برنامه مطالعاتی انسانی ${SecurityEngine.escapeHtml(gS)}
               </h3>
-              <p class="text-xs text-slate-500 mt-1 font-semibold">
-                ${SecurityEngine.escapeHtml(gLabel)} • راهبردی و هفتگی
+              <p class="text-[11px] text-slate-400 font-bold mt-0.5">
+                ${SecurityEngine.escapeHtml(gLabel)} • راهبردی هفتگی
               </p>
-              <div class="flex flex-wrap gap-1.5 mt-2.5">
-                <span class="px-2.5 py-0.5 rounded-lg bg-amber-50 text-amber-900 text-[11px] font-bold border border-amber-100">⚖️ حقوق و قضا</span>
-                <span class="px-2.5 py-0.5 rounded-lg bg-amber-50 text-amber-900 text-[11px] font-bold border border-amber-100">🧠 روان‌شناسی</span>
-                <span class="px-2.5 py-0.5 rounded-lg bg-amber-50 text-amber-900 text-[11px] font-bold border border-amber-100">🎓 فرهنگیان</span>
+              <div class="flex flex-wrap gap-1 mt-2">
+                <span class="px-2 py-0.5 rounded-md bg-amber-50 text-amber-900 text-[10px] font-bold">⚖️ حقوق</span>
+                <span class="px-2 py-0.5 rounded-md bg-amber-50 text-amber-900 text-[10px] font-bold">🧠 روان‌شناسی</span>
+                <span class="px-2 py-0.5 rounded-md bg-amber-50 text-amber-900 text-[10px] font-bold">🎓 فرهنگیان</span>
               </div>
             </div>
 
-            <!-- Strategy Highlights -->
-            <ul class="space-y-2 text-xs text-slate-600 border-t border-slate-100 pt-3.5 font-medium leading-relaxed">
-              <li class="flex items-start gap-2">
-                <span class="text-amber-600 font-black mt-0.5">✓</span>
-                <span><b>دروس محوری:</b> علوم و فنون ادبی، فلسفه و منطق، جامعه‌شناسی</span>
+            <ul class="space-y-1.5 text-[11px] text-slate-600 border-t border-slate-100 pt-2.5 font-medium leading-relaxed">
+              <li class="flex items-center gap-1.5">
+                <span class="text-amber-600 font-black text-xs">✓</span>
+                <span>فنون ادبی، فلسفه و منطق، جامعه‌شناسی</span>
               </li>
-              <li class="flex items-start gap-2">
-                <span class="text-amber-600 font-black mt-0.5">✓</span>
-                <span><b>روش اجرا:</b> تقطیع سماعی عروض، درک مفاهیم و اقتصاد کنکور</span>
+              <li class="flex items-center gap-1.5">
+                <span class="text-amber-600 font-black text-xs">✓</span>
+                <span>تقطیع سماعی عروض + اقتصاد کنکور</span>
               </li>
-              <li class="flex items-start gap-2">
-                <span class="text-amber-600 font-black mt-0.5">✓</span>
-                <span><b>توازن امتحانی:</b> تسلط تشریحی دروس نهایی + تقویت ریاضی و آمار</span>
+              <li class="flex items-center gap-1.5">
+                <span class="text-amber-600 font-black text-xs">✓</span>
+                <span>تسلط تشریحی + تقویت ریاضی و آمار</span>
               </li>
             </ul>
 
-            <!-- Hourly Metrics Box -->
-            <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-100/90 space-y-1.5 text-xs">
+            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100 space-y-1 text-[11px]">
               <div class="flex items-center justify-between">
-                <span class="text-slate-500 font-bold flex items-center gap-1.5">
+                <span class="text-slate-400 font-bold flex items-center gap-1">
                   <span>⏱️</span>
                   <span>ساعت مطالعه هدف:</span>
                 </span>
-                <span class="font-black text-amber-700">${SecurityEngine.escapeHtml(gH.ensani)}</span>
-              </div>
-              <div class="flex items-center justify-between text-[11px] text-slate-400 pt-0.5 border-t border-slate-200/50">
-                <span>تقویم مطالعاتی:</span>
-                <span class="font-bold text-slate-600">شنبه تا جمعه (۷ روزه)</span>
+                <span class="font-black text-amber-700">${SecurityEngine.escapeHtml(gH.ensani)} در هفته</span>
               </div>
             </div>
           </div>
 
-          <!-- Action Button -->
-          <div class="pt-5">
-            <button type="button" onclick="navigateTo('study-plan', {grade: '${gCode}', major: 'ensani'})" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-500 text-navy-950 font-black text-xs sm:text-sm transition-all duration-200 shadow-md shadow-amber-500/25 flex items-center justify-center gap-2 group-hover:gap-3">
-              <span>مشاهده برنامه مطالعاتی انسانی</span>
-              <span class="text-base transition-transform group-hover:-translate-x-1">←</span>
+          <div class="pt-3.5">
+            <button type="button" onclick="navigateTo('study-plan', {grade: '${gCode}', major: 'ensani'})" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-navy-950 font-black text-xs transition shadow-sm flex items-center justify-center gap-1.5">
+              <span>مشاهده برنامه انسانی</span>
+              <span class="text-sm">←</span>
             </button>
           </div>
         </div>
 
         <!-- 3. Riazi Card -->
-        <div class="relative bg-white rounded-3xl p-6 sm:p-7 border-2 border-sky-500/20 hover:border-sky-500 shadow-lg hover:shadow-2xl hover:shadow-sky-500/15 transition-all duration-300 flex flex-col justify-between group overflow-hidden">
-          <div class="absolute top-0 right-0 left-0 h-1.5 bg-gradient-to-r from-sky-400 via-indigo-500 to-sky-600"></div>
+        <div class="relative bg-white rounded-2xl p-4 sm:p-5 border-2 border-sky-500/25 hover:border-sky-500 shadow-sm hover:shadow-xl hover:shadow-sky-500/10 transition-all duration-200 flex flex-col justify-between group overflow-hidden">
+          <div class="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-sky-400 to-indigo-600"></div>
           
-          <div class="space-y-5">
-            <!-- Header Row -->
-            <div class="flex items-center justify-between pt-1">
-              <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-50 to-indigo-100/90 text-sky-600 border border-sky-200/80 flex items-center justify-center text-3xl font-black shadow-inner group-hover:scale-105 transition-transform duration-300">
+          <div class="space-y-3 pt-0.5">
+            <div class="flex items-center justify-between">
+              <div class="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 border border-sky-100 flex items-center justify-center text-xl font-black shadow-inner">
                 📐
               </div>
-              <span class="px-3 py-1 rounded-full text-xs font-black bg-gradient-to-r from-sky-600 to-indigo-600 text-white shadow-sm shadow-sky-600/30">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-sky-600 text-white shadow-sm">
                 ریاضی و فیزیک
               </span>
             </div>
 
-            <!-- Title & Target Majors -->
             <div>
-              <h3 class="text-xl font-black text-navy-950 group-hover:text-sky-700 transition">
+              <h3 class="text-base sm:text-lg font-black text-navy-950 group-hover:text-sky-700 transition leading-snug">
                 برنامه مطالعاتی ریاضی ${SecurityEngine.escapeHtml(gS)}
               </h3>
-              <p class="text-xs text-slate-500 mt-1 font-semibold">
-                ${SecurityEngine.escapeHtml(gLabel)} • راهبردی و هفتگی
+              <p class="text-[11px] text-slate-400 font-bold mt-0.5">
+                ${SecurityEngine.escapeHtml(gLabel)} • راهبردی هفتگی
               </p>
-              <div class="flex flex-wrap gap-1.5 mt-2.5">
-                <span class="px-2.5 py-0.5 rounded-lg bg-sky-50 text-sky-900 text-[11px] font-bold border border-sky-100">💻 مهندسی کامپیوتر</span>
-                <span class="px-2.5 py-0.5 rounded-lg bg-sky-50 text-sky-900 text-[11px] font-bold border border-sky-100">⚡ مهندسی برق</span>
-                <span class="px-2.5 py-0.5 rounded-lg bg-sky-50 text-sky-900 text-[11px] font-bold border border-sky-100">🏢 عمران و مکانیک</span>
+              <div class="flex flex-wrap gap-1 mt-2">
+                <span class="px-2 py-0.5 rounded-md bg-sky-50 text-sky-900 text-[10px] font-bold">💻 کامپیوتر</span>
+                <span class="px-2 py-0.5 rounded-md bg-sky-50 text-sky-900 text-[10px] font-bold">⚡ برق</span>
+                <span class="px-2 py-0.5 rounded-md bg-sky-50 text-sky-900 text-[10px] font-bold">🏢 عمران و مکانیک</span>
               </div>
             </div>
 
-            <!-- Strategy Highlights -->
-            <ul class="space-y-2 text-xs text-slate-600 border-t border-slate-100 pt-3.5 font-medium leading-relaxed">
-              <li class="flex items-start gap-2">
-                <span class="text-sky-600 font-black mt-0.5">✓</span>
-                <span><b>دروس محوری:</b> حسابان و ریاضیات، هندسه و گسسته، فیزیک</span>
+            <ul class="space-y-1.5 text-[11px] text-slate-600 border-t border-slate-100 pt-2.5 font-medium leading-relaxed">
+              <li class="flex items-center gap-1.5">
+                <span class="text-sky-600 font-black text-xs">✓</span>
+                <span>حسابان، هندسه و گسسته، فیزیک</span>
               </li>
-              <li class="flex items-start gap-2">
-                <span class="text-sky-600 font-black mt-0.5">✓</span>
-                <span><b>روش اجرا:</b> دست‌به‌قلم شدن روزانه، اثبات قضایا و تست زمان‌دار</span>
+              <li class="flex items-center gap-1.5">
+                <span class="text-sky-600 font-black text-xs">✓</span>
+                <span>حل مسئله تشریحی + تست زمان‌دار</span>
               </li>
-              <li class="flex items-start gap-2">
-                <span class="text-sky-600 font-black mt-0.5">✓</span>
-                <span><b>توازن امتحانی:</b> حل مسائل تشریحی نهایی + تکنیک‌های حل سریع</span>
+              <li class="flex items-center gap-1.5">
+                <span class="text-sky-600 font-black text-xs">✓</span>
+                <span>تکنیک‌های سرعت عمل + امتحانات نهایی</span>
               </li>
             </ul>
 
-            <!-- Hourly Metrics Box -->
-            <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-100/90 space-y-1.5 text-xs">
+            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100 space-y-1 text-[11px]">
               <div class="flex items-center justify-between">
-                <span class="text-slate-500 font-bold flex items-center gap-1.5">
+                <span class="text-slate-400 font-bold flex items-center gap-1">
                   <span>⏱️</span>
                   <span>ساعت مطالعه هدف:</span>
                 </span>
-                <span class="font-black text-sky-700">${SecurityEngine.escapeHtml(gH.riazi)}</span>
-              </div>
-              <div class="flex items-center justify-between text-[11px] text-slate-400 pt-0.5 border-t border-slate-200/50">
-                <span>تقویم مطالعاتی:</span>
-                <span class="font-bold text-slate-600">شنبه تا جمعه (۷ روزه)</span>
+                <span class="font-black text-sky-700">${SecurityEngine.escapeHtml(gH.riazi)} در هفته</span>
               </div>
             </div>
           </div>
 
-          <!-- Action Button -->
-          <div class="pt-5">
-            <button type="button" onclick="navigateTo('study-plan', {grade: '${gCode}', major: 'riazi'})" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-sky-600 via-indigo-600 to-sky-700 hover:from-sky-500 hover:to-indigo-600 text-white font-black text-xs sm:text-sm transition-all duration-200 shadow-md shadow-sky-600/25 flex items-center justify-center gap-2 group-hover:gap-3">
-              <span>مشاهده برنامه مطالعاتی ریاضی</span>
-              <span class="text-base transition-transform group-hover:-translate-x-1">←</span>
+          <div class="pt-3.5">
+            <button type="button" onclick="navigateTo('study-plan', {grade: '${gCode}', major: 'riazi'})" class="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-black text-xs transition shadow-sm flex items-center justify-center gap-1.5">
+              <span>مشاهده برنامه ریاضی</span>
+              <span class="text-sm">←</span>
             </button>
           </div>
         </div>
