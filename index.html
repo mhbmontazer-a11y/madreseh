@@ -912,6 +912,13 @@ html.ref-pending::after{content:"";position:fixed;z-index:2147483647;top:50%;lef
         <button type="button" onclick="navigateTo('majors');toggleMobileMenu(false);" class="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-right">🎓 رشته‌ها و مشاغل</button>
         <button type="button" onclick="openCounselorModal();toggleMobileMenu(false);" class="p-2.5 rounded-xl bg-turquoise-50 text-turquoise-800 hover:bg-turquoise-100 text-right">👨‍🏫 معرفی مشاور</button>
       </div>
+      <button type="button" data-admin-trigger="true" onclick="navigateTo('admin');toggleMobileMenu(false);" class="w-full p-2.5 rounded-xl bg-navy-900 text-white hover:bg-navy-800 text-right font-black flex items-center justify-between shadow-sm">
+        <span class="flex items-center gap-2 text-xs">
+          <svg class="w-4 h-4 text-turquoise-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          <span>ورود به پنل مدیریت سامانه</span>
+        </span>
+        <span class="text-[10px] px-2 py-0.5 rounded bg-turquoise-400 text-navy-950 font-bold">مدیر / مشاور</span>
+      </button>
       <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
         <button type="button" onclick="toggleReadingMode();toggleMobileMenu(false);" class="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition">
           <span>🌙</span>
@@ -957,6 +964,7 @@ html.ref-pending::after{content:"";position:fixed;z-index:2147483647;top:50%;lef
             <li><button type="button" onclick="navigateTo('explorer', {type: 'download'})" class="hover:text-turquoise-400 transition">دانلود جزوه‌ها و فرم‌های مشاوره‌ای</button></li>
             <li><button type="button" onclick="navigateTo('quizzes')" class="hover:text-turquoise-400 transition">آزمون‌های خودارزیابی و رغبت‌سنجی</button></li>
             <li><button type="button" onclick="navigateTo('tools')" class="hover:text-turquoise-400 transition">تایمر پومودورو و برنامه‌ریزی هفتگی</button></li>
+            <li><button type="button" data-admin-trigger="true" onclick="navigateTo('admin')" class="text-turquoise-400 hover:text-white font-bold transition flex items-center gap-1.5 pt-1"><span>🔐</span><span>ورود به پنل مدیریت سامانه</span></button></li>
           </ul>
         </div>
 
@@ -11557,6 +11565,7 @@ window.openStaffLoginModal = function(redirectParams) {
 };
 
 openSwitchUserModal = function(redirectParams) {
+  STATE._pendingLoginRedirect = redirectParams || null;
   const isLoggedIn = AuthService.isAuthenticated();
   const cur = STATE.currentUser;
 
@@ -11580,7 +11589,7 @@ openSwitchUserModal = function(redirectParams) {
             <p class="text-emerald-700 text-[11px] mt-0.5">شما با دسترسی کامل به پنل مدیریت وارد شده‌اید.</p>
           </div>
           <div class="flex gap-2">
-            <button type="button" onclick="closeModal();navigateTo('admin');" class="px-4 py-2 rounded-xl bg-navy-900 text-white font-bold">ورود به پنل</button>
+            <button type="button" onclick="closeModal();const p = STATE._pendingLoginRedirect || {};STATE._pendingLoginRedirect = null;navigateTo('admin', p);" class="px-4 py-2 rounded-xl bg-navy-900 text-white font-bold">ورود به پنل</button>
             <button type="button" onclick="closeModal();AuthService.logout();" class="px-4 py-2 rounded-xl bg-rose-600 text-white font-bold">خروج امن</button>
           </div>
         </div>
@@ -11640,7 +11649,9 @@ window.submitRealLoginForm = function() {
   closeModal();
   showToast(`ورود امن انجام شد: ${res.user.name} (${res.user.roleLabel})`, 'success');
   if (['role-superadmin', 'role-content-manager', 'role-author', 'role-counselor'].includes(res.user.roleId)) {
-    navigateTo('admin');
+    const targetParams = STATE._pendingLoginRedirect || {};
+    STATE._pendingLoginRedirect = null;
+    navigateTo('admin', targetParams);
   } else {
     renderApp();
   }
@@ -14561,7 +14572,19 @@ function renderQuickCompassSection() {
           <h2>${SecurityEngine.escapeHtml(cfg.title || '🧭 قطب‌نمای سریع: همین الان تو چه وضعیتی هستی؟')}</h2>
           <p>${SecurityEngine.escapeHtml(cfg.subtitle || 'روی دغدغه یا وضعیت فعلی‌ات کلیک کن تا کوتاه‌ترین مسیر حل مسئله را ببینی:')}</p>
         </div>
-        ${isLive ? `<button type="button" onclick="navigateTo('admin', {tab: 'compass'})" class="live-cms-control px-3 py-1.5 rounded-xl bg-turquoise-500 text-navy-950 font-black text-xs shadow">✏️ ویرایش قطب‌نما در پنل مدیریت</button>` : ''}
+        <div class="flex items-center gap-2">
+          ${(typeof AuthService !== 'undefined' && AuthService.isAuthenticatedStaff()) ? `
+            <button type="button" onclick="navigateTo('admin', {tab: 'compass'})" class="px-3.5 py-1.5 rounded-xl bg-navy-900 hover:bg-turquoise-600 text-turquoise-300 hover:text-white font-black text-xs shadow-md transition flex items-center gap-1.5 border border-turquoise-500/30">
+              <span>⚙️</span>
+              <span>مدیریت و ویرایش سریع قطب‌نما</span>
+            </button>
+          ` : `
+            <button type="button" onclick="navigateTo('admin', {tab: 'compass'})" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-navy-950 text-[11px] font-bold transition flex items-center gap-1 border border-slate-200" title="ورود به مدیریت و ویرایش این بخش">
+              <span>✏️</span>
+              <span>ویرایش قطب‌نما</span>
+            </button>
+          `}
+        </div>
       </div>
       <div class="need-router-grid">
         ${(cfg.items || []).map(item => {
