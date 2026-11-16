@@ -787,11 +787,19 @@ html.ref-pending::after{content:"";position:fixed;z-index:2147483647;top:50%;lef
         <span id="top-announcement-text" class="text-slate-200 font-medium">کارگاه جامع «تکنیک‌های مدیریت زمان و برنامه‌ریزی امتحانات نهایی» روز چهارشنبه ساعت ۱۰ در سالن اجتماعات برگزار می‌شود.</span>
       </div>
       <div class="flex items-center gap-4 text-xs text-turquoise-400">
-        <button type="button" onclick="navigateTo('tools', {tab: 'calendar'})" class="hover:underline flex items-center gap-1">
-          <span>تقویم آموزشی مدرسه</span>
+        <!-- Live Shamsi Calendar Clock Widget -->
+        <div id="live-topbar-shamsi-clock" class="flex items-center gap-2 cursor-pointer bg-white/10 hover:bg-white/15 px-3 py-1 rounded-xl text-turquoise-300 transition border border-white/10 shadow-sm" onclick="openShamsiCalendarModal()" title="مشاهده تقویم کامل هجری شمسی و رویدادهای دبیرستان">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="topbar-live-shamsi-date" class="font-extrabold text-white text-[11px]">تقویم شمسی آنلاین</span>
+          <span class="text-white/40">|</span>
+          <span id="topbar-live-shamsi-time" class="font-black text-turquoise-300 text-[11px] font-mono">--:--:--</span>
+          <span class="hidden md:inline-block px-1.5 py-0.5 rounded text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">زنده</span>
+        </div>
+        <button type="button" onclick="openShamsiCalendarModal()" class="text-turquoise-400 hover:text-turquoise-300 hover:underline flex items-center gap-1 font-bold">
+          <span>🗓️ تقویم رویدادها</span>
         </button>
-        <span class="opacity-40">|</span>
-        <button type="button" onclick="openCounselorModal()" class="hover:underline flex items-center gap-1">
+        <span class="opacity-40 text-slate-500">|</span>
+        <button type="button" onclick="openCounselorModal()" class="text-turquoise-400 hover:text-turquoise-300 hover:underline flex items-center gap-1">
           <span>معرفی و وقت مشاوره</span>
         </button>
       </div>
@@ -833,6 +841,10 @@ html.ref-pending::after{content:"";position:fixed;z-index:2147483647;top:50%;lef
           <button type="button" onclick="navigateTo('study-plan')" id="nav-study-plan" class="px-3 py-2 rounded-xl hover:bg-slate-100 hover:text-navy-900 transition flex items-center gap-1">
             <span class="text-xs">📅</span>
             <span>برنامه‌های مطالعاتی</span>
+          </button>
+          <button type="button" onclick="navigateTo('calendar')" id="nav-calendar" class="px-3 py-2 rounded-xl hover:bg-slate-100 hover:text-navy-900 transition flex items-center gap-1 font-bold text-navy-900">
+            <span class="text-xs">🗓️</span>
+            <span>تقویم و رویدادها</span>
           </button>
           <button type="button" onclick="navigateTo('tools')" id="nav-tools" class="px-3 py-2 rounded-xl hover:bg-slate-100 hover:text-navy-900 transition">جعبه ابزار دانش‌آموز</button>
           <button type="button" onclick="navigateTo('majors')" id="nav-majors" class="px-3 py-2 rounded-xl hover:bg-slate-100 hover:text-navy-900 transition">رشته‌ها و مشاغل</button>
@@ -3766,9 +3778,18 @@ html.ref-pending::after{content:"";position:fixed;z-index:2147483647;top:50%;lef
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
               <!-- Hero Text -->
               <div class="lg:col-span-7 space-y-6">
-                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 backdrop-blur-md text-xs sm:text-sm font-bold text-turquoise-300">
-                  <span class="w-2.5 h-2.5 rounded-full bg-turquoise-400 animate-ping"></span>
-                  <span>مرجع اختصاصی مشاوره و هدایت تحصیلی دبیرستان نمونه دولتی پسرانه باقرالعلوم</span>
+                <div class="flex flex-wrap items-center gap-2">
+                  <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 backdrop-blur-md text-xs sm:text-sm font-bold text-turquoise-300">
+                    <span class="w-2.5 h-2.5 rounded-full bg-turquoise-400 animate-ping"></span>
+                    <span>مرجع اختصاصی مشاوره و هدایت تحصیلی دبیرستان نمونه دولتی پسرانه باقرالعلوم</span>
+                  </div>
+                  <!-- Live Online Shamsi Calendar Badge -->
+                  <div onclick="openShamsiCalendarModal()" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 backdrop-blur-md text-xs sm:text-sm font-bold text-emerald-300 cursor-pointer transition shadow-sm" title="مشاهده تقویم کامل هجری شمسی و رویدادهای دبیرستان">
+                    <span>📅</span>
+                    <span id="home-live-shamsi-date">${(typeof OnlineShamsiCalendar !== 'undefined') ? OnlineShamsiCalendar.getToday().fullPersian : 'تقویم شمسی آنلاین'}</span>
+                    <span class="text-white/30">•</span>
+                    <span class="text-xs text-turquoise-200">مشاهده تقویم و رویدادها ←</span>
+                  </div>
                 </div>
                 <h1 class="text-2xl sm:text-4xl lg:text-5xl font-black leading-tight sm:leading-snug tracking-tight text-white">
                   «برای شناخت بهتر خودت، یادگیری مؤثرتر و ساختن آینده‌ای موفق‌تر»
@@ -5481,6 +5502,27 @@ html.ref-pending::after{content:"";position:fixed;z-index:2147483647;top:50%;lef
                   <p class="text-xs sm:text-sm text-slate-600 whitespace-pre-line leading-relaxed">${n.content}</p>
                 </div>
               `).join('')}
+            </div>
+          </div>
+        `;
+      } else if (activeTab === 'calendar') {
+        const calToday = (typeof OnlineShamsiCalendar !== 'undefined') ? OnlineShamsiCalendar.getToday() : { jy: 1405, jm: 8, jd: 25 };
+        bodyHtml = `
+          <div class="space-y-6">
+            <div class="bg-navy-900 rounded-3xl p-6 text-white flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h3 class="text-lg font-black flex items-center gap-2">
+                  <span>🗓️</span>
+                  <span>تقویم شمسی آنلاین و رویدادهای تحصیلی دبیرستان</span>
+                </h3>
+                <p class="text-xs text-slate-300 mt-1">مشاهده رویدادها، آزمون‌های پیش‌رو و هماهنگی برنامه‌های هفتگی مطالعه با تقویم رسمی</p>
+              </div>
+              <button type="button" onclick="openShamsiCalendarModal()" class="px-4 py-2 rounded-xl bg-turquoise-500 text-navy-950 font-black text-xs shadow-md hover:bg-turquoise-400 transition">
+                نمای تمام‌صفحه تقویم
+              </button>
+            </div>
+            <div>
+              ${renderInteractiveShamsiCalendarWidget(calToday.jy, calToday.jm, calToday.jd, 'tools-shamsi-cal-widget')}
             </div>
           </div>
         `;
@@ -8218,6 +8260,619 @@ const JalaliDateEngine = {
     const weekdays = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه', 'شنبه'];
     return weekdays[dt.getDay()] || 'شنبه';
   }
+};
+
+// =============================================================================
+// 15.2.2 ENTERPRISE ONLINE SHAMSI (JALALI) CALENDAR & IRAN TIME ENGINE
+// =============================================================================
+window.OnlineShamsiCalendar = {
+  isOnline: (typeof navigator !== 'undefined') ? navigator.onLine : true,
+  timeOffsetMs: 0,
+  lastSyncTime: null,
+  activeWidgetMonth: null,
+  activeWidgetYear: null,
+  activeWidgetDay: null,
+
+  monthNames: [
+    'فروردین', 'اردیبهشت', 'خرداد',
+    'تیر', 'مرداد', 'شهریور',
+    'مهر', 'آبان', 'آذر',
+    'دی', 'بهمن', 'اسفند'
+  ],
+  monthDaysCount: [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29],
+
+  weekdays: [
+    { name: 'شنبه', short: 'ش' },
+    { name: 'یکشنبه', short: 'ی' },
+    { name: 'دوشنبه', short: 'د' },
+    { name: 'سه‌شنبه', short: 'س' },
+    { name: 'چهارشنبه', short: 'چ' },
+    { name: 'پنجشنبه', short: 'پ' },
+    { name: 'جمعه', short: 'ج' }
+  ],
+
+  isLeapYear(jy) {
+    const breaks = [-61, 9, 38, 199, 426, 686, 756, 818, 1111, 1181, 1210, 1635, 2060, 2097, 2192, 2262, 2324, 2394, 2456, 3178];
+    let jp = breaks[0];
+    let jm, jump, leap;
+    if (jy < jp || jy >= breaks[breaks.length - 1]) {
+      return (((((jy - 474) % 2820) + 474) + 38) * 682) % 2816 < 682;
+    }
+    for (let i = 1; i < breaks.length; i++) {
+      jm = breaks[i];
+      jump = jm - jp;
+      if (jy < jm) break;
+      jp = jm;
+    }
+    let n = jy - jp;
+    if (jump - n < 6) n = n - jump + Math.floor((jump + 4) / 33) * 33;
+    leap = (((((n + 1) % 33) - 1) % 4) === 0) && (((n + 1) % 33) !== 1);
+    return leap;
+  },
+
+  getDaysInMonth(jy, jm) {
+    if (jm <= 6) return 31;
+    if (jm <= 11) return 30;
+    return this.isLeapYear(jy) ? 30 : 29;
+  },
+
+  getOccasions(jm, jd) {
+    const occasions = {
+      // فروردین
+      "1-1": { title: "آغاز سال نو • عید نوروز", holiday: true },
+      "1-2": { title: "عید نوروز (روز دوم)", holiday: true },
+      "1-3": { title: "عید نوروز (روز سوم)", holiday: true },
+      "1-4": { title: "عید نوروز (روز چهارم)", holiday: true },
+      "1-12": { title: "روز جمهوری اسلامی ایران", holiday: true },
+      "1-13": { title: "روز طبیعت (سیزده‌بدر)", holiday: true },
+      // اردیبهشت
+      "2-2": { title: "روز زمین پاک", holiday: false },
+      "2-12": { title: "شهادت استاد مطهری • روز معلم", holiday: false },
+      "2-28": { title: "بزرگداشت حکیم خیام نیشابوری", holiday: false },
+      // خرداد
+      "3-1": { title: "آغاز امتحانات نهایی خردادماه سراسر کشور", holiday: false },
+      "3-14": { title: "رحلت امام خمینی (ره)", holiday: true },
+      "3-15": { title: "قیام خونین ۱۵ خرداد", holiday: true },
+      "3-31": { title: "شهادت دکتر مصطفی چمران", holiday: false },
+      // تیر
+      "4-7": { title: "شهادت آیت‌الله بهشتی و ۷۲ تن • روز قوه قضائیه", holiday: false },
+      "4-10": { title: "روز صنعت و معدن", holiday: false },
+      "4-14": { title: "روز قلم", holiday: false },
+      // مرداد
+      "5-17": { title: "روز خبرنگار", holiday: false },
+      "5-26": { title: "سالروز بازگشت آزادگان به میهن اسلامی", holiday: false },
+      // شهریور
+      "6-1": { title: "روز پزشک • بزرگداشت ابوعلی سینا", holiday: false },
+      "6-5": { title: "روز داروسازی • بزرگداشت زکریای رازی", holiday: false },
+      "6-13": { title: "روز بزرگداشت ابوریحان بیرونی", holiday: false },
+      "6-27": { title: "روز شعر و ادب فارسی • بزرگداشت استاد شهریار", holiday: false },
+      // مهر
+      "7-1": { title: "آغاز سال تحصیلی جدید و بازگشایی مدارس سراسر کشور", holiday: false },
+      "7-8": { title: "روز بزرگداشت مولانا جلال‌الدین بلخی", holiday: false },
+      "7-20": { title: "روز بزرگداشت لسان‌الغیب حافظ شیرازی", holiday: false },
+      // آبان
+      "8-8": { title: "روز نوجوان و بسیج دانش‌آموزی", holiday: false },
+      "8-13": { title: "روز دانش‌آموز • روز ملی مبارزه با استکبار جهانی", holiday: false },
+      "8-16": { title: "کارگاه حضوری تکنیک‌های مدیریت زمان دبیرستان باقرالعلوم", holiday: false, schoolEvent: true },
+      "8-18": { title: "آزمون آزمایشی جامع مرحله سوم دبیرستان باقرالعلوم", holiday: false, schoolEvent: true },
+      "8-24": { title: "روز کتاب، کتابخوانی و کتابدار", holiday: false },
+      "8-25": { title: "نشست اولیا و مربیان دبیرستان باقرالعلوم", holiday: false, schoolEvent: true },
+      // آذر
+      "9-2": { title: "سمینار قوانین سوابق تحصیلی و امتحانات نهایی", holiday: false, schoolEvent: true },
+      "9-16": { title: "روز دانشجو", holiday: false },
+      "9-30": { title: "شب یلدا • کهن‌ترین جشن پاسداشت زمستان", holiday: false },
+      // دی
+      "10-3": { title: "آغاز امتحانات تشریحی نوبت اول (دی‌ماه) دبیرستان", holiday: false, schoolEvent: true },
+      "10-22": { title: "روز اختراع و فناوری", holiday: false },
+      // بهمن
+      "11-12": { title: "آغاز دهه فجر انقلاب اسلامی", holiday: false },
+      "11-22": { title: "سالروز پیروزی انقلاب اسلامی ایران", holiday: true },
+      "11-29": { title: "روز تجلیل از اسناد ملی", holiday: false },
+      // اسفند
+      "12-5": { title: "روز مهندس • بزرگداشت خواجه نصیرالدین طوسی", holiday: false },
+      "12-15": { title: "روز درختکاری و هفته منابع طبیعی", holiday: false },
+      "12-29": { title: "روز ملی شدن صنعت نفت ایران", holiday: true }
+    };
+    return occasions[`${jm}-${jd}`] || null;
+  },
+
+  getNow() {
+    const d = new Date();
+    if (this.timeOffsetMs) {
+      d.setTime(d.getTime() + this.timeOffsetMs);
+    }
+    return d;
+  },
+
+  getToday() {
+    const now = this.getNow();
+    let jy, jm, jd, weekdayName, timeStr;
+
+    try {
+      const parts = new Intl.DateTimeFormat('en-US-u-ca-persian', {
+        timeZone: 'Asia/Tehran',
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+        weekday: 'long',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      }).formatToParts(now);
+
+      const map = {};
+      parts.forEach(p => map[p.type] = p.value);
+      jy = parseInt(map.year, 10);
+      jm = parseInt(map.month, 10);
+      jd = parseInt(map.day, 10);
+      timeStr = `${map.hour}:${map.minute}:${map.second}`;
+
+      const weekdayFaMap = {
+        'Saturday': 'شنبه',
+        'Sunday': 'یکشنبه',
+        'Monday': 'دوشنبه',
+        'Tuesday': 'سه‌شنبه',
+        'Wednesday': 'چهارشنبه',
+        'Thursday': 'پنجشنبه',
+        'Friday': 'جمعه'
+      };
+      weekdayName = weekdayFaMap[map.weekday] || 'دوشنبه';
+    } catch (e) {
+      const [gy, gm, gd] = [now.getFullYear(), now.getMonth() + 1, now.getDate()];
+      const j = (typeof JalaliDateEngine !== 'undefined') ? JalaliDateEngine.gregorianToJalali(gy, gm, gd) : [1405, 8, 25];
+      jy = j[0]; jm = j[1]; jd = j[2];
+      const wDays = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه', 'شنبه'];
+      weekdayName = wDays[now.getDay()];
+      timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+    }
+
+    const monthName = this.monthNames[jm - 1] || 'آبان';
+    const season = (jm <= 3) ? 'بهار' : (jm <= 6) ? 'تابستان' : (jm <= 9) ? 'پاییز' : 'زمستان';
+
+    let dayOfYear = 0;
+    for (let m = 0; m < jm - 1; m++) {
+      dayOfYear += this.monthDaysCount[m];
+    }
+    dayOfYear += jd;
+    const totalDays = this.isLeapYear(jy) ? 366 : 365;
+    const daysToNewYear = Math.max(0, totalDays - dayOfYear);
+
+    const gregorianStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+    const fullPersian = `${weekdayName} ${this.toPersianDigits(jd)} ${monthName} ${this.toPersianDigits(jy)}`;
+    const shortDate = `${jy}/${String(jm).padStart(2, '0')}/${String(jd).padStart(2, '0')}`;
+
+    return {
+      jy, jm, jd,
+      weekdayName,
+      monthName,
+      season,
+      timeStr: this.toPersianDigits(timeStr),
+      rawTimeStr: timeStr,
+      fullPersian,
+      shortDate: this.toPersianDigits(shortDate),
+      rawShortDate: shortDate,
+      gregorianStr,
+      dayOfYear: this.toPersianDigits(dayOfYear),
+      daysToNewYear: this.toPersianDigits(daysToNewYear),
+      isOnline: this.isOnline
+    };
+  },
+
+  toPersianDigits(str) {
+    if (typeof toPersianDigits === 'function') return toPersianDigits(str);
+    return String(str).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[Number(d)]);
+  },
+
+  getCountdowns() {
+    const today = this.getToday();
+    const jy = today.jy;
+    const dayOfYear = parseInt(JalaliDateEngine.toEnglishDigits(today.dayOfYear), 10) || 240;
+    const totalDays = this.isLeapYear(jy) ? 366 : 365;
+
+    // دی (3 دی = 6*31 + 3*30 + 3 = 279)
+    const deyExamsDay = 6 * 31 + 3 * 30 + 3;
+    const daysToDey = deyExamsDay >= dayOfYear ? deyExamsDay - dayOfYear : (totalDays - dayOfYear + deyExamsDay);
+
+    // تحویل سال نو (1 فروردین)
+    const daysToNowruz = totalDays - dayOfYear;
+
+    // امتحانات نهایی خرداد (1 خرداد = 2*31 + 1 = 63)
+    const khordadDay = 2 * 31 + 1;
+    const daysToKhordad = (dayOfYear < khordadDay) ? (khordadDay - dayOfYear) : (totalDays - dayOfYear + khordadDay);
+
+    // کنکور سراسری تیر (7 تیر = 3*31 + 7 = 100)
+    const tirKonkurDay = 3 * 31 + 7;
+    const daysToKonkur = (dayOfYear < tirKonkurDay) ? (tirKonkurDay - dayOfYear) : (totalDays - dayOfYear + tirKonkurDay);
+
+    return [
+      {
+        id: 'khordad-exams',
+        title: 'امتحانات نهایی خردادماه',
+        sub: 'تأثیر قطعی ۶۰٪ در پذیرش دانشگاه',
+        days: daysToKhordad,
+        dateStr: '۱ خرداد',
+        icon: '📝',
+        badge: 'آزمون سراسری'
+      },
+      {
+        id: 'tir-konkur',
+        title: 'کنکور سراسری تیرماه',
+        sub: 'سنجش جامع تستی سراسر کشور',
+        days: daysToKonkur,
+        dateStr: '۷ تیر',
+        icon: '🎯',
+        badge: 'کنکور سراسری'
+      },
+      {
+        id: 'dey-exams',
+        title: 'امتحانات نوبت اول (دی‌ماه)',
+        sub: 'سنجش تشریحی نوبت اول دبیرستان',
+        days: daysToDey,
+        dateStr: '۳ دی',
+        icon: '📚',
+        badge: 'آزمون درون‌مدرسه‌ای'
+      },
+      {
+        id: 'nowruz-break',
+        title: 'عید نوروز و اردوی طلایی',
+        sub: 'اردوی مطالعاتی و جمع‌بندی پایه',
+        days: daysToNowruz,
+        dateStr: '۱ فروردین',
+        icon: '🌱',
+        badge: 'اردوی نوروزی'
+      }
+    ];
+  },
+
+  async syncOnlineTime() {
+    try {
+      if (typeof fetch === 'undefined') return;
+      const controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+      const timeoutId = controller ? setTimeout(() => controller.abort(), 2000) : null;
+      const res = await fetch('https://worldtimeapi.org/api/timezone/Asia/Tehran', {
+        signal: controller ? controller.signal : undefined,
+        cache: 'no-store'
+      });
+      if (timeoutId) clearTimeout(timeoutId);
+      if (res && res.ok) {
+        const data = await res.json();
+        if (data && data.utc_datetime) {
+          const serverTime = new Date(data.utc_datetime).getTime();
+          const localTime = Date.now();
+          this.timeOffsetMs = serverTime - localTime;
+          this.isOnline = true;
+          this.lastSyncTime = Date.now();
+        }
+      }
+    } catch (e) {
+      this.isOnline = (typeof navigator !== 'undefined') ? navigator.onLine : true;
+    }
+  },
+
+  startTicker() {
+    this.tick();
+    setInterval(() => this.tick(), 1000);
+    this.syncOnlineTime();
+    setInterval(() => this.syncOnlineTime(), 15 * 60 * 1000);
+  },
+
+  tick() {
+    const today = this.getToday();
+
+    // 1. Top Announcement Bar
+    const dateEl = document.getElementById('topbar-live-shamsi-date');
+    if (dateEl && dateEl.textContent !== today.fullPersian) {
+      dateEl.textContent = today.fullPersian;
+    }
+
+    const timeEl = document.getElementById('topbar-live-shamsi-time');
+    if (timeEl) {
+      timeEl.textContent = today.timeStr;
+    }
+
+    // 2. Admin Clock
+    const adminEl = document.getElementById('admin-live-shamsi-clock');
+    if (adminEl) {
+      adminEl.innerHTML = `
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-xs font-bold">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>تقویم آنلاین: ${today.fullPersian}</span>
+          <span>•</span>
+          <span class="font-mono font-black">${today.timeStr}</span>
+        </span>
+      `;
+    }
+
+    // 3. Home Banner
+    const homeEl = document.getElementById('home-live-shamsi-date');
+    if (homeEl && homeEl.textContent !== today.fullPersian) {
+      homeEl.textContent = today.fullPersian;
+    }
+  }
+};
+
+// =============================================================================
+// 15.2.3 INTERACTIVE SHAMSI CALENDAR WIDGET & MODAL SYSTEM
+// =============================================================================
+window.renderInteractiveShamsiCalendarWidget = function(targetJy, targetJm, selectedJd, containerId) {
+  const today = OnlineShamsiCalendar.getToday();
+  const jy = targetJy || today.jy;
+  const jm = targetJm || today.jm;
+  const selDay = selectedJd || (jy === today.jy && jm === today.jm ? today.jd : 1);
+  const cId = containerId || 'shamsi-cal-widget';
+
+  OnlineShamsiCalendar.activeWidgetYear = jy;
+  OnlineShamsiCalendar.activeWidgetMonth = jm;
+  OnlineShamsiCalendar.activeWidgetDay = selDay;
+
+  const daysCount = OnlineShamsiCalendar.getDaysInMonth(jy, jm);
+  const [gy, gm, gd] = JalaliDateEngine.jalaliToGregorian(jy, jm, 1);
+  const d1 = new Date(gy, gm - 1, gd);
+  const leadingCells = (d1.getDay() + 1) % 7; // 0 for Saturday, 6 for Friday
+
+  const monthName = OnlineShamsiCalendar.monthNames[jm - 1] || 'آبان';
+
+  // Selected Day Metadata
+  const selOcc = OnlineShamsiCalendar.getOccasions(jm, selDay);
+  const selDateStr = `${jy}/${String(jm).padStart(2, '0')}/${String(selDay).padStart(2, '0')}`;
+  const selFaDateStr = JalaliDateEngine.toPersianDigits(selDateStr);
+  const selSchoolEvents = (DB.calendarEvents || []).filter(e => {
+    return e && (e.date === selDateStr || e.date === selFaDateStr);
+  });
+
+  const [selGy, selGm, selGd] = JalaliDateEngine.jalaliToGregorian(jy, jm, selDay);
+  const selGregDate = new Date(selGy, selGm - 1, selGd);
+  const selGregStr = selGregDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  const selWeekdayName = JalaliDateEngine.getWeekdayFromJalali(selDateStr);
+
+  return `
+    <div id="${cId}" class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden text-right" dir="rtl">
+      <!-- Calendar Header & Month Navigation -->
+      <div class="bg-gradient-to-r from-navy-950 via-navy-900 to-navy-800 text-white p-5 sm:p-6 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="text-xs text-turquoise-300 font-bold">تقویم شمسی آنلاین و رویدادهای تحصیلی</span>
+          </div>
+          <h2 class="text-xl sm:text-2xl font-black flex items-center gap-2">
+            <span>🗓️</span>
+            <span>${SecurityEngine.escapeHtml(monthName)} ${OnlineShamsiCalendar.toPersianDigits(jy)}</span>
+          </h2>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <!-- Prev Month -->
+          <button type="button" onclick="changeShamsiCalendarMonth(${jm === 1 ? jy - 1 : jy}, ${jm === 1 ? 12 : jm - 1}, '${cId}')" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition flex items-center gap-1 border border-white/15" title="ماه گذشته">
+            <span>→ ماه قبل</span>
+          </button>
+
+          <!-- Today Button -->
+          <button type="button" onclick="changeShamsiCalendarMonth(${today.jy}, ${today.jm}, '${cId}', ${today.jd})" class="px-3.5 py-1.5 rounded-xl bg-turquoise-500 hover:bg-turquoise-400 text-navy-950 text-xs font-black transition shadow-sm" title="بازگشت به امروز">
+            <span>امروز</span>
+          </button>
+
+          <!-- Next Month -->
+          <button type="button" onclick="changeShamsiCalendarMonth(${jm === 12 ? jy + 1 : jy}, ${jm === 12 ? 1 : jm + 1}, '${cId}')" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition flex items-center gap-1 border border-white/15" title="ماه آینده">
+            <span>ماه بعد ←</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="p-4 sm:p-6 space-y-6">
+        <!-- 7 Column Grid -->
+        <div class="overflow-x-auto">
+          <div class="min-w-[320px]">
+            <!-- Day of Week Headers -->
+            <div class="grid grid-cols-7 gap-1 sm:gap-2 text-center text-xs font-black pb-2 border-b border-slate-100">
+              <span class="text-slate-600">شنبه</span>
+              <span class="text-slate-600">۱شنبه</span>
+              <span class="text-slate-600">۲شنبه</span>
+              <span class="text-slate-600">۳شنبه</span>
+              <span class="text-slate-600">۴شنبه</span>
+              <span class="text-slate-600">۵شنبه</span>
+              <span class="text-rose-600">جمعه</span>
+            </div>
+
+            <!-- Month Days Grid -->
+            <div class="grid grid-cols-7 gap-1 sm:gap-2 pt-2">
+              <!-- Leading Empty Cells -->
+              ${Array.from({ length: leadingCells }).map(() => `
+                <div class="aspect-square sm:aspect-auto sm:min-h-[64px] rounded-2xl bg-slate-50/50 border border-dashed border-slate-200/50 opacity-40"></div>
+              `).join('')}
+
+              <!-- Active Month Days -->
+              ${Array.from({ length: daysCount }).map((_, idx) => {
+                const day = idx + 1;
+                const isToday = (today.jy === jy && today.jm === jm && today.jd === day);
+                const isSelected = (selDay === day);
+                const colIdx = (leadingCells + idx) % 7;
+                const isFriday = (colIdx === 6);
+
+                const occ = OnlineShamsiCalendar.getOccasions(jm, day);
+                const dateKey = `${jy}/${String(jm).padStart(2, '0')}/${String(day).padStart(2, '0')}`;
+                const faDateKey = JalaliDateEngine.toPersianDigits(dateKey);
+                const dayEvents = (DB.calendarEvents || []).filter(e => e && (e.date === dateKey || e.date === faDateKey));
+
+                let dayBoxClass = 'bg-white border-slate-200 text-slate-800 hover:border-turquoise-400 hover:bg-slate-50';
+                if (isSelected) {
+                  dayBoxClass = 'bg-navy-950 border-navy-900 text-white shadow-md ring-2 ring-navy-900';
+                } else if (isToday) {
+                  dayBoxClass = 'bg-turquoise-50/80 border-turquoise-500 text-turquoise-950 font-black shadow-sm ring-2 ring-turquoise-400/50';
+                } else if (isFriday || (occ && occ.holiday)) {
+                  dayBoxClass = 'bg-rose-50/60 border-rose-200 text-rose-700 hover:bg-rose-100 font-extrabold';
+                } else if (dayEvents.length > 0) {
+                  dayBoxClass = 'bg-amber-50/60 border-amber-300 text-amber-950 hover:bg-amber-100 font-bold';
+                }
+
+                return `
+                  <button type="button" onclick="selectShamsiCalendarDay(${jy}, ${jm}, ${day}, '${cId}')" class="aspect-square sm:aspect-auto sm:min-h-[64px] p-1.5 sm:p-2 rounded-2xl border text-center transition flex flex-col justify-between items-center relative group cursor-pointer ${dayBoxClass}">
+                    <div class="flex items-center justify-between w-full">
+                      <span class="text-xs sm:text-sm font-black">${OnlineShamsiCalendar.toPersianDigits(day)}</span>
+                      ${isToday ? `<span class="w-2 h-2 rounded-full bg-turquoise-500 animate-ping"></span>` : ''}
+                    </div>
+
+                    <div class="flex items-center justify-center gap-1 w-full mt-1">
+                      ${(occ && occ.holiday) ? `<span class="w-1.5 h-1.5 rounded-full bg-rose-500" title="${SecurityEngine.escapeHtml(occ.title)}"></span>` : ''}
+                      ${(occ && !occ.holiday) ? `<span class="w-1.5 h-1.5 rounded-full bg-slate-400" title="${SecurityEngine.escapeHtml(occ.title)}"></span>` : ''}
+                      ${dayEvents.length > 0 ? `<span class="w-2 h-2 rounded-full bg-amber-500 shadow-sm" title="${SecurityEngine.escapeHtml(dayEvents[0].title)}"></span>` : ''}
+                    </div>
+
+                    ${isToday ? `<span class="text-[9px] font-black ${isSelected ? 'text-turquoise-300' : 'text-turquoise-700'} mt-0.5">امروز</span>` : ''}
+                  </button>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+
+        <!-- Selected Day Inspector & School Events -->
+        <div class="bg-slate-50 rounded-2xl p-4 sm:p-5 border border-slate-200 space-y-3 animate-fade-in">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/80 pb-3">
+            <div class="flex items-center gap-2">
+              <span class="w-8 h-8 rounded-xl bg-navy-900 text-turquoise-300 flex items-center justify-center text-sm font-black shrink-0">
+                ${OnlineShamsiCalendar.toPersianDigits(selDay)}
+              </span>
+              <div>
+                <p class="font-black text-sm text-navy-950">
+                  ${SecurityEngine.escapeHtml(selWeekdayName)} ${OnlineShamsiCalendar.toPersianDigits(selDay)} ${SecurityEngine.escapeHtml(monthName)} ${OnlineShamsiCalendar.toPersianDigits(jy)}
+                  ${(jy === today.jy && jm === today.jm && selDay === today.jd) ? '<span class="mr-2 text-[10px] font-black bg-emerald-600 text-white px-2 py-0.5 rounded-full">امروز</span>' : ''}
+                </p>
+                <p class="text-[11px] text-slate-500 mt-0.5">
+                  معادل میلادی: ${SecurityEngine.escapeHtml(selGregStr)}
+                </p>
+              </div>
+            </div>
+
+            ${selOcc ? `
+              <div class="px-3 py-1 rounded-xl text-xs font-bold ${selOcc.holiday ? 'bg-rose-100 text-rose-800 border border-rose-200' : 'bg-slate-200 text-slate-800'}">
+                ${selOcc.holiday ? '🔴 تعطیل رسمی: ' : '📌 مناسبت: '} ${SecurityEngine.escapeHtml(selOcc.title)}
+              </div>
+            ` : `
+              <span class="text-[11px] text-slate-400 font-medium">مناسبت تعطیلی رسمی در تقویم عمومی ثبت نشده است.</span>
+            `}
+          </div>
+
+          <!-- School Events for this day -->
+          <div class="space-y-2">
+            <p class="text-xs font-black text-navy-900 flex items-center gap-1.5">
+              <span>🏫</span>
+              <span>برنامه‌ها و آزمون‌های دبیرستان باقرالعلوم در این روز:</span>
+            </p>
+
+            ${selSchoolEvents.length > 0 ? `
+              <div class="space-y-2">
+                ${selSchoolEvents.map(ev => `
+                  <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="flex items-center gap-2.5">
+                      <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-turquoise-100 text-turquoise-900">
+                        ${SecurityEngine.escapeHtml(ev.type || 'رویداد آموزشی')}
+                      </span>
+                      <div>
+                        <h4 class="text-xs sm:text-sm font-black text-navy-950">${SecurityEngine.escapeHtml(ev.title)}</h4>
+                        <p class="text-[11px] text-slate-500 font-medium mt-0.5">${SecurityEngine.escapeHtml(ev.grade || 'تمام پایه‌ها')}</p>
+                      </div>
+                    </div>
+
+                    <button type="button" onclick="activateRealCalendarReminder('${SecurityEngine.escapeHtml(ev.id)}')" class="px-3 py-1.5 rounded-xl bg-turquoise-50 hover:bg-turquoise-100 text-turquoise-800 border border-turquoise-200 text-xs font-bold transition flex items-center gap-1 self-start sm:self-auto shrink-0">
+                      <span>🔔 ثبت یادآور</span>
+                    </button>
+                  </div>
+                `).join('')}
+              </div>
+            ` : `
+              <div class="p-3 bg-white rounded-xl border border-dashed border-slate-200 text-slate-500 text-xs flex items-center justify-between">
+                <span>رویداد یا آزمون خاصی از سمت دبیرستان برای این روز ثبت نشده است.</span>
+                ${(typeof AuthService !== 'undefined' && AuthService.isAuthenticatedStaff()) ? `
+                  <button type="button" onclick="LiveVisualCMS.openQuickCalendarModal(null)" class="text-xs font-bold text-turquoise-600 hover:underline">
+                    + افزودن رویداد جدید به این تاریخ
+                  </button>
+                ` : ''}
+              </div>
+            `}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+};
+
+window.changeShamsiCalendarMonth = function(jy, jm, containerId, targetDay) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const parent = el.parentElement;
+  if (!parent) return;
+  parent.innerHTML = renderInteractiveShamsiCalendarWidget(jy, jm, targetDay || 1, containerId);
+};
+
+window.selectShamsiCalendarDay = function(jy, jm, jd, containerId) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const parent = el.parentElement;
+  if (!parent) return;
+  parent.innerHTML = renderInteractiveShamsiCalendarWidget(jy, jm, jd, containerId);
+};
+
+window.openShamsiCalendarModal = function(targetJy, targetJm, targetJd) {
+  const today = OnlineShamsiCalendar.getToday();
+  const jy = targetJy || today.jy;
+  const jm = targetJm || today.jm;
+  const jd = targetJd || today.jd;
+  const countdowns = OnlineShamsiCalendar.getCountdowns();
+
+  const modalHtml = `
+    <div class="space-y-6 text-right" dir="rtl">
+      <!-- Modal Title -->
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="w-10 h-10 rounded-2xl bg-gradient-to-br from-navy-950 to-navy-800 text-turquoise-300 flex items-center justify-center text-lg font-black shadow-sm">
+            🗓️
+          </span>
+          <div>
+            <h3 class="text-base sm:text-lg font-black text-navy-950">تقویم جامع شمسی آنلاین و رویدادهای دبیرستان</h3>
+            <p class="text-xs text-slate-500 mt-0.5">همگام‌سازی لحظه‌ای با ساعت رسمی کشور و تقویم تحصیلی دبیرستان باقرالعلوم</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-sm font-black transition">
+          ✕
+        </button>
+      </div>
+
+      <!-- Live Countdown Banners -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        ${countdowns.map(cd => `
+          <div class="bg-gradient-to-br from-slate-50 to-slate-100/80 p-3 rounded-2xl border border-slate-200/80 flex flex-col justify-between text-right">
+            <div class="flex items-center justify-between">
+              <span class="text-base">${cd.icon}</span>
+              <span class="text-[10px] font-black bg-navy-900 text-turquoise-300 px-2 py-0.5 rounded-full">${OnlineShamsiCalendar.toPersianDigits(cd.days)} روز مانده</span>
+            </div>
+            <div class="mt-2">
+              <h5 class="text-xs font-black text-navy-950 leading-tight">${SecurityEngine.escapeHtml(cd.title)}</h5>
+              <p class="text-[10px] text-slate-500 font-bold mt-0.5">${SecurityEngine.escapeHtml(cd.dateStr)}</p>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+
+      <!-- Main Interactive Calendar -->
+      <div>
+        ${renderInteractiveShamsiCalendarWidget(jy, jm, jd, 'modal-shamsi-cal-widget')}
+      </div>
+
+      <!-- Footer Action -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
+        <button type="button" onclick="navigateTo('calendar');closeModal();" class="px-4 py-2 rounded-xl bg-navy-900 hover:bg-navy-800 text-turquoise-300 font-black text-xs transition flex items-center gap-1.5">
+          <span>مشاهده تقویم و فهرست کامل رویدادها در صفحه اختصاصی</span>
+          <span>←</span>
+        </button>
+        <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">
+          بستن پنجره
+        </button>
+      </div>
+    </div>
+  `;
+
+  openModal(modalHtml);
 };
 
 // -----------------------------------------------------------------------------
@@ -13047,11 +13702,12 @@ renderApp = function() {
 };
 
 // Boot V3 Database Migration, Session Init, and Initial Hash Route
-window.DB = DB; window.STATE = STATE; window.AuthService = AuthService; window.WorkflowEngine = WorkflowEngine; window.SecurityEngine = SecurityEngine; window.JalaliDateEngine = JalaliDateEngine; window.MediaStorageIDB = MediaStorageIDB;
+window.DB = DB; window.STATE = STATE; window.AuthService = AuthService; window.WorkflowEngine = WorkflowEngine; window.SecurityEngine = SecurityEngine; window.JalaliDateEngine = JalaliDateEngine; window.OnlineShamsiCalendar = OnlineShamsiCalendar; window.MediaStorageIDB = MediaStorageIDB;
 (function bootEnterpriseV3() {
   DB = upgradeAndMigrateDatabaseV3(DB); window.DB = DB;
   saveDatabase(DB);
   AuthService.initSession();
+  OnlineShamsiCalendar.startTicker();
   if (window.location.hash && window.location.hash.length > 2) {
     handleHashChangeRoute();
   } else {
@@ -14659,12 +15315,20 @@ function syncStaticShellWithSiteSettings() {
           <span id="top-announcement-text" class="text-slate-200 font-medium">${SecurityEngine.escapeHtml(s.topBarAnnouncement)}</span>
           ${isLive ? `<button type="button" onclick="LiveVisualCMS.openQuickSiteTextModal('topbar')" class="live-cms-control px-2 py-0.5 rounded bg-turquoise-500 text-navy-950 font-black text-[10px] shrink-0">✏️ ویرایش نوار بالا</button>` : ''}
         </div>
-        <div class="flex items-center gap-4 text-xs text-turquoise-400 shrink-0">
-          <button type="button" onclick="navigateTo('tools', {tab: 'calendar'})" class="hover:underline flex items-center gap-1">
-            <span>تقویم آموزشی مدرسه</span>
+        <div class="flex items-center gap-3 text-xs shrink-0">
+          <!-- Live Shamsi Calendar Clock Widget -->
+          <div id="live-topbar-shamsi-clock" class="flex items-center gap-2 cursor-pointer bg-white/10 hover:bg-white/15 px-3 py-1 rounded-xl text-turquoise-300 transition border border-white/10 shadow-sm" onclick="openShamsiCalendarModal()" title="مشاهده تقویم کامل هجری شمسی و رویدادهای دبیرستان">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span id="topbar-live-shamsi-date" class="font-extrabold text-white text-[11px]">${(typeof OnlineShamsiCalendar !== 'undefined') ? OnlineShamsiCalendar.getToday().fullPersian : 'تقویم شمسی آنلاین'}</span>
+            <span class="text-white/40">|</span>
+            <span id="topbar-live-shamsi-time" class="font-black text-turquoise-300 text-[11px] font-mono">${(typeof OnlineShamsiCalendar !== 'undefined') ? OnlineShamsiCalendar.getToday().timeStr : '--:--:--'}</span>
+            <span class="hidden md:inline-block px-1.5 py-0.5 rounded text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">زنده</span>
+          </div>
+          <button type="button" onclick="openShamsiCalendarModal()" class="text-turquoise-400 hover:text-turquoise-300 hover:underline flex items-center gap-1 font-bold">
+            <span>🗓️ تقویم رویدادها</span>
           </button>
-          <span class="opacity-40">|</span>
-          <button type="button" onclick="openCounselorModal()" class="hover:underline flex items-center gap-1">
+          <span class="opacity-40 text-slate-500">|</span>
+          <button type="button" onclick="openCounselorModal()" class="text-turquoise-400 hover:text-turquoise-300 hover:underline flex items-center gap-1">
             <span>معرفی و وقت مشاوره</span>
           </button>
         </div>
@@ -15206,49 +15870,126 @@ renderApp();
 // 16.5 COMPLETE 30-VIEW AUDIT POLISH & ZERO-DEFECT SYNCHRONIZATION
 // =============================================================================
 
-// 1. Clean Override for renderCalendarPageView (Removes hacky button.hidden and keeps both Reminder + Live Edit buttons)
+// 1. Clean Override for renderCalendarPageView with full Interactive Online Shamsi Calendar & Countdowns
 renderCalendarPageView = function() {
   const s = ensureCompleteSiteSettings();
   const isLive = LiveVisualCMS.isActive();
   updatePageSeoMetadata('تقویم آموزشی، آزمون‌ها و کارگاه‌های مشاوره', `تقویم رسمی رویدادهای آموزشی ${s.schoolName}`, 'calendar', false);
   const events = (DB.calendarEvents || []).filter(ev => WorkflowEngine.isEntityPublic(ev));
+  const today = (typeof OnlineShamsiCalendar !== 'undefined') ? OnlineShamsiCalendar.getToday() : { fullPersian: 'تقویم شمسی', timeStr: '' };
+  const countdowns = (typeof OnlineShamsiCalendar !== 'undefined') ? OnlineShamsiCalendar.getCountdowns() : [];
+
   return `
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6 animate-fade-in">
-      <div class="bg-navy-900 rounded-3xl p-6 sm:p-8 text-white space-y-2 shadow-xl">
-        <div class="flex flex-wrap items-center justify-between gap-3">
-          <h1 class="text-2xl sm:text-3xl font-black">🗓️ تقویم رسمی آموزشی و مشاوره‌ای ${SecurityEngine.escapeHtml(s.schoolName)}</h1>
-          ${isLive ? `<button type="button" onclick="LiveVisualCMS.openQuickCalendarModal(null)" class="live-cms-control px-4 py-2 rounded-xl bg-turquoise-500 text-navy-950 text-xs font-black shadow">+ افزودن رویداد جدید به تقویم</button>` : ''}
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in text-right" dir="rtl">
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-xs font-bold text-navy-900 bg-white px-4 py-3 rounded-2xl border border-slate-200 shadow-sm overflow-x-auto">
+        <button type="button" onclick="navigateTo('home')" class="text-turquoise-700 hover:underline">🏠 صفحه اصلی</button>
+        <span class="text-slate-300">/</span>
+        <span class="text-slate-600">🗓️ تقویم رسمی و رویدادهای دبیرستان</span>
+      </nav>
+
+      <!-- Page Header Banner with Live Online Clock -->
+      <div class="bg-gradient-to-br from-navy-950 via-navy-900 to-navy-800 rounded-3xl p-6 sm:p-8 text-white space-y-4 shadow-xl border border-navy-800 relative overflow-hidden">
+        <div class="flex flex-wrap items-center justify-between gap-4 relative z-10">
+          <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/25 text-emerald-300 text-xs font-bold mb-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>متصل به تقویم شمسی آنلاین و زمان رسمی کشور (تهران)</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-black">🗓️ تقویم رسمی رویدادها، آزمون‌ها و برنامه‌های ${SecurityEngine.escapeHtml(s.schoolName)}</h1>
+            <p class="text-xs sm:text-sm text-slate-300 mt-1">مشاهده دقیق روزهای ماه، تعطیلات رسمی کشور، زمان‌بندی آزمون‌های هماهنگ و روزشمارهای تحصیلی</p>
+          </div>
+
+          <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2.5">
+            <div class="px-4 py-2.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 text-center">
+              <p class="text-[11px] text-turquoise-300 font-bold">امروز به وقت تهران:</p>
+              <p class="text-xs sm:text-sm font-black text-white mt-0.5">${SecurityEngine.escapeHtml(today.fullPersian)}</p>
+            </div>
+            ${isLive ? `<button type="button" onclick="LiveVisualCMS.openQuickCalendarModal(null)" class="live-cms-control px-4 py-2.5 rounded-2xl bg-turquoise-500 text-navy-950 text-xs font-black shadow-md hover:bg-turquoise-400 transition">+ افزودن رویداد جدید به تقویم</button>` : ''}
+          </div>
         </div>
-        <p class="text-xs sm:text-sm text-slate-300">همگام‌سازی‌شده با تقویم رسمی هجری شمسی و روزهای دقیق هفته</p>
       </div>
+
+      <!-- Live Countdowns Grid -->
       <div class="space-y-3">
-        ${events.map(ev => {
-          const exactDay = JalaliDateEngine.getWeekdayFromJalali(ev.date);
-          const safeId = SecurityEngine.escapeHtml(ev.id);
-          return `
-            <div id="${safeId}" class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div class="flex items-center gap-4">
-                <div class="px-4 py-2.5 rounded-2xl bg-navy-900 text-white text-center shrink-0 min-w-[110px]">
-                  <p class="text-xs text-turquoise-300 font-bold">${SecurityEngine.escapeHtml(exactDay)}</p>
-                  <p class="text-xs font-extrabold mt-0.5">${SecurityEngine.escapeHtml(ev.date)}</p>
-                </div>
-                <div>
-                  <span class="px-2.5 py-0.5 rounded-lg bg-softyellow-100 text-amber-900 text-xs font-bold">${SecurityEngine.escapeHtml(ev.type)} • ${SecurityEngine.escapeHtml(ev.grade)}</span>
-                  <h2 class="text-sm sm:text-base font-black text-navy-900 mt-1">${SecurityEngine.escapeHtml(ev.title)}</h2>
-                </div>
+        <div class="flex items-center gap-2 text-xs font-black text-navy-950">
+          <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+          <span>روزشمارهای زنده تحصیلی بر اساس تقویم شمسی:</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          ${countdowns.map(cd => `
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-2xl">${cd.icon}</span>
+                <span class="px-2.5 py-1 rounded-full text-[11px] font-black bg-navy-950 text-turquoise-300">
+                  ${OnlineShamsiCalendar.toPersianDigits(cd.days)} روز مانده
+                </span>
               </div>
-              <div class="flex flex-wrap items-center gap-2 self-start sm:self-auto">
-                <button type="button" onclick="activateRealCalendarReminder('${safeId}')" class="px-4 py-2 rounded-xl bg-turquoise-50 hover:bg-turquoise-100 text-turquoise-800 border border-turquoise-200 text-xs font-bold">
-                  🔔 ثبت یادآور فعال در نشست من
-                </button>
-                ${isLive ? `
-                  <button type="button" onclick="LiveVisualCMS.openQuickCalendarModal('${safeId}')" class="live-cms-control px-3 py-2 rounded-xl bg-navy-900 text-turquoise-300 text-xs font-bold">✏️ ویرایش</button>
-                  <button type="button" onclick="adminDeleteCalendarEvent('${safeId}')" class="live-cms-control px-3 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold">🗑️ حذف</button>
-                ` : ''}
+              <div class="mt-3">
+                <h3 class="text-sm font-black text-navy-950">${SecurityEngine.escapeHtml(cd.title)}</h3>
+                <p class="text-[11px] text-slate-500 font-medium mt-0.5">${SecurityEngine.escapeHtml(cd.sub)}</p>
+                <div class="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                  <span class="text-slate-400 font-bold">تاریخ هدف:</span>
+                  <span class="font-black text-amber-700">${SecurityEngine.escapeHtml(cd.dateStr)}</span>
+                </div>
               </div>
             </div>
-          `;
-        }).join('')}
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- Full Interactive Monthly Shamsi Calendar Widget -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2 text-xs font-black text-navy-950">
+            <span class="w-2 h-2 rounded-full bg-turquoise-500"></span>
+            <span>نمای ماهانه تقویم شمسی (روی هر روز کلیک کنید تا جزئیات و رویدادهای آن نمایش یابد):</span>
+          </div>
+        </div>
+        <div>
+          ${renderInteractiveShamsiCalendarWidget(today.jy, today.jm, today.jd, 'page-shamsi-cal-widget')}
+        </div>
+      </div>
+
+      <!-- Detailed List of School Events -->
+      <div class="space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3">
+          <div class="flex items-center gap-2">
+            <span class="text-lg">📋</span>
+            <h3 class="text-base font-black text-navy-950">فهرست تمام آزمون‌ها و رویدادهای ثبت‌شده در تقویم آموزشی دبیرستان (${OnlineShamsiCalendar.toPersianDigits(events.length)} رویداد)</h3>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          ${events.map(ev => {
+            const exactDay = JalaliDateEngine.getWeekdayFromJalali(ev.date);
+            const safeId = SecurityEngine.escapeHtml(ev.id);
+            return `
+              <div id="${safeId}" class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-turquoise-300 transition">
+                <div class="flex items-center gap-4">
+                  <div class="px-4 py-2.5 rounded-2xl bg-navy-950 text-white text-center shrink-0 min-w-[110px] shadow-sm">
+                    <p class="text-xs text-turquoise-300 font-bold">${SecurityEngine.escapeHtml(exactDay)}</p>
+                    <p class="text-xs font-extrabold mt-0.5">${SecurityEngine.escapeHtml(ev.date)}</p>
+                  </div>
+                  <div>
+                    <span class="px-2.5 py-0.5 rounded-lg bg-softyellow-100 text-amber-900 text-xs font-bold">${SecurityEngine.escapeHtml(ev.type)} • ${SecurityEngine.escapeHtml(ev.grade)}</span>
+                    <h2 class="text-sm sm:text-base font-black text-navy-950 mt-1">${SecurityEngine.escapeHtml(ev.title)}</h2>
+                  </div>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+                  <button type="button" onclick="activateRealCalendarReminder('${safeId}')" class="px-4 py-2 rounded-xl bg-turquoise-50 hover:bg-turquoise-100 text-turquoise-800 border border-turquoise-200 text-xs font-bold transition flex items-center gap-1">
+                    <span>🔔</span>
+                    <span>ثبت یادآور در مرورگر من</span>
+                  </button>
+                  ${isLive ? `
+                    <button type="button" onclick="LiveVisualCMS.openQuickCalendarModal('${safeId}')" class="live-cms-control px-3 py-2 rounded-xl bg-navy-900 text-turquoise-300 text-xs font-bold">✏️ ویرایش</button>
+                    <button type="button" onclick="adminDeleteCalendarEvent('${safeId}')" class="live-cms-control px-3 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold">🗑️ حذف</button>
+                  ` : ''}
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
       </div>
     </div>
   `;
@@ -20969,13 +21710,20 @@ function renderStudyPlanView() {
             <tbody class="divide-y divide-slate-100 font-medium">
               ${plan.schedule.map((row, idx) => {
                 const isWeekend = row.day === 'پنجشنبه' || row.day === 'جمعه';
-                const rowBg = isWeekend ? (row.day === 'جمعه' ? 'bg-emerald-50/40' : 'bg-amber-50/30') : (idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/60');
-                const badgeColor = row.day === 'جمعه' ? 'bg-emerald-100 text-emerald-900' : (row.day === 'پنجشنبه' ? 'bg-amber-100 text-amber-900' : 'bg-navy-900 text-white');
+                const todayWk = (typeof OnlineShamsiCalendar !== 'undefined') ? OnlineShamsiCalendar.getToday().weekdayName : 'دوشنبه';
+                const isToday = (row.day === todayWk);
+                let rowBg = isWeekend ? (row.day === 'جمعه' ? 'bg-emerald-50/40' : 'bg-amber-50/30') : (idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/60');
+                if (isToday) rowBg = 'bg-turquoise-500/15 border-2 border-turquoise-500';
+                let badgeColor = isWeekend ? (row.day === 'جمعه' ? 'bg-emerald-100 text-emerald-900' : 'bg-amber-100 text-amber-900') : 'bg-navy-900 text-white';
+                if (isToday) badgeColor = 'bg-turquoise-600 text-white shadow-sm ring-2 ring-turquoise-400';
 
                 return `
                   <tr class="${rowBg} hover:bg-turquoise-50/40 transition">
                     <td class="py-3 px-3.5 font-black text-navy-900">
-                      <span class="inline-block px-2.5 py-1 rounded-lg text-xs ${badgeColor}">${SecurityEngine.escapeHtml(row.day)}</span>
+                      <div class="flex items-center gap-1.5">
+                        <span class="inline-block px-2.5 py-1 rounded-lg text-xs font-black ${badgeColor}">${SecurityEngine.escapeHtml(row.day)}</span>
+                        ${isToday ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-600 text-white shadow-sm animate-pulse">امروز شما</span>` : ''}
+                      </div>
                     </td>
                     <td class="py-3 px-3.5 text-slate-800 font-semibold">${SecurityEngine.escapeHtml(row.p1)}</td>
                     <td class="py-3 px-3.5 text-slate-800 font-semibold">${SecurityEngine.escapeHtml(row.p2)}</td>
