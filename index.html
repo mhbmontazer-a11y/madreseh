@@ -20089,11 +20089,6 @@ html.reading-mode body #app-viewport :is(.bg-softyellow-300,.bg-softyellow-400,.
     const gradeCodes = ['10', '11', '12'];
     const gradeLabels = ['پایه دهم', 'پایه یازدهم', 'پایه دوازدهم و کنکور'];
     const gradeShort = ['دهم', 'یازدهم', 'دوازدهم'];
-    const gradeSubtitles = [
-      'پایه‌سازی قوی، تسلط بر امتحانات نهایی و تمرین مهارت حل مسئله از ابتدای دوره دوم متوسطه.',
-      'سال تثبیت معدل نهایی، ارتقای تراز آزمون‌های آزمایشی و مرور هدفمند مباحث پایه دهم.',
-      'ماراتن نهایی ۶۰ درصدی و کنکور سراسری، جمع‌بندی مباحث پایه و شبیه‌سازی شرایط کنکور.'
-    ];
     const gradeHours = [
       { tajrobi: '۲۸ الی ۳۴ ساعت در هفته', ensani: '۲۶ الی ۳۲ ساعت در هفته', riazi: '۲۸ الی ۳۴ ساعت در هفته' },
       { tajrobi: '۳۵ الی ۴۲ ساعت در هفته', ensani: '۳۲ الی ۳۸ ساعت در هفته', riazi: '۳۵ الی ۴۲ ساعت در هفته' },
@@ -20102,7 +20097,6 @@ html.reading-mode body #app-viewport :is(.bg-softyellow-300,.bg-softyellow-400,.
 
     const gCode = gradeCodes[i] || '10';
     const gLabel = gradeLabels[i] || 'پایه دهم';
-    const gSub = gradeSubtitles[i] || '';
     const gH = gradeHours[i] || gradeHours[0];
     const gS = gradeShort[i] || 'دهم';
 
@@ -20110,110 +20104,217 @@ html.reading-mode body #app-viewport :is(.bg-softyellow-300,.bg-softyellow-400,.
     if (!gpEl) return;
 
     gpEl.innerHTML = `
-      <div class="space-y-6">
-        <!-- Grade Header Banner -->
-        <div class="bg-gradient-to-r from-navy-950 via-navy-900 to-indigo-950 text-white rounded-3xl p-6 sm:p-7 border border-navy-800 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div class="space-y-1.5 max-w-2xl">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-turquoise-500/20 text-turquoise-300 text-xs font-bold border border-turquoise-400/30">
-              <span>🎯 راهنمای انتخاب رشته و دریافت برنامه مطالعاتی</span>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">
+        <!-- 1. Tajrobi Card -->
+        <div class="relative bg-white rounded-3xl p-6 sm:p-7 border-2 border-emerald-500/20 hover:border-emerald-500 shadow-lg hover:shadow-2xl hover:shadow-emerald-500/15 transition-all duration-300 flex flex-col justify-between group overflow-hidden">
+          <div class="absolute top-0 right-0 left-0 h-1.5 bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-600"></div>
+          
+          <div class="space-y-5">
+            <!-- Header Row -->
+            <div class="flex items-center justify-between pt-1">
+              <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-100/90 text-emerald-600 border border-emerald-200/80 flex items-center justify-center text-3xl font-black shadow-inner group-hover:scale-105 transition-transform duration-300">
+                🧬
+              </div>
+              <span class="px-3 py-1 rounded-full text-xs font-black bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm shadow-emerald-600/30">
+                علوم تجربی
+              </span>
             </div>
-            <h3 class="text-xl sm:text-2xl font-black text-white">برنامه مطالعاتی راهبردی ${SecurityEngine.escapeHtml(gLabel)}</h3>
-            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">${SecurityEngine.escapeHtml(gSub)}</p>
+
+            <!-- Title & Target Majors -->
+            <div>
+              <h3 class="text-xl font-black text-navy-950 group-hover:text-emerald-700 transition">
+                برنامه مطالعاتی تجربی ${SecurityEngine.escapeHtml(gS)}
+              </h3>
+              <p class="text-xs text-slate-500 mt-1 font-semibold">
+                ${SecurityEngine.escapeHtml(gLabel)} • راهبردی و هفتگی
+              </p>
+              <div class="flex flex-wrap gap-1.5 mt-2.5">
+                <span class="px-2.5 py-0.5 rounded-lg bg-emerald-50 text-emerald-800 text-[11px] font-bold border border-emerald-100">🩺 پزشکی</span>
+                <span class="px-2.5 py-0.5 rounded-lg bg-emerald-50 text-emerald-800 text-[11px] font-bold border border-emerald-100">🦷 دندانپزشکی</span>
+                <span class="px-2.5 py-0.5 rounded-lg bg-emerald-50 text-emerald-800 text-[11px] font-bold border border-emerald-100">💊 داروسازی</span>
+              </div>
+            </div>
+
+            <!-- Strategy Highlights -->
+            <ul class="space-y-2 text-xs text-slate-600 border-t border-slate-100 pt-3.5 font-medium leading-relaxed">
+              <li class="flex items-start gap-2">
+                <span class="text-emerald-600 font-black mt-0.5">✓</span>
+                <span><b>دروس محوری:</b> زیست‌شناسی، شیمی، فیزیک و ریاضی تجربی</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-emerald-600 font-black mt-0.5">✓</span>
+                <span><b>روش اجرا:</b> متن‌خوانی خط‌به‌خط، شکل‌خوانی و تست‌های ترکیبی</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-emerald-600 font-black mt-0.5">✓</span>
+                <span><b>توازن امتحانی:</b> پوشش کامل امتحانات نهایی + مهارت سنجش</span>
+              </li>
+            </ul>
+
+            <!-- Hourly Metrics Box -->
+            <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-100/90 space-y-1.5 text-xs">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-500 font-bold flex items-center gap-1.5">
+                  <span>⏱️</span>
+                  <span>ساعت مطالعه هدف:</span>
+                </span>
+                <span class="font-black text-emerald-700">${SecurityEngine.escapeHtml(gH.tajrobi)}</span>
+              </div>
+              <div class="flex items-center justify-between text-[11px] text-slate-400 pt-0.5 border-t border-slate-200/50">
+                <span>تقویم مطالعاتی:</span>
+                <span class="font-bold text-slate-600">شنبه تا جمعه (۷ روزه)</span>
+              </div>
+            </div>
           </div>
-          <div class="shrink-0 flex items-center gap-2">
-            <span class="text-xs font-bold text-turquoise-300 bg-white/10 px-3.5 py-2 rounded-xl backdrop-blur-sm">
-              👇 رشته خود را انتخاب کنید:
-            </span>
+
+          <!-- Action Button -->
+          <div class="pt-5">
+            <button type="button" onclick="navigateTo('study-plan', {grade: '${gCode}', major: 'tajrobi'})" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-600 text-white font-black text-xs sm:text-sm transition-all duration-200 shadow-md shadow-emerald-600/25 flex items-center justify-center gap-2 group-hover:gap-3">
+              <span>مشاهده برنامه مطالعاتی تجربی</span>
+              <span class="text-base transition-transform group-hover:-translate-x-1">←</span>
+            </button>
           </div>
         </div>
 
-        <!-- 3 Majors Grid (تجربی، انسانی، ریاضی) -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <!-- 1. Tajrobi -->
-          <div class="bg-white rounded-3xl p-6 border-2 border-emerald-500/30 hover:border-emerald-500 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group shadow-sm">
-            <div class="space-y-4">
-              <div class="flex items-center justify-between">
-                <span class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl font-black shadow-inner">🧬</span>
-                <span class="px-3 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-200">علوم تجربی</span>
+        <!-- 2. Ensani Card -->
+        <div class="relative bg-white rounded-3xl p-6 sm:p-7 border-2 border-amber-500/20 hover:border-amber-500 shadow-lg hover:shadow-2xl hover:shadow-amber-500/15 transition-all duration-300 flex flex-col justify-between group overflow-hidden">
+          <div class="absolute top-0 right-0 left-0 h-1.5 bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600"></div>
+          
+          <div class="space-y-5">
+            <!-- Header Row -->
+            <div class="flex items-center justify-between pt-1">
+              <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-100/90 text-amber-600 border border-amber-200/80 flex items-center justify-center text-3xl font-black shadow-inner group-hover:scale-105 transition-transform duration-300">
+                ⚖️
               </div>
-              <div>
-                <h4 class="text-lg font-black text-navy-900 group-hover:text-emerald-700 transition">برنامه مطالعاتی تجربی</h4>
-                <p class="text-xs text-slate-500 mt-1 font-semibold">${SecurityEngine.escapeHtml(gLabel)} — ویژه داوطلبان پزشکی، دندانپزشکی و داروسازی</p>
-              </div>
-              <ul class="space-y-2 text-xs text-slate-600 border-t border-slate-100 pt-3 font-medium">
-                <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✔</span><span>تمرکز عمیق روی زیست‌شناسی و شیمی تخصصی</span></li>
-                <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✔</span><span>پارت‌های منظم حل مسئله فیزیک و ریاضی تجربی</span></li>
-                <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✔</span><span>پوشش کامل تشریحی‌خوانی امتحانات نهایی</span></li>
-              </ul>
-              <div class="bg-emerald-50/70 p-3 rounded-2xl border border-emerald-100 flex items-center justify-between text-xs">
-                <span class="text-slate-600 font-bold">ساعت مطالعه هدف:</span>
-                <span class="font-black text-emerald-800">${SecurityEngine.escapeHtml(gH.tajrobi)}</span>
+              <span class="px-3 py-1 rounded-full text-xs font-black bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-sm shadow-amber-500/30">
+                علوم انسانی
+              </span>
+            </div>
+
+            <!-- Title & Target Majors -->
+            <div>
+              <h3 class="text-xl font-black text-navy-950 group-hover:text-amber-700 transition">
+                برنامه مطالعاتی انسانی ${SecurityEngine.escapeHtml(gS)}
+              </h3>
+              <p class="text-xs text-slate-500 mt-1 font-semibold">
+                ${SecurityEngine.escapeHtml(gLabel)} • راهبردی و هفتگی
+              </p>
+              <div class="flex flex-wrap gap-1.5 mt-2.5">
+                <span class="px-2.5 py-0.5 rounded-lg bg-amber-50 text-amber-900 text-[11px] font-bold border border-amber-100">⚖️ حقوق و قضا</span>
+                <span class="px-2.5 py-0.5 rounded-lg bg-amber-50 text-amber-900 text-[11px] font-bold border border-amber-100">🧠 روان‌شناسی</span>
+                <span class="px-2.5 py-0.5 rounded-lg bg-amber-50 text-amber-900 text-[11px] font-bold border border-amber-100">🎓 فرهنگیان</span>
               </div>
             </div>
-            <div class="pt-5">
-              <button type="button" onclick="navigateTo('study-plan', {grade: '${gCode}', major: 'tajrobi'})" class="w-full py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs transition shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2">
-                <span>مشاهده برنامه ${SecurityEngine.escapeHtml(gS)} تجربی</span>
-                <span>←</span>
-              </button>
+
+            <!-- Strategy Highlights -->
+            <ul class="space-y-2 text-xs text-slate-600 border-t border-slate-100 pt-3.5 font-medium leading-relaxed">
+              <li class="flex items-start gap-2">
+                <span class="text-amber-600 font-black mt-0.5">✓</span>
+                <span><b>دروس محوری:</b> علوم و فنون ادبی، فلسفه و منطق، جامعه‌شناسی</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-amber-600 font-black mt-0.5">✓</span>
+                <span><b>روش اجرا:</b> تقطیع سماعی عروض، درک مفاهیم و اقتصاد کنکور</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-amber-600 font-black mt-0.5">✓</span>
+                <span><b>توازن امتحانی:</b> تسلط تشریحی دروس نهایی + تقویت ریاضی و آمار</span>
+              </li>
+            </ul>
+
+            <!-- Hourly Metrics Box -->
+            <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-100/90 space-y-1.5 text-xs">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-500 font-bold flex items-center gap-1.5">
+                  <span>⏱️</span>
+                  <span>ساعت مطالعه هدف:</span>
+                </span>
+                <span class="font-black text-amber-700">${SecurityEngine.escapeHtml(gH.ensani)}</span>
+              </div>
+              <div class="flex items-center justify-between text-[11px] text-slate-400 pt-0.5 border-t border-slate-200/50">
+                <span>تقویم مطالعاتی:</span>
+                <span class="font-bold text-slate-600">شنبه تا جمعه (۷ روزه)</span>
+              </div>
             </div>
           </div>
 
-          <!-- 2. Ensani -->
-          <div class="bg-white rounded-3xl p-6 border-2 border-amber-500/30 hover:border-amber-500 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group shadow-sm">
-            <div class="space-y-4">
-              <div class="flex items-center justify-between">
-                <span class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl font-black shadow-inner">⚖️</span>
-                <span class="px-3 py-1 rounded-full text-xs font-black bg-amber-100 text-amber-900 border border-amber-200">علوم انسانی</span>
+          <!-- Action Button -->
+          <div class="pt-5">
+            <button type="button" onclick="navigateTo('study-plan', {grade: '${gCode}', major: 'ensani'})" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-500 text-navy-950 font-black text-xs sm:text-sm transition-all duration-200 shadow-md shadow-amber-500/25 flex items-center justify-center gap-2 group-hover:gap-3">
+              <span>مشاهده برنامه مطالعاتی انسانی</span>
+              <span class="text-base transition-transform group-hover:-translate-x-1">←</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. Riazi Card -->
+        <div class="relative bg-white rounded-3xl p-6 sm:p-7 border-2 border-sky-500/20 hover:border-sky-500 shadow-lg hover:shadow-2xl hover:shadow-sky-500/15 transition-all duration-300 flex flex-col justify-between group overflow-hidden">
+          <div class="absolute top-0 right-0 left-0 h-1.5 bg-gradient-to-r from-sky-400 via-indigo-500 to-sky-600"></div>
+          
+          <div class="space-y-5">
+            <!-- Header Row -->
+            <div class="flex items-center justify-between pt-1">
+              <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-50 to-indigo-100/90 text-sky-600 border border-sky-200/80 flex items-center justify-center text-3xl font-black shadow-inner group-hover:scale-105 transition-transform duration-300">
+                📐
               </div>
-              <div>
-                <h4 class="text-lg font-black text-navy-900 group-hover:text-amber-700 transition">برنامه مطالعاتی انسانی</h4>
-                <p class="text-xs text-slate-500 mt-1 font-semibold">${SecurityEngine.escapeHtml(gLabel)} — ویژه داوطلبان حقوق، روان‌شناسی و فرهنگیان</p>
-              </div>
-              <ul class="space-y-2 text-xs text-slate-600 border-t border-slate-100 pt-3 font-medium">
-                <li class="flex items-center gap-2"><span class="text-amber-500 font-bold">✔</span><span>تسلط بر علوم و فنون ادبی، عروض و قافیه</span></li>
-                <li class="flex items-center gap-2"><span class="text-amber-500 font-bold">✔</span><span>درک مفهومی فلسفه و منطق و روان‌شناسی</span></li>
-                <li class="flex items-center gap-2"><span class="text-amber-500 font-bold">✔</span><span>تقویت برگ برنده: ریاضی و آمار و عربی اختصاصی</span></li>
-              </ul>
-              <div class="bg-amber-50/70 p-3 rounded-2xl border border-amber-100 flex items-center justify-between text-xs">
-                <span class="text-slate-600 font-bold">ساعت مطالعه هدف:</span>
-                <span class="font-black text-amber-900">${SecurityEngine.escapeHtml(gH.ensani)}</span>
+              <span class="px-3 py-1 rounded-full text-xs font-black bg-gradient-to-r from-sky-600 to-indigo-600 text-white shadow-sm shadow-sky-600/30">
+                ریاضی و فیزیک
+              </span>
+            </div>
+
+            <!-- Title & Target Majors -->
+            <div>
+              <h3 class="text-xl font-black text-navy-950 group-hover:text-sky-700 transition">
+                برنامه مطالعاتی ریاضی ${SecurityEngine.escapeHtml(gS)}
+              </h3>
+              <p class="text-xs text-slate-500 mt-1 font-semibold">
+                ${SecurityEngine.escapeHtml(gLabel)} • راهبردی و هفتگی
+              </p>
+              <div class="flex flex-wrap gap-1.5 mt-2.5">
+                <span class="px-2.5 py-0.5 rounded-lg bg-sky-50 text-sky-900 text-[11px] font-bold border border-sky-100">💻 مهندسی کامپیوتر</span>
+                <span class="px-2.5 py-0.5 rounded-lg bg-sky-50 text-sky-900 text-[11px] font-bold border border-sky-100">⚡ مهندسی برق</span>
+                <span class="px-2.5 py-0.5 rounded-lg bg-sky-50 text-sky-900 text-[11px] font-bold border border-sky-100">🏢 عمران و مکانیک</span>
               </div>
             </div>
-            <div class="pt-5">
-              <button type="button" onclick="navigateTo('study-plan', {grade: '${gCode}', major: 'ensani'})" class="w-full py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-navy-950 font-black text-xs transition shadow-md shadow-amber-500/20 flex items-center justify-center gap-2">
-                <span>مشاهده برنامه ${SecurityEngine.escapeHtml(gS)} انسانی</span>
-                <span>←</span>
-              </button>
+
+            <!-- Strategy Highlights -->
+            <ul class="space-y-2 text-xs text-slate-600 border-t border-slate-100 pt-3.5 font-medium leading-relaxed">
+              <li class="flex items-start gap-2">
+                <span class="text-sky-600 font-black mt-0.5">✓</span>
+                <span><b>دروس محوری:</b> حسابان و ریاضیات، هندسه و گسسته، فیزیک</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-sky-600 font-black mt-0.5">✓</span>
+                <span><b>روش اجرا:</b> دست‌به‌قلم شدن روزانه، اثبات قضایا و تست زمان‌دار</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-sky-600 font-black mt-0.5">✓</span>
+                <span><b>توازن امتحانی:</b> حل مسائل تشریحی نهایی + تکنیک‌های حل سریع</span>
+              </li>
+            </ul>
+
+            <!-- Hourly Metrics Box -->
+            <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-100/90 space-y-1.5 text-xs">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-500 font-bold flex items-center gap-1.5">
+                  <span>⏱️</span>
+                  <span>ساعت مطالعه هدف:</span>
+                </span>
+                <span class="font-black text-sky-700">${SecurityEngine.escapeHtml(gH.riazi)}</span>
+              </div>
+              <div class="flex items-center justify-between text-[11px] text-slate-400 pt-0.5 border-t border-slate-200/50">
+                <span>تقویم مطالعاتی:</span>
+                <span class="font-bold text-slate-600">شنبه تا جمعه (۷ روزه)</span>
+              </div>
             </div>
           </div>
 
-          <!-- 3. Riazi -->
-          <div class="bg-white rounded-3xl p-6 border-2 border-sky-500/30 hover:border-sky-500 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group shadow-sm">
-            <div class="space-y-4">
-              <div class="flex items-center justify-between">
-                <span class="w-12 h-12 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center text-2xl font-black shadow-inner">📐</span>
-                <span class="px-3 py-1 rounded-full text-xs font-black bg-sky-100 text-sky-900 border border-sky-200">ریاضی و فیزیک</span>
-              </div>
-              <div>
-                <h4 class="text-lg font-black text-navy-900 group-hover:text-sky-700 transition">برنامه مطالعاتی ریاضی</h4>
-                <p class="text-xs text-slate-500 mt-1 font-semibold">${SecurityEngine.escapeHtml(gLabel)} — ویژه داوطلبان مهندسی و علوم پایه</p>
-              </div>
-              <ul class="space-y-2 text-xs text-slate-600 border-t border-slate-100 pt-3 font-medium">
-                <li class="flex items-center gap-2"><span class="text-sky-500 font-bold">✔</span><span>مهارت تحلیلی حسابان، هندسه و گسسته</span></li>
-                <li class="flex items-center gap-2"><span class="text-sky-500 font-bold">✔</span><span>پارت‌های متوالی حل مسئله تشریحی و تستی فیزیک</span></li>
-                <li class="flex items-center gap-2"><span class="text-sky-500 font-bold">✔</span><span>استراتژی حل سریع مسائل شیمی ریاضی</span></li>
-              </ul>
-              <div class="bg-sky-50/70 p-3 rounded-2xl border border-sky-100 flex items-center justify-between text-xs">
-                <span class="text-slate-600 font-bold">ساعت مطالعه هدف:</span>
-                <span class="font-black text-sky-900">${SecurityEngine.escapeHtml(gH.riazi)}</span>
-              </div>
-            </div>
-            <div class="pt-5">
-              <button type="button" onclick="navigateTo('study-plan', {grade: '${gCode}', major: 'riazi'})" class="w-full py-3 rounded-2xl bg-sky-600 hover:bg-sky-500 text-white font-black text-xs transition shadow-md shadow-sky-600/20 flex items-center justify-center gap-2">
-                <span>مشاهده برنامه ${SecurityEngine.escapeHtml(gS)} ریاضی</span>
-                <span>←</span>
-              </button>
-            </div>
+          <!-- Action Button -->
+          <div class="pt-5">
+            <button type="button" onclick="navigateTo('study-plan', {grade: '${gCode}', major: 'riazi'})" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-sky-600 via-indigo-600 to-sky-700 hover:from-sky-500 hover:to-indigo-600 text-white font-black text-xs sm:text-sm transition-all duration-200 shadow-md shadow-sky-600/25 flex items-center justify-center gap-2 group-hover:gap-3">
+              <span>مشاهده برنامه مطالعاتی ریاضی</span>
+              <span class="text-base transition-transform group-hover:-translate-x-1">←</span>
+            </button>
           </div>
         </div>
       </div>
