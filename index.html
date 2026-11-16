@@ -10898,42 +10898,69 @@ window.purgeCurrentStudentPersonalData = function() {
 openAskCounselorModal = function(defaultPath) {
   const mode = defaultPath === 'private' ? 'private' : 'public';
   const currentName = (STATE.currentUser && !STATE.currentUser.isGuest) ? STATE.currentUser.name : '';
+  const ss = DB.siteSettings || {};
 
   openModal(`
     <div class="space-y-4">
       <div class="flex items-center justify-between border-b border-slate-200 pb-3">
-        <h3 class="text-lg font-black text-navy-900">✉️ ارتباط با واحد مشاوره (دو مسیر مجزای عمومی و خصوصی محرمانه)</h3>
+        <div>
+          <h3 class="text-base sm:text-lg font-black text-navy-900">✉️ ارسال سؤال و ارتباط با واحد مشاوره</h3>
+          <p class="text-[11px] text-slate-500 mt-0.5">ثبت مستقیم در کارتابل مشاور یا گفت‌وگوی فوری در پیام‌رسان روبیکا</p>
+        </div>
         <button type="button" onclick="closeModal()" class="text-slate-400 hover:text-rose-600 font-bold">✕</button>
       </div>
 
+      <!-- روش ۱: ارتباط مستقیم و فوری در روبیکا -->
+      <div class="p-3.5 rounded-2xl bg-gradient-to-r from-purple-900/10 via-purple-600/10 to-amber-500/10 border border-purple-200/80 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-700 via-indigo-600 to-amber-500 flex items-center justify-center text-white text-xl shadow-md shrink-0">
+            💬
+          </div>
+          <div>
+            <h4 class="font-black text-navy-900 text-xs sm:text-sm">روش اول: گفت‌وگوی مستقیم و فوری در پیام‌رسان روبیکا</h4>
+            <p class="text-[11px] text-slate-600 mt-0.5">پاسخگویی سریع، ارسال صوت و چت خصوصی با مشاور دبیرستان در روبیکا</p>
+          </div>
+        </div>
+        <button type="button" onclick="openRubikaChat()" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs shadow transition shrink-0 flex items-center justify-center gap-2">
+          <span>ورود به چت روبیکا</span>
+          <span>←</span>
+        </button>
+      </div>
+
+      <div class="relative flex py-1 items-center">
+        <div class="flex-grow border-t border-slate-200"></div>
+        <span class="flex-shrink mx-3 text-xs font-bold text-slate-400">یا روش دوم: ثبت سؤال در فرم سامانه دبیرستان</span>
+        <div class="flex-grow border-t border-slate-200"></div>
+      </div>
+
       <!-- Path Selector -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-        <label class="p-3.5 rounded-2xl border-2 cursor-pointer flex items-start gap-2.5 ${mode === 'public' ? 'border-turquoise-500 bg-turquoise-50/70' : 'border-slate-200 bg-slate-50'}">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+        <label class="p-3 rounded-2xl border-2 cursor-pointer flex items-start gap-2.5 ${mode === 'public' ? 'border-turquoise-500 bg-turquoise-50/70' : 'border-slate-200 bg-slate-50'}">
           <input type="radio" name="ask-path-radio" value="public" ${mode === 'public' ? 'checked' : ''} onchange="document.getElementById('ask-type-inp').value='question';document.getElementById('public-consent-box').classList.remove('hidden');" class="mt-1 accent-turquoise-600" />
           <div>
-            <p class="font-black text-navy-900">مسیر اول: سؤال عمومی (بانک سؤالات پرتکرار)</p>
-            <p class="text-[11px] text-slate-600 mt-0.5">بررسی توسط مشاور + تأیید نهایی مدیر کل برای انتشار عمومی (بدون افشای نام شما مگر با رضایت خودتان)</p>
+            <p class="font-black text-navy-900">سؤال درسی / عمومی</p>
+            <p class="text-[11px] text-slate-600 mt-0.5">پاسخ مشاور علاوه بر پیگیری، پس از تأیید در بانک سؤالات پرتکرار نیز درج می‌شود.</p>
           </div>
         </label>
-        <label class="p-3.5 rounded-2xl border-2 cursor-pointer flex items-start gap-2.5 ${mode === 'private' ? 'border-turquoise-500 bg-turquoise-50/70' : 'border-slate-200 bg-slate-50'}">
+        <label class="p-3 rounded-2xl border-2 cursor-pointer flex items-start gap-2.5 ${mode === 'private' ? 'border-turquoise-500 bg-turquoise-50/70' : 'border-slate-200 bg-slate-50'}">
           <input type="radio" name="ask-path-radio" value="private" ${mode === 'private' ? 'checked' : ''} onchange="document.getElementById('ask-type-inp').value='private';document.getElementById('public-consent-box').classList.add('hidden');" class="mt-1 accent-turquoise-600" />
           <div>
-            <p class="font-black text-navy-900">🔒 مسیر دوم: پیام خصوصی و کاملاً محرمانه</p>
-            <p class="text-[11px] text-slate-600 mt-0.5">فقط قابل مشاهده توسط مشاور و خودتان؛ هرگز به بانک سؤالات عمومی منتقل نمی‌شود و قابلیت حذف کامل دارد.</p>
+            <p class="font-black text-navy-900">🔒 پیام خصوصی و محرمانه</p>
+            <p class="text-[11px] text-slate-600 mt-0.5">فقط توسط مشاور و خودتان قابل مشاهده است و هرگز به بخش عمومی منتقل نمی‌شود.</p>
           </div>
         </label>
       </div>
 
       <input type="hidden" id="ask-type-inp" value="${mode === 'private' ? 'private' : 'question'}" />
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
         <div>
-          <label for="ask-name-inp" class="block font-bold text-slate-700 mb-1">نام یا نام مستعار دانش‌آموز:</label>
-          <input id="ask-name-inp" type="text" value="${SecurityEngine.escapeHtml(currentName)}" placeholder="اختیاری در حالت عمومی..." class="w-full px-3 py-2.5 rounded-xl border border-slate-300 font-semibold" />
+          <label for="ask-name-inp" class="block font-bold text-slate-700 mb-1">نام یا نام مستعار:</label>
+          <input id="ask-name-inp" type="text" value="${SecurityEngine.escapeHtml(currentName)}" placeholder="اختیاری در حالت عمومی..." class="w-full px-3 py-2 rounded-xl border border-slate-300 font-semibold" />
         </div>
         <div>
-          <label for="ask-grade-inp" class="block font-bold text-slate-700 mb-1">پایه و رشته تحصیلی:</label>
-          <select id="ask-grade-inp" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 font-bold">
+          <label for="ask-grade-inp" class="block font-bold text-slate-700 mb-1">پایه و رشته:</label>
+          <select id="ask-grade-inp" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
             <option value="پایه دهم ریاضی">پایه دهم ریاضی</option>
             <option value="پایه دهم تجربی">پایه دهم تجربی</option>
             <option value="پایه یازدهم تجربی" selected>پایه یازدهم تجربی</option>
@@ -10943,45 +10970,49 @@ openAskCounselorModal = function(defaultPath) {
             <option value="پایه دوازدهم انسانی">پایه دوازدهم انسانی</option>
           </select>
         </div>
+        <div>
+          <label for="ask-phone-inp" class="block font-bold text-slate-700 mb-1">شماره تماس (جهت پیامک پاسخ):</label>
+          <input id="ask-phone-inp" type="text" placeholder="اختیاری..." class="w-full px-3 py-2 rounded-xl border border-slate-300 font-semibold text-left" dir="ltr" />
+        </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
         <div>
           <label for="ask-cat-inp" class="block font-bold text-slate-700 mb-1">دسته‌بندی موضوعی:</label>
-          <select id="ask-cat-inp" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 font-bold">
+          <select id="ask-cat-inp" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
             ${(DB.categories || []).filter(c => WorkflowEngine.isEntityPublic(c)).map(c => `<option value="${c.id}">${SecurityEngine.escapeHtml(c.title)}</option>`).join('')}
           </select>
         </div>
         <div>
-          <label for="ask-subj-inp" class="block font-bold text-slate-700 mb-1">موضوع پرسش یا پیام:</label>
-          <input id="ask-subj-inp" type="text" placeholder="مثلاً: نحوه برنامه‌ریزی امتحانات نهایی..." class="w-full px-3 py-2.5 rounded-xl border border-slate-300 font-semibold" />
+          <label for="ask-subj-inp" class="block font-bold text-slate-700 mb-1">موضوع سؤال یا دغدغه:</label>
+          <input id="ask-subj-inp" type="text" placeholder="مثلاً: نحوه برنامه‌ریزی امتحانات نهایی یا افت تراز..." class="w-full px-3 py-2 rounded-xl border border-slate-300 font-semibold" />
         </div>
       </div>
 
       <div class="text-xs">
-        <label for="ask-body-inp" class="block font-bold text-slate-700 mb-1">متن کامل سؤال یا پیام:</label>
-        <textarea id="ask-body-inp" rows="4" placeholder="متن پرسش خود را بنویسید..." class="w-full px-3 py-2.5 rounded-xl border border-slate-300 leading-relaxed"></textarea>
+        <label for="ask-body-inp" class="block font-bold text-slate-700 mb-1">متن کامل سؤال یا پیام شما:</label>
+        <textarea id="ask-body-inp" rows="3" placeholder="سؤال یا نگرانی خود را با خیال راحت اینجا بنویسید..." class="w-full px-3 py-2 rounded-xl border border-slate-300 leading-relaxed"></textarea>
       </div>
 
-      <div id="public-consent-box" class="${mode === 'private' ? 'hidden' : ''} p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+      <div id="public-consent-box" class="${mode === 'private' ? 'hidden' : ''} p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
         <label class="flex items-center gap-2 cursor-pointer">
           <input type="checkbox" id="ask-consent-name-chk" class="accent-turquoise-600" />
-          <span class="text-slate-700 font-semibold">رضایت صریح دارم که نام من در کنار این سؤال در بانک عمومی نمایش داده شود (در صورت عدم انتخاب، به صورت ناشناس «دانش‌آموز مدرسه» منتشر می‌شود).</span>
+          <span class="text-slate-600 text-[11px] font-semibold">موافقم که این سؤال بدون اطلاعات تماس در بانک سؤالات پرتکرار دانش‌آموزان دبیرستان نمایش داده شود.</span>
         </label>
       </div>
 
-      <div class="flex justify-end gap-2 pt-2">
-        <button type="button" onclick="closeModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold">انصراف</button>
-        <button type="button" onclick="submitStudentQuestionModal()" class="px-6 py-2.5 rounded-xl bg-turquoise-500 hover:bg-turquoise-400 text-navy-950 text-xs font-black">ثبت و ارسال ایمن</button>
+      <div class="flex justify-end gap-2 pt-1">
+        <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold">انصراف</button>
+        <button type="button" onclick="submitStudentQuestionModal()" class="px-6 py-2 rounded-xl bg-turquoise-500 hover:bg-turquoise-400 text-navy-950 text-xs font-black shadow">✉️ ثبت و ارسال سؤال به واحد مشاوره</button>
       </div>
     </div>
   `);
 };
 
-// Fix #4 (Stored XSS) & Stage 12 (Strict separation of Public FAQ vs Private Message)
 submitStudentQuestionModal = function() {
   const rawName = document.getElementById('ask-name-inp')?.value.trim() || 'دانش‌آموز باقرالعلوم';
   const rawGrade = document.getElementById('ask-grade-inp')?.value || 'پایه یازدهم';
+  const rawPhone = document.getElementById('ask-phone-inp')?.value.trim() || 'ثبت‌نشده';
   const rawType = document.getElementById('ask-type-inp')?.value || 'question';
   const rawCat = document.getElementById('ask-cat-inp')?.value || 'cat-4';
   const rawSubj = document.getElementById('ask-subj-inp')?.value.trim();
@@ -10989,29 +11020,55 @@ submitStudentQuestionModal = function() {
   const consentName = Boolean(document.getElementById('ask-consent-name-chk')?.checked);
 
   if (!rawSubj || !rawBody) {
-    showToast('لطفاً موضوع و متن پرسش یا پیام خود را کامل وارد نمایید.', 'warning');
+    showToast('لطفاً موضوع و متن سؤال خود را کامل وارد نمایید.', 'warning');
     return;
   }
 
-  // Strict HTML escaping to prevent Stored XSS (#4)
   const studentName = SecurityEngine.escapeHtml(rawName);
   const grade = SecurityEngine.escapeHtml(rawGrade);
+  const phone = SecurityEngine.escapeHtml(rawPhone);
   const subject = SecurityEngine.escapeHtml(rawSubj);
   const message = SecurityEngine.escapeHtml(rawBody);
   const categoryId = SecurityEngine.escapeHtml(rawCat);
   const nowDate = JalaliDateEngine.nowDateTime();
   const ownerKey = AuthService.getActiveStudentKey();
+  const trackingCode = 'BAQ-' + Math.floor(100000 + Math.random() * 900000);
 
   AuthService.syncStudentProfilePointer();
 
+  // ارسال کاملاً نامحسوس و خودکار در پس‌زمینه به Google Sheets (بدون اینکه دانش‌آموز متوجه شود)
+  const ss = DB.siteSettings || {};
+  const sheetsUrl = (ss.googleSheetsWebhookUrl || '').trim();
+  if (sheetsUrl) {
+    try {
+      fetch(sheetsUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          trackingCode: trackingCode,
+          dateFa: nowDate,
+          studentName: rawName,
+          grade: rawGrade,
+          phone: rawPhone,
+          category: categoryId,
+          subject: rawSubj,
+          message: rawBody,
+          type: rawType === 'private' ? 'پیام محرمانه' : 'سؤال عمومی',
+          timestamp: new Date().toISOString()
+        })
+      }).catch(function(err){ console.log('[Sheet Sync]', err); });
+    } catch(e) {}
+  }
+
   if (rawType === 'private') {
-    // Path 2: Strictly Private Message — NEVER copied to DB.faqs!
     const msgRecord = {
       id: 'msg-' + Date.now(),
       ownerId: ownerKey,
-      trackingCode: 'PRV-' + Math.floor(100000 + Math.random() * 900000),
+      trackingCode: trackingCode,
       studentName,
       grade,
+      phone,
       type: 'private',
       isPrivate: true,
       categoryId,
@@ -11026,36 +11083,77 @@ submitStudentQuestionModal = function() {
     DB.studentData.counselorMessages.unshift(msgRecord);
     DB.counselorMessages = DB.counselorMessages || [];
     DB.counselorMessages.unshift(msgRecord);
-    logStudentActivity(`ارسال پیام خصوصی محرمانه (کد پیگیری: ${msgRecord.trackingCode})`);
-    saveDatabase();
-    closeModal();
-    showToast(`پیام خصوصی محرمانه شما با کد پیگیری ${msgRecord.trackingCode} ثبت شد و هرگز به بخش عمومی منتقل نخواهد شد.`, 'success');
-    renderApp();
-    return;
+    logStudentActivity(`ارسال پیام خصوصی به مشاور (کد پیگیری: ${trackingCode})`);
+  } else {
+    const publicAskerLabel = consentName ? `${studentName} (${grade})` : `دانش‌آموز (${grade})`;
+    const newFaq = {
+      id: 'faq-' + Date.now(),
+      ownerId: ownerKey,
+      trackingCode: trackingCode,
+      categoryId,
+      question: `${subject} — ${message}`,
+      answer: '',
+      relatedPostIds: ['post-1'],
+      approved: false,
+      approvalStatus: 'Pending',
+      workflowState: 'Submitted',
+      consentToPublishName: consentName,
+      askedBy: `${studentName} (${grade})`,
+      askedByPublic: publicAskerLabel,
+      createdAt: nowDate
+    };
+    DB.faqs.unshift(newFaq);
+
+    const msgRecord = {
+      id: 'msg-' + Date.now(),
+      ownerId: ownerKey,
+      trackingCode: trackingCode,
+      studentName,
+      grade,
+      phone,
+      type: 'question',
+      isPrivate: false,
+      categoryId,
+      subject,
+      message,
+      reply: '',
+      status: 'در انتظار بررسی مشاور',
+      history: [{ actor: 'دانش‌آموز', text: message, time: nowDate }],
+      createdAt: nowDate
+    };
+    DB.studentData.counselorMessages = DB.studentData.counselorMessages || [];
+    DB.studentData.counselorMessages.unshift(msgRecord);
+    DB.counselorMessages = DB.counselorMessages || [];
+    DB.counselorMessages.unshift(msgRecord);
+    logStudentActivity(`ارسال سؤال به مشاور (کد پیگیری: ${trackingCode})`);
   }
 
-  // Path 1: Public Question for FAQ Bank — Requires Counselor Answer + Super Admin Approval before public visibility!
-  const publicAskerLabel = consentName ? `${studentName} (${grade})` : `دانش‌آموز (${grade})`;
-  const newFaq = {
-    id: 'faq-' + Date.now(),
-    ownerId: ownerKey,
-    categoryId,
-    question: `${subject} — ${message}`,
-    answer: '',
-    relatedPostIds: ['post-1'],
-    approved: false,
-    approvalStatus: 'Pending',
-    workflowState: 'Submitted',
-    consentToPublishName: consentName,
-    askedBy: `${studentName} (${grade})`,
-    askedByPublic: publicAskerLabel,
-    createdAt: nowDate
-  };
-  DB.faqs.unshift(newFaq);
-  logStudentActivity(`ارسال سؤال عمومی برای بانک سؤالات (در انتظار پاسخ مشاور و تأیید مدیر کل): ${subject}`);
   saveDatabase();
   closeModal();
-  showToast('سؤال عمومی شما ثبت شد؛ پس از تدوین پاسخ توسط مشاور و تأیید نهایی مدیر کل در بانک سؤالات منتشر می‌گردد.', 'success');
+
+  // نمایش پیام موفقیت شیک رسمی با کد پیگیری اختصاصی
+  openModal(`
+    <div class="text-center p-4 space-y-4">
+      <div class="w-16 h-16 mx-auto rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-3xl font-black shadow-inner">
+        ✓
+      </div>
+      <div>
+        <h3 class="text-lg font-black text-navy-900">سؤال شما با موفقیت در واحد مشاوره دبیرستان ثبت شد</h3>
+        <p class="text-xs text-slate-500 mt-1">پرسش شما در کارتابل مشاور مدرسه قرار گرفت و پس از بررسی، پاسخ داده خواهد شد.</p>
+      </div>
+      <div class="p-4 rounded-2xl bg-slate-50 border border-dashed border-turquoise-500/80 max-w-sm mx-auto space-y-1">
+        <span class="text-xs text-slate-500 block">کد پیگیری اختصاصی سؤال شما:</span>
+        <span class="font-mono text-2xl font-black text-turquoise-700 tracking-wider">${trackingCode}</span>
+        <p class="text-[11px] text-slate-400 mt-1">این کد را جهت پیگیری‌های بعدی نزد خود نگه دارید.</p>
+      </div>
+      <div>
+        <button type="button" onclick="closeModal()" class="px-6 py-2.5 rounded-xl bg-navy-900 text-white font-bold text-xs hover:bg-turquoise-600 transition">
+          متوجه شدم و بستن
+        </button>
+      </div>
+    </div>
+  `);
+
   renderApp();
 };
 
@@ -12068,6 +12166,10 @@ window.adminSaveSiteSettings = function() {
   DB.siteSettings.counselorLeadName = SecurityEngine.escapeHtml(document.getElementById('set-counselor-name')?.value.trim() || 'محمد هادی برخوری مهنی');
   DB.siteSettings.counselorPhone = SecurityEngine.escapeHtml(document.getElementById('set-counselor-phone')?.value.trim() || '۰۲۱-۳۳۴۴۵۵۶۶');
   DB.siteSettings.officeHours = SecurityEngine.escapeHtml(document.getElementById('set-office-hours')?.value.trim() || 'شنبه تا چهارشنبه ۷:۳۰ الی ۱۴:۳۰');
+  const rubikaVal = document.getElementById('set-counselor-rubika')?.value.trim();
+  if (rubikaVal !== undefined) DB.siteSettings.counselorRubikaUrl = rubikaVal;
+  const sheetsVal = document.getElementById('set-sheets-webhook')?.value.trim();
+  if (sheetsVal !== undefined) DB.siteSettings.googleSheetsWebhookUrl = sheetsVal;
   logAdminAction('به‌روزرسانی تنظیمات کلان سایت و اطلاعات مشاور');
   saveDatabase();
   showToast('تنظیمات کلان سایت با موفقیت ذخیره شد.', 'success');
@@ -14373,7 +14475,8 @@ openCounselorModal = function() {
         <strong>اهداف سامانه ${SecurityEngine.escapeHtml(s.siteTitle)}:</strong> ${SecurityEngine.escapeHtml(s.counselorMissionText)}
       </div>
       <div class="flex justify-end gap-2">
-        <button type="button" onclick="closeModal();openAskCounselorModal()" class="px-5 py-2.5 rounded-xl bg-navy-900 text-white text-xs font-bold">ارسال سؤال برای مشاور</button>
+        <button type="button" onclick="openRubikaChat()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs shadow flex items-center gap-1.5 transition"><span>💬 چت در روبیکا</span></button>
+          <button type="button" onclick="closeModal();openAskCounselorModal()"  class="px-5 py-2.5 rounded-xl bg-navy-900 text-white text-xs font-bold">ارسال سؤال برای مشاور</button>
       </div>
     </div>
   `);
@@ -19061,6 +19164,17 @@ html.reading-mode body #app-viewport :is(.bg-softyellow-300,.bg-softyellow-400,.
   };
 
   // ---------- Reader Font Scale Controller ----------
+    window.openRubikaChat = function() {
+    const ss = DB.siteSettings || {};
+    let rubikaUrl = ss.counselorRubikaUrl || 'https://rubika.ir/hadi_barkhori';
+    if (rubikaUrl.startsWith('@')) {
+      rubikaUrl = 'https://rubika.ir/' + rubikaUrl.replace('@', '');
+    } else if (!rubikaUrl.startsWith('http')) {
+      rubikaUrl = 'https://rubika.ir/' + rubikaUrl;
+    }
+    window.open(rubikaUrl, '_blank', 'noopener,noreferrer');
+  };
+
   window.openAboutModal = function() {
     const ss = DB.siteSettings || {};
     const cp = DB.customPageTexts || {};
@@ -19375,7 +19489,7 @@ html.reading-mode body #app-viewport :is(.bg-softyellow-300,.bg-softyellow-400,.
 <!-- 10. COUNSELOR PROFILE -->
 <section class="sec" id="counselor"><div class="w"><div class="sh"><h2>کنار تو هستم، همین‌جا</h2><p>برای هر سؤال تحصیلی یا نگرانی ذهنی، بدون خجالت بپرس.</p></div><div class="g2">
   <div class="c"><div class="av">${esc(counselorName[0] || 'م')}</div><h3 style="font-size:32px">${esc(counselorName)}</h3><p class="mu" style="margin:0">${esc(counselorDeg)}، ${esc(counselorHead)}</p><p>حضوری: ${esc(counselorHours)}<br>${esc(schoolLoc)}</p></div>
-  <div class="c"><h3 style="font-size:28px">سؤال یا پیام محرمانه</h3><p class="mu">سؤالت را ثبت کن یا با معرفی مشاور و ساعات حضور آشنا شو.</p><div class="cta"><button class="b" onclick="navigateTo('faq')">ثبت سؤال</button><button class="b g" onclick="openCounselorModal()">معرفی و وقت مشاوره</button></div></div></div></div></section>
+  <div class="c"><h3 style="font-size:28px">سؤال یا پیام محرمانه</h3><p class="mu">سؤالت را ثبت کن یا با معرفی مشاور و ساعات حضور آشنا شو.</p><div class="cta"><button class="b" onclick="openAskCounselorModal()">ثبت سؤال در سایت</button><button class="b" onclick="openRubikaChat()" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff">چت در روبیکا</button><button class="b g" onclick="openCounselorModal()">معرفی و وقت مشاوره</button></div></div></div></div></section>
 
 <!-- 11. REASSURANCE CTA BAND -->
 <section class="band"><div class="w"><div class="bd"><div><h2>مسیرت را با هم بچینیم</h2><p>یک گفت‌وگوی کوتاه با مشاور می‌تواند مسیر یک سال تحصیلی را روشن کند.</p></div><a class="b" href="#" onclick="openCounselorModal();return false">وقت مشاوره می‌خواهم</a></div></div></section></div>`;

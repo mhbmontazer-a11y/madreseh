@@ -6285,7 +6285,9 @@
       "showCounselorBox": true,
       "showHomeFaq": true,
       "showCalendar": true
-    }
+    },
+    "counselorRubikaUrl": "https://rubika.ir/hadi_barkhori",
+    "googleSheetsWebhookUrl": ""
   },
   "backupRecords": [],
   "sessions": [],
